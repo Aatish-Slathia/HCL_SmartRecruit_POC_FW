@@ -1,0 +1,662 @@
+﻿//=========================================================================================================================================================
+//    Version             Modified By          Modified On          Change Description
+//=========================================================================================================================================================
+//     v1.0               Arvind Kumar         10-Jan-2016          Drop functionality added     
+//     v1.1               pankaj Kumar         03-Oct-2016           search by ReqNo.    
+//=========================================================================================================================================================
+
+var re = new RegExp(/^.*\//);
+var Sourceurl = ""
+
+$('#myModal').on('hidden', function () {
+
+    $(this).removeData('modal');
+});
+
+$(function () {
+   
+    Sourceurl = re.exec(window.location.href)
+
+    $('body').on('click', '.btn', function (e) {
+
+        $(this).removeData('bs.modal');
+        $(this).attr('data-target', '#modal-container');
+        $(this).attr('data-toggle', 'modal');
+
+        var id = $(this).attr("id");
+        if (id == "SearchReq" || id == "Reset") {
+            $(this).removeData('bs.modal');
+            $(this).attr('data-target', '');
+            $(this).attr('data-toggle', '');
+        }
+
+    });
+
+
+    $('body').on('click', '.modal-close-btn', function () {
+
+        $('#modal-container').modal('hide');
+
+    });
+
+    $('#modal-container').on('hidden.bs.modal', function () {
+
+        $(this).removeData('bs.modal');
+
+    });
+    $('#modal-container').on('show.bs.modal', function () {
+
+    });
+
+    $('#CancelModal').on('click', function () {
+
+        return false;
+    });
+
+    $('#edit, #copy,#close,#TSC,#HMLink, #profiledetail').tooltip()
+
+    $('.DropVacency').tooltip()
+
+    $("#SearchReq").click(function () {
+        SearchRequisitions();
+    });
+    $("#Reset").click(function () {
+        Reset();
+    });
+});
+
+$('.DropVacency').live("click", function () {
+    var REQ_OR_IPRFID = $(this).attr("id");
+    var iprfId = $(this).attr("name");
+    $("#hdnDropVacancyPRFID").val(iprfId);
+    GetDropVacancy();
+
+});
+
+//Start:Banshi Pal SR transfer
+$('.SRTransfer').live("click", function () {
+    var REQ_OR_IPRFID = $(this).attr("TRid");
+    var TRiprfId = $(this).attr("TRname");
+    $("#hdnSRTransferPRFID").val(TRiprfId);
+    GetSRTransfer();
+
+});
+//End:Banshi Pal SR Transfer
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+function SearchRequisitions() {
+    var dateFrom = $("#StartDate").val();
+    var dateTo = $("#EndDate").val();
+    var Sourceurl = window.location.pathname;
+    var Status = getParameterByName('Status');
+    var IsFromCopyLob = getParameterByName('IsFromCopyLob');
+    var OnBehalfOf = getParameterByName('OnBehalfOf');
+    //v1.1
+    var ReqNo = $("#ReqNo").val();
+    var re = /^[ A-Za-z0-9_@/-]*$/
+    if (!re.test(ReqNo)) {
+        alert("Please enter valid Requisition number");
+        return true;
+    }
+    // var ReqnewVal = ReqNo.replace(/[^\w\s]/gi, '+');
+    var ReqnewVal = ReqNo.replace(/[/]/g, '!');
+    if ((dateFrom != "" && dateTo != "") || (ReqNo != "")) {
+
+        if (Sourceurl.indexOf('CopyLobManageRequisitions') != -1) {
+            window.location.href = "CopyLobManageRequisitions?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&IsFromCopyLob=C" + "&Status=" + Status + "&ReqNo=" + ReqnewVal;
+        }
+        else if (Sourceurl.indexOf('ManageOnBehalfRequisitions') != -1) {
+            window.location.href = "ManageOnBehalfRequisitions?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&Status=" + Status + "&IsFromCopyLob=" + IsFromCopyLob + "&ReqNo=" + ReqnewVal + "&OnBehalfOf=Y";
+        }
+        else {
+            window.location.href = "ManageRequisitions?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&Status=" + Status + "&IsFromCopyLob=" + IsFromCopyLob + "&ReqNo=" + ReqnewVal;
+        }
+        //v1.1
+    }
+
+    else {
+        alert("Please select date Or Requisition number");
+        return true;
+    }
+}
+
+function Reset()
+{
+    var Sourceurl = window.location.pathname;
+    if (Sourceurl.indexOf('CopyLobManageRequisitions') != -1) {
+        window.location.href = "CopyLobManageRequisitions?IsFromCopyLob=C";
+    }
+    else if (Sourceurl.indexOf('ManageOnBehalfRequisitions') != -1) {
+        window.location.href = "ManageOnBehalfRequisitions?OnBehalfOf=Y";
+    }
+    else
+    {
+        window.location.href = "ManageRequisitions";
+    }
+}
+
+function GetDropVacancy() {
+    var _url = Sourceurl + "GetDropVacancy";
+    var iprfId = $("#hdnDropVacancyPRFID").val();
+
+    OpenProgress();
+
+    $.ajax({
+        type: "POST",
+        url: _url,
+        data: { 'prfId': iprfId },
+        beforeSend: function (msg) {
+
+        },
+        success: function (msg) {
+
+            var NumberOfVacency;
+
+            $.each(msg, function (index, data) {
+
+                var $DataValue = index;
+
+                if ($DataValue == "ReqNumber") {
+                    $("#spanRequsitionNumber").html(data);
+                }
+                if ($DataValue == "TotalVacancy") {
+                    NumberOfVacency = data;
+                    $("#spanVacancy").html(data);
+
+                    if (NumberOfVacency == 0) {
+                        alert("No of Vacancy Is Zero.");
+                        return false;
+                    }
+
+                }
+                if ($DataValue == "dicreason") {
+                    var ddlReason = "<select class=\"form-control input-sm\" id=\"ddlreason\" name=\"ddlreason\">" +
+                                     "<option value=\"\">--Select--</option>"
+
+                    $.each(data, function (Value, Text) {
+
+                        ddlReason = ddlReason + "<option value=" + Value + ">" + Text + "</option>";
+
+                    });
+
+                    ddlReason = ddlReason + "</select>"
+                    $("#divReason").html(ddlReason);
+
+                }
+                if ($DataValue == "dicPositionToBe") {
+
+                    var PositionToBe = "<select class=\"form-control input-sm\" id=\"ddlPositionToBe\" name=\"ddlPositionToBe\">"
+
+                    $.each(data, function (Value, Text) {
+
+                        PositionToBe = PositionToBe + "<option value=" + Value + ">" + Text + "</option>";
+
+                    });
+
+                    PositionToBe = PositionToBe + "</select>"
+                    $("#divPositionToBe").html(PositionToBe);
+                }
+                if ($DataValue == "lstDropVacancyGrid") {
+
+                    $("#divDropVacancy").html("");
+
+                    if (data.length != 0) {
+
+                        var tblDropVacency = "<table class=\"table-striped table-bordered table-hover example dataTable no-footer\"><tbody>" +
+                                    "<tr>" +
+                                        "<th scope=col>Avaliable No of Vacancy</th>" +
+                                        "<th scope=col>Offer Made</th>" +
+                                        "<th scope=col>Third Party</th>" +
+                                        "<th scope=col>Offshore closed</th>" +
+                                        "<th scope=col>Dropped</th>" +
+                                        "<th scope=col>Loss to Competition</th>" +
+                                        "<th scope=col>Requirement/Positions Delayed</th>" +
+                                        "<th scope=col>Delay in fulfillment</th>" +
+                                        "<th scope=col>Closed by customer</th>" +
+                                        "<th scope=col>Duplicate SR</th>" +
+                                        "<th scope=col>Incorrect details</th>" +
+                                        "<th scope=col>Revoked Resignation</th>" +
+                                        "<th scope=col>Internal Fulfillment outside of SR</th>" +
+                                        "<th scope=col>Failed Rotation</th>" +
+                                    "</tr>" +
+                                    "<tr>" +
+                                        "<td>" + NumberOfVacency + "</TD>" +
+                                        "<td>" + data[0].OfferMade + "</TD>" +
+                                        "<td>" + 0 + "</TD>" +
+                                        "<td>" + data[0].Off_Close + "</TD>" +
+                                        "<td>" + data[0].Drop + "</TD>" +
+                                        "<td>" + data[0].Loss + "</TD>" +
+                                        "<td>" + data[0].Pos_Delayed + "</TD>" +
+                                        "<td>" + data[0].Delay + "</TD>" +
+                                        "<td>" + data[0].Cust_Closed + "</TD>" +
+                                        "<td>" + data[0].Dup_SR + "</TD>" +
+                                        "<td>" + data[0].Incorrect + "</TD>" +
+                                        "<td>" + data[0].Res_Revoked + "</TD>" +
+                                        "<td>" + data[0].Fulfil_OutOfSR + "</TD>" +
+                                        "<td>" + data[0].Failed_Rotation + "</TD>" +
+                                    "</tr>" +
+                                "</tbody></table>";
+
+                        $("#divDropVacancy").html(tblDropVacency);
+                    }
+
+                    $('#ApproveRequestions11').bootstrapValidator({
+                        framework: 'bootstrap',
+                        excluded: ':disabled',
+                        feedbackIcons: {
+                            valid: 'glyphicon glyphicon-ok',
+                            invalid: 'glyphicon glyphicon-remove',
+                            validating: 'glyphicon glyphicon-refresh'
+                        },
+                        live: 'enabled',
+                        fields: {
+                            txtRemarks: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Please enter remarks.'
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    $('#ApproveRequestions11').bootstrapValidator('addField', 'ddlreason', {
+                        validators: {
+                            callback: {
+                                message: 'Please select reason.',
+                                callback: function (value, validator, $field) {
+                                    var options = validator.getFieldElements('ddlreason').val();
+                                    if (options == "") {
+                                        $('#ApproveRequestions11').bootstrapValidator('revalidateField', 'txtRemarks');
+                                        return false;
+                                    }
+                                    else { return true; }
+                                }
+                            }
+                        }
+                    });
+
+                    $('#myModalDropVacency').modal('show');
+                  
+                }
+            })
+
+            CloseProgress();
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            CloseProgress();
+            alert(thrownError);
+        }
+    });
+}
+
+function SaveDropVacancy() {
+
+    $('#ApproveRequestions11').data('bootstrapValidator').validate();
+
+    var isValid = $('#ApproveRequestions11').data('bootstrapValidator').isValid();
+
+    if (isValid == false) {
+        return false;
+    }
+
+    var _url = Sourceurl + "SaveDropVacancy";
+    OpenProgress();
+    var iprfId = $("#hdnDropVacancyPRFID").val();
+    var iOwnerId = $("#empSapCode").val();
+    var remarks = $("#txtRemarks").val();
+    var ddlreason = $("#ddlreason").val();
+    var ddlPositionToBe = $("#ddlPositionToBe").val();
+    var dropEvent = "D";
+
+    try {
+
+        $.ajax({
+            type: "POST",
+            url: _url,
+            data: { 'prfId': iprfId, 'iPositionId': ddlreason, 'iDroppedVac': ddlPositionToBe, 'Remarks': remarks, 'iOwnerId': iOwnerId, 'DropEvent': dropEvent },
+            beforeSend: function (msg) {
+
+            },
+            success: function (msg) {
+
+                if (msg == "Success") {
+                    alert("Vacancy has been dropped Successfully!!")
+                    $("#txtRemarks").val("");
+                    CloseProgress();
+                    //$("#myModalDropVacency").modal("hide");
+                    $("#myModalDropVacency button.close").trigger("click");
+                }
+                else {
+
+                    alert(msg)
+                }
+
+            }, error: function (xhr, textStatus, error) {
+
+                //debugger;
+                CloseProgress();
+                alert(error);
+            }
+        });
+
+    } catch (e) {
+        //debugger;
+        alert(e);
+
+    }
+}
+
+function CloseModel() {
+    $("#myModalDropVacency").modal("hide");
+    $("#modal-container").attr("style", "display:none");
+    $(".modal-backdrop").attr("class", "");
+}
+
+$(document).ready(function () {
+    $('#divdateFrom').datepicker({
+        defaultDate: new Date(),
+        autoclose: true,
+        format: 'dd-MM-yyyy',
+    });
+
+    $('#divdateTo').datepicker({
+        defaultDate: new Date(),
+        autoclose: true,
+        format: 'dd-MM-yyyy'
+
+    });
+
+    $("#ExportToExcel").on('click', function () {
+
+        $("#modal-container").html("");
+
+    });
+
+    var hdnMsgSaveReq = $("#hdnMsgSaveReq").val();
+
+    if (hdnMsgSaveReq != "" && hdnMsgSaveReq != null && hdnMsgSaveReq != undefined) {
+        $("#hdnIsFromLastPage").val("True");
+        $("#hdnOverLay").val("False");
+        srApp.HideOverLay();
+        alert(hdnMsgSaveReq);
+        ClearSessionData();
+    }
+
+});
+
+$(document).on('pageinit', function (event) {
+
+    $('#edit').click(function (event) {
+        event.stopPropagation();
+    });
+});
+
+function ClearSessionData() {
+    var _url = Sourceurl + "ClearSessionData";
+
+    $.ajax({
+        type: "POST",
+        url: _url,
+        beforeSend: function (msg) {
+
+        },
+        success: function (msg) {
+
+        }, error: function (xhr, ajaxOptions, thrownError) {
+        }
+    });
+}
+
+function ExportReport() {
+    
+    var startDate = $("#StartDate").val();
+    var endDate = $("#EndDate").val();
+    var Sourceurl = window.location.pathname;
+    if (Sourceurl.indexOf('CopyLobManageRequisitions') != -1) {
+        location.href = '../Home/ExportToExcell?startDate=' + startDate + '&endDate=' + endDate + '&Condition=C';
+    }
+    else if (Sourceurl.indexOf('ManageOnBehalfRequisitions') != -1) {
+        location.href = '../Home/ExportToExcell?startDate=' + startDate + '&endDate=' + endDate + '&Condition=O';
+    }
+    else {
+        location.href = '../Home/ExportToExcell?startDate=' + startDate + '&endDate=' + endDate + '&Condition=R';
+    }
+    //location.href = '../Home/ExportToExcell?startDate=' + startDate + '&endDate=' + endDate;
+}
+
+function GetParameterValues(param) {
+    var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for (var i = 0; i < url.length; i++) {
+        var urlparam = url[i].split('=');
+        if (urlparam[0] == param) {
+            return urlparam[1];
+        }
+    }
+}
+
+$('#ExportToExcel').click(function (event) {
+
+    event.preventDefault();
+    OpenProgress();
+    var _startDate = "a";
+    var _endDate = "a";
+
+    var _url = Sourceurl + "ExportToExcell";
+
+    $.ajax({
+        url: _url,
+        cache: false,
+        data: { startDate: _startDate, endDate: _endDate },
+        success: function (html) {
+
+        },
+        complete: function () {
+            CloseProgress();
+            $('#modal-container').modal('hide');
+        },
+        error: function () {
+            // Handle any errors here.
+            CloseProgress();
+        }
+    });
+});
+
+//Start:Banshi Pal SR Transfer
+function GetSRTransfer() {
+    var _url = Sourceurl + "GetSRTransfer";
+    var iprfId = $("#hdnSRTransferPRFID").val();
+
+    OpenProgress();
+
+    $.ajax({
+        type: "POST",
+        url: _url,
+        data: { 'prfId': iprfId },
+        beforeSend: function (msg) {
+
+        },
+        success: function (msg) {
+
+            var NumberOfVacency;
+
+            $.each(msg, function (index, data) {
+
+                var $DataValue = index;
+
+                if ($DataValue == "ReqNumber") {
+                    $("#SRTRNumber").html(data);
+                }
+                if ($DataValue == "dicTRreason") {
+                    var ddlReason = "<select class=\"form-control input-sm\" id=\"ddlSRTreason\" name=\"ddlSRTreason\">" +
+                                     "<option value=\"\">--Select--</option>"
+
+                    $.each(data, function (Value, Text) {
+
+                        ddlReason = ddlReason + "<option value=" + Value + ">" + Text + "</option>";
+
+                    });
+
+                    ddlReason = ddlReason + "</select>"
+                    $("#divSRTRReason").html(ddlReason);
+
+                }
+            });
+                $("#divSRTransfer").html("");
+
+                
+                 $('#ApproveRequestions11').bootstrapValidator({
+                        framework: 'bootstrap',
+                        excluded: ':disabled',
+                        feedbackIcons: {
+                            valid: 'glyphicon glyphicon-ok',
+                            invalid: 'glyphicon glyphicon-remove',
+                            validating: 'glyphicon glyphicon-refresh'
+                        },
+                        live: 'enabled',
+                        fields: {
+                            txtTRRemarks: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'Please enter remarks.'
+                                    }
+                                }
+
+
+                            }
+
+                        }
+                 });
+
+                 $('#ApproveRequestions11').bootstrapValidator('addField', 'ddlSRTreason',
+                     {
+                   
+                     validators: {
+                         callback: {
+                             message: 'Please select Sr Transfer reason.',
+                             callback: function (value, validator, $field) {
+                                 var options = validator.getFieldElements('ddlSRTreason').val();
+                                 if (options == "") {
+                                     return false;
+                                 }
+                                 else { return true; }
+                             }
+                         }
+                     }
+                 });
+                $('#ApproveRequestions11').bootstrapValidator('addField', 'SRTransferSAPCode', {
+                     validators: {
+                         callback: {
+                          
+                             message: 'Please select Transfree Employee.',
+                             callback: function (value, validator, $field) {
+                                 var options = $.trim(validator.getFieldElements('SRTransferSAPCode').val());
+                                 if (options == "") {
+                                     return false;
+                                 }
+                                 else {
+                                     return { valid: true, message: '' }
+                                 }
+                             }
+                         }
+                     }
+                 });
+
+                    $('#myModalTransferSR').modal('show');
+                
+            
+
+            CloseProgress();
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            CloseProgress();
+            alert(thrownError);
+        }
+    });
+}
+function SaveSRTransfer() {
+    $('#ApproveRequestions11').data('bootstrapValidator').validate();
+
+    var isValid = $('#ApproveRequestions11').data('bootstrapValidator').isValid();
+
+    if (isValid == false) {
+        return false;
+    }
+
+    var _url = Sourceurl + "SaveSRTransfer";    
+    
+    var iprfId = $("#hdnSRTransferPRFID").val();
+    var Initiator = $("#empSapCode").val();
+    var TransfeeId = $("#SRTransferSAPCode").val();
+    TransfeeId = TransfeeId.split('(');
+    TransfeeId = TransfeeId[1].substring(0,8);
+    var remarks = $("#txtTRRemarks").val();
+    var ddlreason = $("#ddlSRTreason").val();
+  
+    var TRResonId = ddlreason;
+ 
+
+    try {
+
+
+        $.ajax({
+            type: "POST",
+            url: _url,
+            data: { 'prfId': iprfId, 'Initiator': Initiator, 'TransfeeId': TransfeeId, 'TRResonId': TRResonId, 'Remarks': remarks },
+            beforeSend: function (msg) {
+
+            },
+            success: function (msg) {
+
+                if (msg == "Success") {
+                    alert("SR has been Transfer Successfully!!")
+                    $("#txtRemarks").val("");
+                    CloseProgress();
+                    $("#myModalTransferSR button.close").trigger("click");
+
+                }
+                if (msg == "EXISTS")
+               {
+                    alert("This SR already transfer now pending with transferee!!")
+                  
+               }
+                if (msg == "NOTINITIATOR") {
+                    alert("Transferee do not have initiator role access !!")
+
+                }
+                if (msg == "ExitsApprover") {
+                    alert("Selected transferee have approval hierarchy this SR transfer is not allowed !!")
+
+                }
+                if (msg == "NOTPROACTIVEINITIATOR") {
+                    alert("Transferee do not rights to create Proactive SR role access !!")
+
+                }
+                if (msg == "NOTCAMPUSINITIATOR") {
+                    alert("Transferee do not rights to create Campus SR role access !!")
+
+                }
+
+
+            }, error: function (xhr, textStatus, error) {
+
+                alert(error);
+              
+                
+            }
+        });
+
+    } catch (e) {
+
+        alert(e);
+
+    }
+}
+//End:Banshi Pal SR Transfer 
+        

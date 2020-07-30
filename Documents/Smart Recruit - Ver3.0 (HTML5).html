@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)https://staging.myhcl.com/SR_New/ -->
+<html style="" class=" js flexbox flexboxlegacy canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">@charset "UTF-8";[ng\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="no-cache">
+    <meta http-equiv="pragma" content="no-cache">
+    <title>Smart Recruit - Ver3.0 (HTML5)</title>
+    <link href="./Smart Recruit - Ver3.0 (HTML5)_files/css" rel="stylesheet">
+
+    <script src="./Smart Recruit - Ver3.0 (HTML5)_files/modernizr"></script>
+
+    <script src="./Smart Recruit - Ver3.0 (HTML5)_files/jquery"></script>
+
+    <script src="./Smart Recruit - Ver3.0 (HTML5)_files/bootstrap"></script>
+
+</head>
+<body style="">
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        
+
+
+
+
+<div class="welcome">
+
+
+</div>
+<script type="text/javascript">
+    var SimplifyHRUrl = 'https://staging.myhcl.com/SimplifySR/';
+    var IsDeliveryUnit = 'False';
+</script>
+<div class="container blueThemeImage">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://staging.myhcl.com/Home/ManageRequisitions">
+            Smart Recruit
+            <span class="version">Ver 3.0</span>
+            <br>
+        </a>
+    </div>
+</div>
+<script src="./Smart Recruit - Ver3.0 (HTML5)_files/LocalNav.js.download"></script>
+
+
+
+
+
+
+    </nav>
+
+    <div class="container global_maincontent" style="min-height: 444px;">
+
+        <style>
+            #ajaxSpinnerContainer {
+                height: 11px;
+            }
+
+            #ajaxSpinnerImage {
+                display: none;
+            }
+
+            .ajaxLoad {
+            }
+
+            #preloader {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #fefefe;
+                z-index: 99;
+                height: 100%;
+            }
+
+            #status {
+                width: 200px;
+                height: 200px;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                background-image: url(../images/AjaxtPageLoader.gif);
+                background-position: center;
+                background-repeat: no-repeat;
+                margin: -100px 0 0 -100px;
+            }
+
+
+            .loader {
+                position: fixed;
+                left: 0px;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                z-index: 9999;
+                background: url('../images/AjaxtPageLoader.gif') 50% 50% no-repeat rgb(249,249,249);
+            }
+        </style>
+        <div class="row" style="display:none">
+            <div class="col-sm-4">
+            </div>
+            <div class="col-sm-5">
+                <div id="ajaxSpinnerContainer">
+                    <img src="./Smart Recruit - Ver3.0 (HTML5)_files/AjaxtPageLoader.gif" class="ajaxLoad" id="ajaxSpinnerImage" title="working...">
+                </div>
+            </div>
+            <div class="col-sm-3">
+            </div>
+        </div>
+        <div class="loader" id="divLoader" style="display: none;"></div>
+        <script type="text/javascript">
+            $(window).load(function () {
+                $(".loader").fadeOut("slow");
+            })
+        </script>
+        
+<script type="text/javascript">
+    jQuery.ajaxSetup({
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        }
+    });
+</script>
+
+<div style="width: 100%; height: 30px; text-align: center; font-size: 18px; padding-top: 3px; background-color: #3071a9; color: white; ">
+    <div style="margin-right:30%"><b>Please Login here</b></div>
+</div><br>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        validate();
+      $('#EmployeeCode, #Password').change(validate);
+     $("#LoginForm").keypress(function (e) {
+    kCode = e.keyCode || e.charCode 
+    if (kCode == 13) {
+             var defaultbtn = $(this).attr("DefaultButton");
+             $("#" + defaultbtn).click();
+             return false;
+         }
+    });
+    });
+
+    function validate() {
+        if ($('#EmployeeCode').val().length > 0 &&
+            $('#Password').val().length > 0 ) {
+            $("input[type=submit]").prop("disabled", false);
+        }
+        else {
+            $("input[type=submit]").prop("disabled", true);
+        }
+    }
+</script>
+
+<form defaultbutton="SubmitButton" action="https://staging.myhcl.com/SR_New/Home/Login" id="LoginForm" method="post">    <div class="row">
+        <div class="col-sm-3"> </div>
+        <div class="col-sm-2" style="padding-top: 9px; font-size:15px"> Employee Code  </div>
+        <div class="col-sm-3">
+            <div class="input-group input-sm">
+                
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-user"></span>
+                </span>
+                <input class="form-control input-sm" id="EmployeeCode" name="EmployeeCode" type="text" value="">
+            </div>
+        </div>
+
+        <div class="col-sm-4"> </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3"> </div>
+        <div class="col-sm-2" style="padding-top: 9px; font-size: 15px"> Password </div>
+        <div class="col-sm-3">
+            <div class="input-group input-sm">
+                
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-certificate"></span>
+                </span>
+                <input class="form-control input-sm" id="Password" name="Password" type="password">
+            </div>
+        </div>
+        <div class="col-sm-4"> </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5"> 
+        </div>
+        <div class="col-lg-6" style="margin-left:10px"> <input type="submit" class="btn btn-primary btn-sm" value="Login" id="SubmitButton" disabled=""></div>
+    </div>
+</form>
+
+<div style="text-align:center">
+    <label class="displayErr">
+        
+    </label>
+</div>
+    </div>
+    <div id="divBackground" style="position: fixed; z-index: 999; height: 100%; width: 100%;
+        top: 0; left:0; background-color: Black; filter: alpha(opacity=20); opacity: 0.6; -moz-opacity: 0.8;display:none;" onclick="focusPopup()">
+    </div>
+    <footer class="hm_footer">
+        <span>This application is best viewed on Microsoft Internet Explorer 9 and above</span>
+    </footer>
+
+
+
+</body></html>
