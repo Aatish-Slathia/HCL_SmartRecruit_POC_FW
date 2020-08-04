@@ -1,0 +1,56 @@
+﻿var app = angular.module('ManageApprovedRequisition', ['datatables']);
+
+app.controller('Ctrl_ManageApprovedRequisition', ['$scope', '$http', 'DTOptionsBuilder', 'DTColumnBuilder',
+    function ($scope, $http, DTOptionsBuilder, DTColumnBuilder) {
+        $scope.dtColumns = [
+           DTColumnBuilder.newColumn(-1).withOption('name', '0').
+            withTitle('Requisition Number').renderWith(function (data, type, full) {
+                return '<a title="Click to view SR details" class="modal-link btn btn-sm" href="../Home/ViewRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=0">' + full["Requisition_Number"] + '</a>';
+            }),
+            DTColumnBuilder.newColumn("Requisition_Date", "Requisition Date").withOption('name', '1'),
+            DTColumnBuilder.newColumn("Customer_Project", "Customer Project").withOption('name', '2'),
+            DTColumnBuilder.newColumn("Country", "Country").withOption('name', '3'),
+            DTColumnBuilder.newColumn("Band", "Band").withOption('name', '4'),
+            DTColumnBuilder.newColumn("Designation", "Designation").withOption('name', '5'),
+            DTColumnBuilder.newColumn("Skills", "Skills").withOption('name', '6'),
+            DTColumnBuilder.newColumn("Status", "Status").withOption('name', '8'),
+            DTColumnBuilder.newColumn(-1).withOption('name', '10').
+            //start SR_336 Suhasini Srivastava
+            withTitle('Head Count Deviation').renderWith(function (data, type, full) {
+                if (full["IsDeviation"] == true) {
+                    return 'Yes';
+                }
+                else {
+                    return 'No';
+                }
+            }),
+                       //end SR_336
+                DTColumnBuilder.newColumn(-1).withTitle('Actions').notSortable().renderWith(function (data, type, full)
+                {
+                    return '<div class="anchor-inBlock">&nbsp;<a id="TSC" name="TSC" class="modal-link btn" title="TSC Remarks" href="../Home/ViewRequisitionsTSCRemarks?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=1">'
+                        +'<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-folder-open"></span></span></a></div>'
+            })
+        ];
+
+        
+            var Sourceurl = re.exec(window.location.href)
+            var postUrl;
+            var qStringVal = GetParameterValues("Status");
+            var qReqNo = GetParameterValues("ReqNo");//pankajk-kmr
+            if (qReqNo == undefined)
+                qReqNo = "";
+            if (qStringVal != undefined) {
+                postUrl = Sourceurl + "/ManageApprovedRequisition_Json?Status=" + qStringVal;
+            }
+            else
+                postUrl = Sourceurl + "/ManageApprovedRequisition_Json?ReqNo=" + qReqNo;
+                $scope.dtOptions = DTOptionsBuilder.newOptions().withOption('ajax', {
+                dataSrc: "data",
+                url: postUrl,
+                type: "POST",
+            })
+            .withOption('processing', true)
+            .withOption('serverSide', true)
+            .withOption('aaSorting', [0, 'DESC'])
+        
+    }])

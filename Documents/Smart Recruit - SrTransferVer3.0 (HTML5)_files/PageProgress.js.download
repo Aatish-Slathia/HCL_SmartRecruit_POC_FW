@@ -1,0 +1,367 @@
+﻿
+//=========================================================================================================================================================
+//    Version             Modified By          Modified On                       Change Description
+//=========================================================================================================================================================
+//     v1.0               Arvind Kumar         10-Jan-2016                        New File Created for ReSubmit
+//=========================================================================================================================================================
+
+var re = new RegExp(/^.*\//);
+var SourcUrl = "";
+var event = "click";
+var srApp;
+var ids = "#btnSubmit,#SaveGeographiy,#btnReSubmit,#SaveSubmit";
+var Msg = "VGhlIGN1cnJlbnQgU2Vzc2lvbiBoYXMgYmVlbiBleHBpcmVkISE=";
+var id = "#Requisition";
+var IsErrorOnLoad = false;
+var $WindowHandler;
+var IsMessage = false;
+
+srApp = srApp || (function () {
+
+    return {
+
+        ClearRebmitValues: function () {
+
+            var _url = SourcUrl + "ClearRebmitValues";
+
+            $.ajax({
+                type: "POST",
+                url: _url,
+                beforeSend: function (msg) {
+
+                },
+                success: function (msg) {
+
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    //alert(thrownError);
+                }
+            });
+        },
+        ReversRebmitValues: function () {
+
+            var _url = SourcUrl + "ReversRebmitValues";
+
+            $.ajax({
+                type: "POST",
+                url: _url,
+                beforeSend: function (msg) {
+
+                },
+                success: function (msg) {
+
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    //alert(thrownError);
+                }
+            });
+        },
+        ValidatePageSubmit: function (pageid, pageName) {
+
+            var hdnIsReSubmit = $("#hdnIsReSubmit").val();
+            var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+            var hdnvalidate = $('#hdnvalidate').val();
+
+            if (hdnIsFromLastPage == "True") {
+
+                var isValid = false;
+
+                if (pageName != "Axon") {
+
+                    try {
+
+                        $(pageid).bootstrapValidator('removeField', 'ReportingManagerID');
+                        $(pageid).bootstrapValidator('removeField', 'txtCustomer');
+                        $(pageid).bootstrapValidator('removeField', 'ProjectId');
+                        $(pageid).bootstrapValidator('removeField', 'ProjectL1');
+                        $(pageid).bootstrapValidator('removeField', 'ProjectL4');
+                        $(pageid).bootstrapValidator('removeField', 'JobDescriptionID');
+
+                    } catch (e) {
+
+                    }
+
+                    var validateValidate = $(pageid).data('bootstrapValidator').validate();
+                    isValid = $(pageid).data('bootstrapValidator').isValid();
+                }
+                else {
+
+                    hdnvalidate = "True";
+                    isValid = true;
+                }
+
+                if (isValid == true) {
+
+                    $(ids).prop("disabled", false);
+                    IsErrorOnLoad = false;
+                    var browserName = srApp.GetBrowser();
+
+                    if (pageName == "IntvApprover" || pageName == "Axon" || hdnvalidate == "True") {
+                        srApp.ReversRebmitValues();
+                        //srApp.HideOverLay();
+                        $(id)[0].submit();
+                    }
+                    else {
+
+                        LoadOverLayDiv();
+
+                        if (
+                            browserName == "IE" ||
+                            browserName == "mozilla" ||
+                            browserName == "safari"
+                            ) {
+                            $(ids).trigger(event);
+                        }
+                        else if (browserName == "chrome") {
+                            $(ids)[0].click();
+                        }
+                        else { //Other Browser,
+                            $(ids).trigger(event);
+                        }
+
+                    }
+                }
+                else {
+
+                    srApp.HideOverLay();
+                    IsErrorOnLoad = true;
+                    $("#hdnIsFromLastPage").val("False");
+                    $(ids).prop("disabled", true);
+                    srApp.ClearRebmitValues();
+                }
+            }
+        },
+        IsErrorOnPageLoad: function () {
+
+            return IsErrorOnLoad;
+        },
+        OpenOverlayProgress: function (pageid, pageName) {
+
+            var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+
+            if (pageid == "#Axon" && hdnIsFromLastPage == "False") {
+                LoadOverLayDiv();
+                srApp.OpenOverLay();
+            }
+            else if (pageid == "#Axon" && hdnIsFromLastPage == "True") {
+
+                //Nothing to do
+            }
+            else if (hdnIsFromLastPage == "False" && pageName == "IntvApprover") {
+
+                var validateValidate = $(pageid).data('bootstrapValidator').validate();
+                var isValid = $(pageid).data('bootstrapValidator').isValid();
+
+                if (isValid == true) {
+                    LoadOverLayDiv();
+                    srApp.OpenOverLay();
+                    $(id)[0].submit();
+                }
+            }
+            else {
+
+            }
+
+        },
+        HideOverLay: function () {
+
+            var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+            $("#divBackground").attr("style", "");
+            var hdnOverLay = $("#hdnOverLay").val();
+
+            if (hdnIsFromLastPage == "True" && hdnOverLay == "False") {
+                try {
+
+                    $("#hdnIsFromLastPage").val("False");
+                    $WindowHandler = window.open('', 'Please Wait...');
+                    $WindowHandler.close();
+                    $("#hdnOverLay").val("True");
+
+                } catch (e) {
+
+                }
+            }
+        },
+        OpenOverLay: function () {
+
+            var width = 600;
+            var height = 200;
+            var left = Number((screen.width / 2) - (width / 2));
+            var tops = Number((screen.height / 2) - (height / 2));
+            $WindowHandler = window.open("../Requisitions/OverlayProgress", 'Please Wait...', 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=' + width + ', height=' + height + ', top=' + tops + ', left=' + left);
+            //$WindowHandler = window.open('/Requisitions/OverlayProgress', 'Please Wait...', 'left=100,top=100,width=400,height=400,toolbar=1,resizable=0');
+        },
+        GetBrowser: function () {
+
+            var browser;
+            $.browser.msie = (/msie|trident/i).test(navigator.userAgent) //IE
+            $.browser.chrome = /chrome/.test(navigator.userAgent.toLowerCase()); //Crome
+            var cc = $.browser.mozilla;;
+
+            if ($.browser.msie) { //IE
+
+                browser = "IE";
+            }
+            else if ($.browser.mozilla) { //Mozila
+
+                browser = "mozilla";
+            }
+            else if ($.browser.chrome) {  //Crome
+
+                browser = "chrome";
+            }
+            else if ($.browser.safari) { //Safari
+
+                browser = "safari";
+            }
+            else { //Other browser
+                browser = "Other";
+            }
+
+            return browser;
+        },
+        OnJSBootStrapError: function (prfId, stackTrace, errorURL, UserName) {
+
+            if (prfId == null || prfId == undefined || prfId == "") {
+
+                prfId = ""
+            }
+
+            var _url = SourcUrl + "OnJSBootStrapError";
+            stackTrace = stackTrace.replace(/http:\/\//gi, '');
+            $.ajax({
+                type: "POST",
+                url: _url,
+                data: JSON.stringify({ 'prfid': prfId, 'StackTrace': stackTrace, 'ErrorURL': errorURL, 'User': UserName }),
+                beforeSend: function (msg) {
+
+                },
+                success: function (msg) {
+
+                    var hdnIsMsgShown = $("#hdnIsMsgShown").val();
+                    if (msg == "Fail" && hdnIsMsgShown == "False") {
+
+                        $("#hdnIsMsgShown").val("True");;
+                        alert(atob(Msg));
+                        window.location.href = SourcUrl + 'Errors';
+
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    //alert(thrownError);
+                }
+            });
+
+
+        }
+    };
+})();
+
+$(function () {
+
+    SourcUrl = re.exec(window.location.href);
+});
+
+$(document).ready(function () {
+
+    $("#btnBack,#OnLink").click(function (e) {
+
+        srApp.ClearRebmitValues();
+
+    });
+
+});
+
+var $WindowHandler;
+var hdnIsLastBtbClicked;
+function LoadOverLayDiv() {
+    var bcgDiv = $("#divBackground");
+    bcgDiv.attr('style', '');
+    bcgDiv.attr('style', "position: fixed; z-index: 999; height: 100%; width: 100%;top: 0; left:0; background-color: Black; filter: alpha(opacity=20); opacity: 0.6; -moz-opacity: 0.8;display:'';");
+}
+
+$(window).load(function () {
+    //debugger;
+    var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+    var hdnIsLastBtbClicked = $("#hdnIsLastBtbClicked").val();
+
+    var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+    $("#divBackground").attr("style", "");
+    var hdnOverLay = $("#hdnOverLay").val();
+
+    if (hdnIsFromLastPage == "True" && hdnOverLay == "False") {
+        LoadOverLayDiv();
+        var width = 500;
+        var height = 300;
+        var left = Number((screen.width / 2) - (width / 2));
+        var tops = Number((screen.height / 2) - (height / 2));
+
+        //$WindowHandler = window.open("", 'Please Wait...');
+        //$WindowHandler.focus();
+    }
+});
+
+function focusPopup() {
+    $WindowHandler = window.open("", 'Please Wait...');
+    $WindowHandler.focus();
+}
+
+$(window).error(function (errorMsg) {
+
+    var stack = errorMsg.originalEvent.error.stack;
+    var description = errorMsg.originalEvent.error.description;
+    var message = errorMsg.originalEvent.error.message;
+    var lineno = errorMsg.originalEvent.lineno;
+    var filename = errorMsg.originalEvent.filename;
+    var LoginUserSapCodeName = $("#hdnLoginUserSapCodeName").val();
+    var prfId = $("#hdnPRFIDD").val();
+    srApp.OnJSBootStrapError(prfId, stack, filename, LoginUserSapCodeName);
+
+});
+
+$(function () {
+    $("#divLoader").click(function () {
+
+        var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+        var hdnOverLay = $("#hdnOverLay").val();
+
+        if (hdnIsFromLastPage == "True" && hdnOverLay == "True") {
+
+            $WindowHandler = window.open("../Requisitions/OverlayProgress", 'Please Wait...')
+            $WindowHandler.focus();
+        }
+    });
+});
+
+$('select').change(function () {
+
+    var prfId = $("#hdnPRFIDD").val();
+    var LoginUserSapCodeName = $("#hdnLoginUserSapCodeName").val();
+    var stack = "Session Expire For User SapCode - " + LoginUserSapCodeName;
+    var errorURL = "OnChange";
+    if (prfId == null || prfId == undefined) {
+        prfId = "";
+    }
+    srApp.OnJSBootStrapError(prfId, stack, errorURL, LoginUserSapCodeName);
+
+});
+
+function TimeOut() {
+
+    var _url = SourcUrl + "SessionCheck";
+    $.ajax({
+        type: "POST",
+        url: _url,
+        data: {},
+        beforeSend: function (msg) {
+
+        },
+        success: function (msg) {
+            if (msg == "True") {
+
+                alert("Time Out");
+            }
+            else {
+                setTimeout(TimeOut, 10000)
+            }
+        }, error: function (xhr, ajaxOptions, thrownError) {
+        }
+    });
+}

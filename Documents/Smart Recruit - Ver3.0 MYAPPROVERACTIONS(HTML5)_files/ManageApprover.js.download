@@ -1,0 +1,439 @@
+﻿//=========================================================================================================================================================
+//    Version             Modified By          Modified On          Change Description
+//=========================================================================================================================================================
+//     v1.0               Arvind Kumar         10-Jan-2016          REQ Changes and Bug fixing
+//     v1.1               pankaj Kumar         03-Oct-2016         Search by Req No.
+//=========================================================================================================================================================
+
+var re = new RegExp(/^.*\//);
+var Sourceurl = ""
+var _PRFAJAX = { Text: "", Value: "", Selected: "" }
+
+$(function () {
+    Sourceurl = re.exec(window.location.href)
+    // Initialize numeric spinner input boxes
+    // Initialize modal dialog
+    // attach modal-container bootstrap attributes to links with .modal-link class.
+    // when a link is clicked with these attributes, bootstrap will display the href content in a modal dialog.
+    $('body').on('click', '.btn', function (e) {
+
+        $(this).removeData('bs.modal');
+        $(this).attr('data-target', '#modal-container');
+        $(this).attr('data-toggle', 'modal');
+
+        //Start v1.0
+        var id = $(this).attr("id"); 
+        if (id == "SearchReq" || id == "Reset") {
+            $(this).removeData('bs.modal');
+            $(this).attr('data-target', '');
+            $(this).attr('data-toggle', '');
+        }
+        //End v1.0
+
+    });
+
+    // Attach listener to .modal-close-btn's so that when the button is pressed the modal dialog disappears
+    $('body').on('click', '.modal-close-btn', function () {
+        $('#modal-container').modal('hide');
+    });
+
+    //clear modal cache, so that new content can be loaded
+    $('#modal-container').on('hidden.bs.modal', function () {
+        $(this).removeData('bs.modal');
+    });
+
+    $('#modal-container').on('show.bs.modal', function () {
+    });
+
+    $('#CancelModal').on('click', function () {
+        return false;
+    });
+
+    $("#SearchReq").click(function () {
+        SearchRequisitions();
+    });
+
+    $("#SearchApprovedReq").click(function () {
+        SearchApprovedRequisitions();
+    });
+
+    $("#ExportToExcel").click(function () {
+        ExportToExcellApprover();
+    });
+
+    $("#Reset").click(function () {
+        Reset();
+    });
+
+    $('#edit, #copy,#close').tooltip()
+    $("#AllRemarks").hide();
+    $("[data-toggle=tooltip]").tooltip();
+    //start  by maneesh SR_336
+    $("#ActionReason1").hide();
+    $("#ActionName").hide();
+    $("#btn-Submit").click(function () {
+        var _Remarks = $("#Remarks").val();
+        var action = $("#Action1")[0].selectedIndex;
+        var reason = $("#Reason1")[0].selectedIndex
+        if (action == 2)
+        {
+            if (reason <= 0) {
+                $('#Reason1').css("borderColor", "red");
+                $('#mandate').css("display", "block");
+
+                //document.getElementById("Reason1").style.borderColor = "red";
+                //document.getElementById("mandate").style.display = "block";
+            }
+            else if (_Remarks.length==0)
+            {
+                $('#Remarks').css("borderColor", "red");
+                $('#bulkRemarks').css("display", "block");
+            }
+            else {
+                $('#Reason1').css("borderColor", "");
+                $('#mandate').css("display", "none");
+                $('#bulkRemarks').css("display", "none");
+                //document.getElementById("Reason1").style.borderColor = "";
+                //document.getElementById("mandate").style.display = "none";
+                BulkReferback();
+
+            }
+            
+        }
+        else if (action == 1) {
+            FormSubmit();
+        }
+        else {
+            $('#Reason1').css("borderColor", "");
+            $('#mandate').css("display", "none");
+            $('#bulkRemarks').css("display", "none");
+            // document.getElementById("Reason1").style.borderColor = "";
+            //start :: suhasini srivastava
+            alert("Select Action")
+            // end :: suhasini srivastava
+        }
+   
+
+    });
+
+    CloseProgress();
+});
+//End  by maneesh SR_336
+function FormSubmit() {
+
+    OpenProgress();
+
+    var PRFID = [];
+    var _url = Sourceurl + "BulkApproval"
+    $("#ManageApprover input[type=checkbox]").each(function () {
+        if ($(this).prop("checked")) {
+            _IsChecked = true;
+            PRFID.push({ "Value": $(this).prop("value"), "Text": "", "Selected": "", "BservSource": $(this).attr("bSource") });
+        }
+    });
+
+    var Remarks = $("#Remarks").val();
+    $.ajax({
+        type: "POST",
+        url: _url,
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({ "PRFID": PRFID, "Remarks": Remarks }),
+        timeout: 120000,
+        success: function (msg) {
+
+            CloseProgress();
+            if (msg == "Sucess") {
+                alert("Requisition(s) has been approved successfully.");
+                window.location.href = "../Home/ManageApproverng";
+            }
+             else if(msg=="0")
+            {
+                alert("Demand cannot be submitted/approved as Company code/PA is not active in iTAP.");
+                window.location.href = "../Home/ManageApproverng";
+             }
+             //Start: CR00011457 TP to FTE
+             else if (msg == "BYPASS") {
+                 alert("Requisition(s) can't be approved as EMS is not initiated for the Resource.");
+                 window.location.href = "../Home/ManageApproverng";
+             }
+            //END: CR00011457 TP to FTE
+
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            if (ajaxOptions === "timeout") {
+                alert("The request has timeout.");
+            }
+
+            CloseProgress();
+        }
+    });
+
+}
+
+//start  by maneesh SR_336
+function BulkReferback() {
+
+    OpenProgress();
+    var PRFID = [];
+    var _url = Sourceurl + "BulkReferbackRequisitions"
+    $("#ManageApprover input[type=checkbox]").each(function () {
+        if ($(this).prop("checked")) {
+            _IsChecked = true;
+            PRFID.push({ "Value": $(this).prop("value"), "Text": "", "Selected": "", "BservSource": $(this).attr("bSource") });
+        }
+    });
+
+    var Remarks = $("#Remarks").val();
+    var action = $("#Action1")[0].selectedIndex;
+    var reason = $('#Reason1 :selected').val()
+    $.ajax({
+        type: "POST",
+        url: _url,
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify({ "PRFID": PRFID, "Remarks": Remarks, "Reason": reason, "action": action }),
+        success: function (msg) {
+
+            CloseProgress();
+            if (msg == "Sucess") {
+
+                alert("Requisition(s) has been Refer back successfully.");
+                window.location.href = "../Home/ManageApproverng";
+            }
+            else if (msg == "0") {
+                alert("Demand cannot be submitted/approved as Company code/PA is not active in iTAP.");
+                window.location.href = "../Home/ManageApproverng";
+            }
+            else if (msg == "BYPASS") {
+                alert("Requisition(s) can't be Refer back as EMS is not initiated for the Resource.");
+                window.location.href = "../Home/ManageApproverng";
+            }
+            else if (msg == "Error") {
+                alert("Requisition(s) can't be Refer back.");
+                window.location.href = "../Home/ManageApproverng";
+            }
+            else {
+                alert(msg);
+                window.location.href = "../Home/ManageApproverng";
+            }
+
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            CloseProgress();
+        }
+    });
+
+}
+//End  by maneesh SR_336
+
+$(document).ready(function () {
+    $('#divdateFrom').datepicker({
+        defaultDate: new Date(),
+        autoclose: true,
+        format: 'dd-MM-yyyy',
+    });
+
+    $('#divdateTo').datepicker({
+        defaultDate: new Date(),
+        autoclose: true,
+        format: 'dd-MM-yyyy'
+
+    });
+
+    $('#selecctall').click(function (event) {  //on click 
+        if (this.checked) { // check select status
+            $('.CheckThis').each(function () { //loop through each checkbox
+                this.checked = true;  //select all checkboxes with class "checkbox1"               
+            });
+        } else {
+            $('.CheckThis').each(function () { //loop through each checkbox
+                this.checked = false; //deselect all checkboxes with class "checkbox1"                       
+            });
+        }
+    });
+
+    var hdnMsgSaveReq = $("#hdnMsgSaveReq").val();
+
+    if (hdnMsgSaveReq != "" && hdnMsgSaveReq != null && hdnMsgSaveReq != undefined) {
+        alert(hdnMsgSaveReq);
+    }
+    //start  by maneesh SR_336
+    $("#ActionReason1").hide();
+    $("#ActionName").hide();
+    $('#mandate').hide();
+    $('#bulkRemarks').hide();
+    $("#Action1").change(function () {
+
+        var action = $("#Action1")[0].selectedIndex;
+        if (action != 2) {
+            $("#ActionReason1").hide();
+            $('#mandate').hide();
+            $('#bulkRemarks').hide();
+            $('#Remarks').css("borderColor", "");
+        }
+        else {
+            $("#ActionReason1").show();
+            $('#mandate').show();
+            $('#bulkRemarks').show();
+        }
+
+
+    })
+    $("#Reason1").change(function () {
+        if (this.value == "Select" || this.value == "") {
+            this.style.borderColor = "red";
+            $('#mandate').show();
+        }
+        else {
+            this.style.borderColor = "";
+            $('#mandate').hide();
+        }
+
+
+    })
+    $("#Remarks").keypress(function () {
+        var length = $("#Remarks").val().length
+        if (length >= 0 && $("#Action1")[0].selectedIndex == 2) {
+            $('#bulkRemarks').hide();
+            $('#Remarks').css("borderColor", "");
+        }
+        else if (length >= 0 && $("#Action1")[0].selectedIndex == 1) {
+            $('#bulkRemarks').hide();
+            $('#Remarks').css("borderColor", "");
+        }
+        else {
+            $('#bulkRemarks').show();
+            $('#Remarks').css("borderColor", "red");
+        }
+
+    });
+    //End  by maneesh SR_336
+});
+
+function SearchRequisitions() {
+    var dateFrom = $("#StartDate").val();
+    var dateTo = $("#EndDate").val();
+    //v1.1
+    var ReqNo = $("#ReqNo").val();//pankaj-kmr    
+    var re = /^[ A-Za-z0-9_@/-]*$/
+    if (!re.test(ReqNo)) {
+        alert("Please enter valid Requisition number");
+        return true;
+    }
+    // var ReqnewVal = ReqNo.replace(/[^\w\s]/gi, '+');
+    var ReqnewVal = ReqNo.replace(/[/]/g, '!');
+    if ((dateFrom != "" && dateTo != "") || (ReqNo != "")) {
+        window.location.href = "ManageApproverng?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&ReqNo=" + ReqnewVal;// + "&IsFrom=" + IsFrom;
+    }
+    else {
+        alert("Please select date Or Requisition number");
+        return true;
+    }
+    //v1.1
+   
+}
+
+function SearchApprovedRequisitions() {
+    var dateFrom = $("#dateFrom").val();
+    var dateTo = $("#dateTo").val();
+    //v1.1
+    var ReqNo = $("#ReqNo").val();//pankaj-kmr   
+    var re = /^[ A-Za-z0-9_@/-]*$/
+    if (!re.test(ReqNo)) {
+        alert("Please enter valid Requisition number");
+        return true;
+    }
+    // var ReqnewVal = ReqNo.replace(/[^\w\s]/gi, '+');
+    var ReqnewVal = ReqNo.replace(/[/]/g, '!');
+    if ((dateFrom != "" && dateTo != "") || (ReqNo != "")) {
+        window.location.href = "ManageApprovedRequisition?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&ReqNo=" + ReqnewVal;;
+    }
+    else {
+        alert("Please select date Or Requisition number");
+        return true;
+    }
+    //v1.1
+}
+
+function Reset() {
+    //v1.1
+    var Sourceurl = window.location.pathname;
+    if (Sourceurl.indexOf('ManageApprovedRequisition') != -1) {
+        window.location.href = "ManageApprovedRequisition";
+    }
+    else {
+        window.location.href = "ManageApproverng";
+    }
+    //v1.1
+}
+
+$("#tsc,#edit").click(function () {
+    $('#modal-container').html("");
+    $('#modal-container').html("Please Wait...");
+
+});
+
+function ExportToExcellApprover() {
+    var startDate = $("#StartDate").val();
+    var endDate = $("#EndDate").val();
+    location.href = '../Home/ExportToExcellApprover?startDate=' + startDate + '&endDate=' + endDate + '&Condition=P';
+}
+
+function ExportToExcellApproved() {
+    var startDate = $("#dateFrom").val();
+    var endDate = $("#dateTo").val();
+    location.href = '../Home/ExportToExcellApprover?startDate=' + startDate + '&endDate=' + endDate + '&Condition=A';
+}
+
+$('#ExportToExcel').click(function (event) {
+
+    event.preventDefault();
+    OpenProgress();
+    var _startDate = "a";
+    var _endDate = "a";
+    var _condition = "P";
+
+    var _url = Sourceurl + "ExportToExcellApprover";
+
+    $.ajax({
+        url: _url,
+        cache: false,
+        data: { startDate: _startDate, endDate: _endDate, Condition: _condition },
+        success: function (html) {
+
+        },
+        complete: function () {
+            CloseProgress();
+            $('#modal-container').modal('hide');
+        },
+        error: function () {
+            // Handle any errors here.
+            CloseProgress();
+        }
+    });
+});
+
+$('#ExportToExcel2').click(function (event) {
+
+    event.preventDefault();
+    OpenProgress();
+    var _startDate = "a";
+    var _endDate = "a";
+    var _condition = "A";
+
+    var _url = Sourceurl + "ExportToExcellApprover";
+
+    $.ajax({
+        url: _url,
+        cache: false,
+        data: { startDate: _startDate, endDate: _endDate, Condition: _condition },
+        success: function (html) {
+
+        },
+        complete: function () {
+            CloseProgress();
+            $('#modal-container').modal('hide');
+        },
+        error: function () {
+            // Handle any errors here.
+            CloseProgress();
+        }
+    });
+});
