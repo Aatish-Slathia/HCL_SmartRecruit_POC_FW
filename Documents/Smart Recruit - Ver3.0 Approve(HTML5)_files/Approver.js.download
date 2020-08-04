@@ -1,0 +1,734 @@
+﻿
+/// =========================================================================================================================================================
+/// Version             Modified By          Modified On              Change Description   
+/// =========================================================================================================================================================
+///  v1.0               Pankaj Singh         10-Sep-2015              ---
+///  v1.1               Mithilesh Singh       23-Jan-2016             SOT Changes (Calling a soft validatio/alert message in case of client interview 
+///                                                                   check box is uncheck when SOT requisition source is selected.) 
+///  v1.2               Pankaj Kumar         23-Jan-2016              TP1 TP2 Validation
+/// =========================================================================================================================================================
+var Interviewer = [];
+var InterviewerCount = 1;
+var InterviewerDTO = { Text: "", Value: "", Selected: false };
+var re = new RegExp(/^.*\//);
+var Sourceurl = ""
+//pankaj kumar
+var clickcount = "";
+
+$(function () {
+    //pankaj kumar
+    ValidateFormApprover();
+   Sourceurl = re.exec(window.location.href)
+    //Interviewer.push("interviewerid1");
+    GetInterviewerManager("interviewerid1TP1");
+    GetInterviewerManager("interviewerid2TP1");
+    GetInterviewerManager("interviewerid1TP2");
+    GetInterviewerManager("interviewerid2TP2");
+    //SR Transfer
+    //ValidateFormTransfree();
+    GetTransferEMPSapCode("SRTransferSAPCode");
+    //SR Transfer
+    //$(".js-add").click(function () { AddRow(); });
+    myApp.AddingAstricToFormControl();
+    var value = $("#hdnReqSource").val();
+    if (value == "22") {
+        RemoveAstricToFormControl("interviewerid1TP1");
+        RemoveAstricToFormControl("interviewerid2TP1");
+    }
+    else {
+        AdAstricToonlyoneControlonl("interviewerid1TP1");
+        AdAstricToonlyoneControlonl("interviewerid2TP1");
+    }
+    if ($('#hdnEntity').val() == 3) {
+        RemoveAstricToFormControl("interviewerid2TP1");
+    }
+});
+
+AdAstricToonlyoneControlonl("Approver1");
+
+//region Version 1.0
+var value = $("#hdnReqSource").val();
+
+if (value == "19") {
+    $("#chksotmandatory").change(function () {
+        if (this.checked == false) {
+            alert('For requisition source – "SOT", client interview is required. Kindly check the Client interview check box.');
+        }
+    });
+}
+//endregion Version 1.0
+
+$(document).ready(function () {
+    $('#SaveSubmit').on('click', function (e) {
+        var value = $("#hdnReqSource").val();
+        //v1.2
+        var TP11l = "", TP11_A, TP11_B, TP11_C, TP11_D;
+        var TP21l = "", TP21_A, TP21_B, TP21_C, TP21_D;
+        var TP12l = "", TP12_A, TP12_B, TP12_C, TP12_D;
+        var TP22l = "", TP22_A, TP22_B, TP22_C, TP22_D;
+        if ($("#interviewerid1TP1").val().length > 0) {
+            if ($("#interviewerid1TP1").val().length > 8) {
+                TP11_A = $("#interviewerid1TP1").val();
+                TP11_B = TP11_A.split('('); TP11_C = TP11_B[0]; TP11_D = TP11_B[1]; TP11_E = TP11_D.split(')');
+                TP11l = TP11_E[0];
+            }
+            else { $("#interviewerid1TP1").val(''); TP11l = $("#interviewerid1TP1").val(); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11"); return false; }
+        }
+        if ($("#interviewerid2TP1").val().length > 0) {
+            if ($("#interviewerid2TP1").val().length > 8) {
+                TP21_A = $("#interviewerid2TP1").val();
+                TP21_B = TP21_A.split('('); TP21_C = TP21_B[0]; TP21_D = TP21_B[1]; TP21_E = TP21_D.split(')');
+                TP21l = TP21_E[0];
+            }
+            else { $("#interviewerid2TP1").val(''); TP21l = $("#interviewerid2TP1").val(); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false; }
+        }
+        if ($("#interviewerid1TP2").val().length > 0) {
+            if ($("#interviewerid1TP2").val().length > 8) {
+                TP12_A = $("#interviewerid1TP2").val();
+                TP12_B = TP12_A.split('('); TP12_C = TP12_B[0]; TP12_D = TP12_B[1]; TP12_E = TP12_D.split(')');
+                TP12l = TP12_E[0];
+            }
+            else { $("#interviewerid1TP2").val(''); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11"); return false; }
+        }
+        if ($("#interviewerid2TP2").val().length > 0) {
+            if ($("#interviewerid2TP2").val().length > 8) {
+                TP22_A = $("#interviewerid2TP2").val();
+                TP22_B = TP22_A.split('('); TP22_C = TP22_B[0]; TP22_D = TP22_B[1]; TP22_E = TP22_D.split(')');
+                TP22l = TP22_E[0];
+            }
+            else { $("#interviewerid2TP2").val(''); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false; }
+        }
+        if (TP11l != '') {
+            if (TP11l == TP21l) {
+                DisplayError("divinterviewerid2TP", "1st Technical Panel 1 interviewers cannot be blank or same as 2nd Technical Panel 1 interviewers.", "smlTP", "SaveSubmit", e, "TP11");
+            }
+            else if ((TP12l == TP22l) && (TP12l != '' && TP22l != '')) {
+                DisplayError("divinterviewerid2TP", "1st Technical Panel 2 interviewers cannot be blank or same as 2nd Technical Panel 2 interviewers.", "smlTP", "SaveSubmit", e, "TP11");
+            }
+            else if ((TP11l == TP12l) && (TP11l != '' && TP12l != '')) {
+                DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP11");
+            }
+            else if ((TP11l == TP22l) && (TP11l != '' && TP22l != '')) {
+                DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+            }
+            else if ((TP21l === TP12l) && (TP21l != '' && TP12l != '')) {
+                DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+            }
+            else if ((TP21l == TP22l) && (TP21l != '' && TP22l != '')) {
+                DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+            }
+            else if ($("#interviewerid1TP2").val() > 0) {
+                if ((TP21l == TP22l) && (TP21l != '' && TP22l != '')) {
+                    DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+                }
+            }
+            else if ((TP11l.length < 8)) {
+                if (TP12l.length > 0) {
+                    $("#interviewerid1TP2").val(''); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11");
+                    return false;
+                }
+                else {
+
+                    $("#interviewerid1TP2").val('');
+                    DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11");
+                    return false;
+                }
+            }
+            else if ((TP21l.length < 8 && $('#hdnEntity').val() != 3)) {
+                if (TP22l.length > 0) {
+                    $("#interviewerid2TP2").val('');
+                    DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false;
+                }
+                else {
+                    if (TP21l.length == 0) {
+                        $("#interviewerid2TP1").val('');
+                        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+                    }
+                    else {
+                        $("#interviewerid2TP1").val('');
+                        DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false;
+                    }
+
+                }
+            }
+            else {
+                ValidateApprover(e);
+                if ($('#Approver1').val() == "") {
+                    if (value == "22") {
+                        alert('Forecasted Demand cannot be raised as no DPL is mapped. Please raise SSD to get the DPL mapping done.');
+                    }
+                    else {
+                        alert('Requisition cannot be raised as no approver is found.');
+                    }
+                    return false;
+                }
+                else {
+                    if ($("#hdnApproverValidationMessage").val() != "") {
+                        alert($("#hdnApproverValidationMessage").val());
+                        clickcount = "2";
+                        return false;
+                    }
+                }
+            }
+        }
+        else {
+
+            if (value != "22") {
+                if ($('#hdnEntity').val() != 3) {
+                    $("#interviewerid1TP1").val('');
+                    $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+                    $("#interviewerid2TP1").val('');
+                }
+                else {
+                    if (TP11l.length < 8) {
+                        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+                        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+                    }
+                    else {
+                        ValidateApprover(e);
+                    }
+                }
+            }
+            else {
+                ValidateApprover(e);
+            }
+            if ($('#Approver1').val() == null) {
+                if (value == "22") {
+                    alert('Forecasted Demand cannot be raised as no DPL is mapped. Please raise SSD to get the DPL mapping done.');
+                }
+                else {
+                    alert('Requisition cannot be raised as no approver is found.');
+                }
+                return false;
+            }
+            else {
+                if ($("#hdnApproverValidationMessage").val() != "") {
+                    alert($("#hdnApproverValidationMessage").val());
+                    clickcount = "2";
+                    return false;
+                }
+            }
+        }
+
+        //Start:CR00012195 changes by Banshi Pal
+        var iTAPCompany = $('#hdniTAPCompany').val();
+        if ($('#hdniTAPCompany').val() != "") {
+            if (iTAPCompany == "0") {
+                alert('Demand cannot be submitted as Company code/PA is not active in iTAP.');
+                return false;
+
+            }
+        }
+        //End:CR00012195 changes by Banshi Pal
+        var MsgiTAPCompany = $('#hdnMsgiTAPCompany').val();
+        var messageStr = "";
+        var iTAPCompanymsg = '';
+        if ($('#hdnMsgiTAPCompany').val() != "")
+        {
+            if (MsgiTAPCompany == "0")
+            {
+                messageStr += "Submitted SR as Company code/PA is not active in iTAP.\n";
+
+            }
+
+        }
+        var TPtoFTResource = $('#hdnTPtoFTResource').val();
+        if (TPtoFTResource == "True" && $('#hdnEntity').val() != 2) {
+            messageStr += "Post final approval, SR will be routed to Central TAG team for external fulfillment.\n";
+        }
+        messageStr += "Are you sure you want to submit this information ?"
+        var _confrimMsg = confirm(messageStr);
+        if (_confrimMsg == true) {
+            var hdnvalidate = $('#hdnvalidate').val();
+
+            if (hdnvalidate == "False") {
+                e.preventDefault();
+            }
+            else if (hdnvalidate == "True") {
+                srApp.OpenOverlayProgress("#Requisition", "IntvApprover");
+            }
+        }
+        else {
+            return false;
+        }
+        //return confirm("Are you sure you want to submit this information ?");
+    });
+
+
+
+    //end v1.2
+    var hdnSR_PRFRoleStatusActionID = $("#hdnSR_PRFRoleStatusActionID").val();
+
+    if (hdnSR_PRFRoleStatusActionID != "4" && hdnSR_PRFRoleStatusActionID != "") {
+
+        $("#divRsRemarks").show();
+
+        $('#Requisition').bootstrapValidator('addField', 'Remarks', {
+            validators: {
+                callback: {
+                    message: 'Please enter remarks.',
+                    callback: function (value, validator, $field) {
+                        var options = $.trim(validator.getFieldElements('Remarks').val());
+                        if (options == "") {
+                            return { valid: false, message: 'Please enter remarks.' }
+                        }
+                        else {
+                            return { valid: true, message: '' }
+                        }
+                    }
+                }
+            }
+        });
+
+        var remarks = $("#hdnRemarks").val();
+
+        if (remarks != "" && remarks != null) {
+            $("#Remarks").val(remarks);
+        }
+
+    }
+    else {
+
+        $("#divRsRemarks").hide();
+    }
+
+    var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+
+
+    srApp.ValidatePageSubmit("#Requisition", "IntvApprover"); // NOTE : THIS STATEMENT SHOULD BE WRITTEN AT LAST
+});
+
+function AddRow() {
+    InterviewerCount++;
+
+    var _Input = "<div class='row'><div class='form-group'><div class='col-sm-1'></div><div class='col-sm-3'>  Interviewer " + InterviewerCount + " ( TP-" + InterviewerCount + " )"
+                    + "</div><div class='col-sm-6'><div class='input-group text-info'>"
+                    + "<input type='text' id='interviewerid" + InterviewerCount + "' name='interviewerid" + InterviewerCount + "' placeholder='Interviewer' data-provide='typeahead' class='form-control input-sm' autocomplete='off' />"
+                    + "<span class='input-group-addon' data-toggle='modal' data-target='#mod-empsearch'><span class='glyphicon glyphicon-user'></span></span>"
+                    + "</div></div></div></div>";
+    //<div class='col-sm-1' id='spandelete' ><span class='glyphicon glyphicon-minus js-delete cursorpointer' id='Delete' data-toggle='tooltip' title='Remove Interviewer'></span></div>
+
+    $("#InterviewerList").append(_Input);
+    $(".js-delete").bind("click", function () {
+        var Controlid = $(this).closest("div.row").find("input[name='interviewerid']").attr("id");
+        var removeItem = Controlid;
+
+        arr = $.grep(Interviewer, function (value) {
+            return value != removeItem;
+        });
+        Interviewer = arr;
+
+        $(this).closest("div.row").remove();
+    });
+
+    $('.js-add, .js-delete').tooltip()
+    GetInterviewerManager("interviewerid" + InterviewerCount, "interviewerid");
+
+    Interviewer.push("interviewerid" + InterviewerCount);
+    var ControlValue = "interviewerid" + InterviewerCount;
+    $('#Requisition').bootstrapValidator('addField', ControlValue, {
+        validators: {
+            notEmpty: {
+                message: 'Interviewer cannot be blank.'
+            }
+        }
+    });
+
+}
+
+function GetInterviewerManager(ControliD, ControlName) {
+    var _url = Sourceurl + "GetEmployeeDetailsByNameAndSapCode";
+
+    var _controlId = "#" + ControliD;
+
+    $("#" + ControliD).typeahead({
+        name: ControlName,
+        source: function (query, process) {
+            var countries = [];
+            map = {};
+
+            if (query.length > 4) {
+                // This is going to make an HTTP post request to the controller
+                return $.post(_url, { _EmployeeCode: query }, function (data) {
+                    $('#divinterviewerid2TP').css('display', 'None');
+                    $('#SaveSubmit').removeAttr('disabled');
+                    // Loop through and push to the array
+                    $.each(data, function (i, country) {
+                        map[country.EMFirstName] = country;
+                        //map[country.CustomerCode] = country.CustomerCode;
+                        countries.push(country.EMFirstName);
+                    });
+                    // Process the details
+                    process(countries);
+                    //alert(countries.length);
+                    if (countries.length == 0) {
+                        $("#" + ControliD).val("");
+                    }
+                });
+            }
+        },
+        updater: function (item) {
+
+            $(_controlId).attr("value", item);
+            if (
+                ControliD == "interviewerid1TP1" ||
+                ControliD == "interviewerid1TP2" ||
+                ControliD == "interviewerid2TP1" ||
+                ControliD == "interviewerid2TP2") {
+
+                $('#Requisition').bootstrapValidator('revalidateField', ControliD);
+            }
+
+            return item;
+        }
+    })
+};
+
+//start v1.2
+function ValidateApprover(e1) {
+    var t1 = $("#interviewerid1TP1").val();
+    var t2 = $("#interviewerid2TP1").val();
+    var t12 = $("#interviewerid1TP2").val();
+    var t22 = $("#interviewerid2TP2").val();
+    var _SR = GetParameterValues('_SR');
+    var _url = Sourceurl + "ValidateInterViewer?inter1= " + t1 + "&&inter2=" + t2 + "&&inter11=" + t12 + "&&inter22=" + t22 + "&&_SR=" + _SR + ""
+    $.ajax({
+        type: "GET",
+        url: _url,
+        async: false,
+        //data: JSON.stringify({
+        //    'inter1': t1, 'inter2': t2, 'inter11': t12, 'inter22': t22
+        //}),
+        //dataType: "json",
+        contentType: 'application/json; charset=utf-8',
+        success: function (msg) {
+            var contact = JSON.parse(msg);
+            if (contact[0].TPvalidation == "Success") {
+                clickcount = "";
+                $('#hdnvalidate').val("True");
+                var DeviationMessage = $('#hdnDeviationMessage').val();
+                if (DeviationMessage != "") {
+                    var resultConfirm = confirm(DeviationMessage);
+                    if (resultConfirm == true) {
+                        clickcount = "";
+                        return true;
+                    }
+                    else {
+                        $('#hdnvalidate').val("False");
+                        clickcount = "2";
+                        return true;
+                    }
+                }
+                else { return true; }
+
+            }
+            else if (contact[0].TPvalidation != "Success") {
+
+                clickcount = "2";
+                DisplayError("divinterviewerid2TP", contact[0].TPvalidation, "smlTP", "SaveSubmit", e1, "TP22");
+                return false;
+
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(thrownError);
+            return false;
+        }
+    });
+
+}
+
+function ValidateFormApprover() {
+    $('#Requisition')
+     .bootstrapValidator({
+         excluded: ':disabled',
+         framework: 'bootstrap',
+         feedbackIcons: {
+             valid: 'glyphicon glyphicon-ok',
+             invalid: 'glyphicon glyphicon-remove',
+             validating: 'glyphicon glyphicon-refresh'
+         },
+         fields: {
+             interviewerid1TP1: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('interviewerid1TP1').val();
+
+                             if ($("#hdnReqSource").val() != "22" && options == "") {
+
+                                 return { valid: false, message: 'Interviewer 1(TP1) cannot be blank.' }
+                             }
+                             else if (!IsValidSapCode(options)) {
+
+                                 return { valid: false, message: 'Interviewer 1(TP1) cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+
+                     }
+                 }
+             },
+             interviewerid1TP2: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('interviewerid1TP2').val();
+
+                             if (!IsValidSapCodeN(options)) {
+
+                                 return { valid: false, message: 'Interviewer 1(TP2) cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+                     }
+                 }
+             },
+             interviewerid2TP1: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options                    
+
+                             var options = validator.getFieldElements('interviewerid2TP1').val();
+
+                             if ($('#hdnEntity').val() == 3) {
+
+                                 if (!IsValidSapCodeN(options)) {
+                                     return { valid: false, message: 'Interviewer 2(TP1) cannot be blank or InValid.' }
+                                 }
+                                 else {
+                                     return { valid: true, message: '' }
+                                 }
+                             }
+
+                             if ($("#hdnReqSource").val() != "22" && options == "" && $('#hdnEntity').val() != 3) {
+                                 return { valid: false, message: 'Interviewer 2(TP1) cannot be blank.' }
+                             }
+                             else {
+                                 if (!IsValidSapCode(options)) {
+                                     return { valid: false, message: 'Interviewer 2(TP1) cannot be blank or InValid.' }
+                                 }
+                                 else {
+                                     return { valid: true, message: '' }
+                                 }
+                             }
+                         }
+                     }
+                 }
+             },
+             interviewerid2TP2: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('interviewerid2TP2').val();
+
+                             if (!IsValidSapCodeN(options)) {
+
+                                 return { valid: false, message: 'Interviewer 2(TP2) cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+                     }
+                 }
+             }
+
+         }
+     }).on('success.form.bv', function (e) {
+         var $form = $(e.target),
+         validator = $form.data('bootstrapValidator');
+
+         if (!e.isDefaultPrevented()) {
+             if (clickcount == "2") {
+                 e.preventDefault();
+             }
+             else {
+
+             }
+         }
+         else {
+
+         }
+     });
+}
+
+//end v1.2
+function RemoveAstricToFormControl(id) {
+    if (id != "") {
+        var $div = $("#" + id).closest('.form-group');
+        var _Html = $div.find("label").find("span").remove();
+        var clone = $div.find("label").clone();
+        $("span", clone).remove();
+        clone = clone.text().replace("*", "");
+        //(" <spna class='note'>*</spna>", "");
+        $div.find("label").html("");
+        $div.find("label").html(clone + " <span class='note'></span>");
+    }
+}
+
+function AdAstricToonlyoneControlonl(id) {
+    if (id != "") {
+        var $div = $("#" + id).closest('.form-group');
+        var _Html = $div.find("label").find("span").remove();
+        var clone = $div.find("label").clone();
+        $("span", clone).remove();
+        clone = clone.text().replace("*", "");
+        //(" <spna class='note'>*</spna>", "");
+        $div.find("label").html("");
+        $div.find("label").html(clone + " <span class='note'>*</span>");
+    }
+}
+
+//start v1.2
+function DisplayError(insertAfterId, errorMsg, displayId, btnId, e, controlid) {
+    var insertAfterId = "#" + insertAfterId;
+    var btnId = "#" + btnId;
+    var control = "<small class=\"displayErr\" id=\"" + displayId + "\">" + errorMsg + "</small>";
+    $(insertAfterId).html(control);
+    $('#divinterviewerid2TP').css('display', 'block');
+    if (controlid == "TP11") {
+        $("#interviewerid1TP1").val("");
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+    }
+    else if (controlid == "TP21") {
+        $("#interviewerid2TP1").val("");
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+    }
+    else {
+        $("#interviewerid1TP1").val("");
+        $("#interviewerid2TP1").val("");
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+    }
+    srApp.HideOverLay();
+    $('#hdnvalidate').val("False");
+    e.preventDefault();
+    return false;
+}
+
+function GetParameterValues(param) {
+    var url = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    for (var i = 0; i < url.length; i++) {
+        var urlparam = url[i].split('=');
+        if (urlparam[0] == param) {
+            return urlparam[1];
+        }
+    }
+}
+//end v1.2
+
+$('#btn4Cancel').click(function () {
+    location.href = '../Home/DashBoard';
+});
+
+$('#btn4Reset').click(function () {
+    window.location.reload();
+});
+
+//TRansfer SR Get EMP
+function GetTransferEMPSapCode(ControliD, ControlName) {
+    var _url = Sourceurl + "GetEmployeeSRTransferDetailsByNameAndSapCode";
+
+    var _controlId = "#" + ControliD;
+
+    $("#" + ControliD).typeahead({
+        name: ControlName,
+        source: function (query, process) {
+            var countries = [];
+            map = {};
+
+            if (query.length > 4) {
+                return $.post(_url, { _EmployeeCode: query }, function (data) {
+                    $.each(data, function (i, country) {
+                        map[country.EMFirstName] = country;
+                        countries.push(country.EMFirstName);
+                    });
+                    // Process the details
+                    process(countries);
+                    //alert(countries.length);
+                    if (countries.length == 0) {
+                        $("#" + ControliD).val("");
+                    }
+                });
+            }
+        },
+        updater: function (item) {
+
+            $(_controlId).attr("value", item);
+            if (
+                ControliD == "SRTransferSAPCode") {
+
+                $('#Requisition').bootstrapValidator('revalidateField', ControliD);
+            }
+
+            return item;
+        }
+    })
+};
+
+
+function ValidateFormTransfree() {
+    $('#Requisition')
+     .bootstrapValidator({
+         excluded: ':disabled',
+         framework: 'bootstrap',
+         feedbackIcons: {
+             valid: 'glyphicon glyphicon-ok',
+             invalid: 'glyphicon glyphicon-remove',
+             validating: 'glyphicon glyphicon-refresh'
+         },
+         fields: {
+             SRTransferSAPCode: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+
+                             var options = validator.getFieldElements('SRTransferSAPCode').val();
+
+                             
+                             if (!IsValidSapCode(options)) {
+
+                                 return { valid: false, message: 'Transfree cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+
+                     }
+                 }
+             }
+
+         }
+     }).on('success.form.bv', function (e) {
+         var $form = $(e.target),
+         validator = $form.data('bootstrapValidator');
+
+         if (!e.isDefaultPrevented()) {
+             if (clickcount == "2") {
+                 e.preventDefault();
+             }
+             else {
+
+             }
+         }
+         else {
+
+         }
+     });
+}
+//End TTRansfer SR
+

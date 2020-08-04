@@ -1,0 +1,120 @@
+﻿//=========================================================================================================================================================
+//    Version      Modified By          Modified On          Change Description
+//=========================================================================================================================================================
+//     v1.0        Arvind Kumar         31-Mar-2016          REQ Changes and firmdemand condition added             
+//=========================================================================================================================================================
+
+var app = angular.module('ManageApprover', ['datatables']);
+app.controller('Ctrl_ManageApprover', ['$scope', '$http', 'DTOptionsBuilder', 'DTColumnBuilder',
+
+function ($scope, $http, DTOptionsBuilder, DTColumnBuilder) {
+    $scope.dtColumns = [
+        DTColumnBuilder.newColumn(-1).notSortable().
+        withTitle("<input type='checkbox' id='selectall' value=0 class='CheckThis'/>").renderWith(function (data, type, full) {
+            return '&nbsp;&nbsp;<input  onclick="UncheckParent(this);" type="checkbox" id="checkOne" class="SingleCheckBox" name="checkOne" value=' + full["PRFID"] + ' bSource=' + full["BSERVSource"] + '  >';
+        }),
+
+        DTColumnBuilder.newColumn(-1).withOption('name', '0').
+        withTitle('Requisition Number').renderWith(function (data, type, full) {
+            return '<a title="Click to view SR details" onclick="OpenProgress();" class="modal-link btn btn-sm" href="../Home/ViewRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=0">' + full["Requisition_Number"] + '</a>';
+        }),
+        DTColumnBuilder.newColumn("Requisition_Date", "Requisition Date").withOption('name', '1'),
+        DTColumnBuilder.newColumn("Customer_Project", "Customer/Project").withOption('name', '2'),
+        DTColumnBuilder.newColumn("Country", "Country").withOption('name', '3'),
+        DTColumnBuilder.newColumn("Band", "Band").withOption('name', '4'),
+        DTColumnBuilder.newColumn("Designation", "Designation").withOption('name', '5'),
+        DTColumnBuilder.newColumn("Skills", "Skills").withOption('name', '6'),
+
+       DTColumnBuilder.newColumn("Job", "Job").withOption('name', '7'),
+       DTColumnBuilder.newColumn("Vacancy", "vacancy").withOption('name', '8'),
+       DTColumnBuilder.newColumn("Initiator", "Initiator").withOption('name', '9'),
+
+        DTColumnBuilder.newColumn(-1).withOption('name', '10').
+        //start SR_336 Suhasini Srivastava
+        withTitle('Head Count Deviation').renderWith(function (data, type, full) {
+            if (full["IsDeviation"] == true) {
+                return 'Yes';
+            }
+            else {
+                return 'No';
+            }
+        }),
+                   //end SR_336
+
+        DTColumnBuilder.newColumn(-1).notSortable().withOption('name', '12').
+        withTitle('Action').renderWith(function (data, type, full) {
+
+            var IsFirmDemand = full["IsFirmDemand"] == "True" ? "1" : "0"; //Added for v1.0
+            var IsDPT = full["IsDPT"] == "True" ? "1" : "0";
+            var a = '<div class="anchor-inBlock"><a onclick="OpenProgress();" id="edit" class="modal-link btn" name="Approve" title="Approve/Close/ReferBack Requisition" href="../Home/ApprovePendingRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=1&IsFirmDemand=' + IsFirmDemand + '&IsDPT=' + IsDPT + '&IsApprovedByDPL=0"><span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-saved"></span></span></a>';
+            return a += '&nbsp;&nbsp;<a onclick="OpenProgress();" name="tsc" title="View TSC Remarks" class="modal-link btn" id="tsc" href="../Home/ViewRequisitionsTSCRemarks?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=1"><span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-folder-open"></span></span></a></div>'
+        })
+
+    ];
+
+    var Sourceurl = re.exec(window.location.href)
+    $scope.dtOptions = DTOptionsBuilder.newOptions().withOption('ajax', {
+        dataSrc: "data",
+        url: Sourceurl + "/ManageApprover_Json",
+        type: "POST"
+    })
+    .withOption('processing', true)
+    .withOption('serverSide', true)
+    .withOption('stateSave', true)
+    .withPaginationType('simple_numbers')
+    .withDisplayLength(10)
+    .withOption('aaSorting', [1, 'asc'])
+}])
+
+$(function () {
+    $("#selectall").click(function () {
+        $('.SingleCheckBox').attr('checked', this.checked);
+        if ($(".SingleCheckBox:checked").length > 0) {
+            $("#AllRemarks").show();
+            //start  by maneesh SR_336
+
+            $("#ActionName").show();
+            //End  by maneesh SR_336
+        }
+        else {
+            $("#AllRemarks").hide();
+            //$("#selectall").attr("disabled", true);
+            //start  by maneesh SR_336
+            $("#ActionName").hide();
+            $("#ActionReason1").hide();
+            //End  by maneesh SR_336
+        }
+    });
+
+    
+    
+});
+
+
+function UncheckParent(control) {
+ 
+    if ($(".SingleCheckBox").length == $(".SingleCheckBox:checked").length) {
+        $("#selectall").attr("checked", "checked");
+    } else {
+        $("#selectall").removeAttr("checked");
+    }
+
+    if ($(".SingleCheckBox:checked").length > 0) {
+        $("#AllRemarks").show();
+        //start  by maneesh SR_336
+        $("#ActionName").show();
+        $("#Action1")[0].selectedIndex = 0;
+        $("#Reason1")[0].selectedIndex = 0;
+        $('#mandate').hide();
+        $('#Remarks').css("borderColor", "");
+        $('#bulkRemarks').hide();
+        //End  by maneesh SR_336
+    }
+    else {
+        $("#AllRemarks").hide();
+        //start  by maneesh SR_336
+        $("#ActionName").hide();
+        $("#ActionReason1").hide();
+        //Ens  by maneesh SR_336
+    }
+}

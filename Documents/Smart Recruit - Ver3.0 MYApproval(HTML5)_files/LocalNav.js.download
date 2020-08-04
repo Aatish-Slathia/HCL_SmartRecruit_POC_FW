@@ -1,0 +1,84 @@
+﻿// Local Navigation
+
+$(document).ready(function () {
+
+    MobMegaMenu();
+});
+
+function MobMegaMenu() {
+
+    if ($(window).width() <= 800) {
+
+        MobMegaMenuClick();
+
+    } else {
+
+        MobMegaMenuHover();
+
+    }
+
+}
+
+
+
+function MobMegaMenuHover() {
+
+    $(".localNavDD").hover(function () {
+
+        $(this).find('ul.localNavData').stop().slideToggle();
+
+    });
+
+}
+
+
+
+function MobMegaMenuClick() {
+
+    $(".localNavDD").click(function () {
+
+        $(this).toggleClass('activelocalNavDD');
+
+        $(this).find('ul.localNavData').stop().slideToggle();
+
+    });
+
+}
+
+
+
+$(document).ready(function () {
+
+    $('.global-filter-toggle-btn').click(function () {
+
+        $('.global-filter').slideToggle();
+
+        $(this).find('span').toggleClass('glyphicon-plus glyphicon-minus');
+
+    });
+
+});
+
+
+
+$(document).ready(function () {
+
+    doResize();
+
+    $(window).on('resize', doResize);
+
+});
+
+function doResize() {
+
+    if ($(window).width() <= 800) {
+
+        $(".navbar-ex1-collapse").prepend($("ul.navbar-nav"));
+
+    } else {
+
+        $(".navbar-ex1-collapse").prepend($("ul.localNav"));
+
+    }
+
+}

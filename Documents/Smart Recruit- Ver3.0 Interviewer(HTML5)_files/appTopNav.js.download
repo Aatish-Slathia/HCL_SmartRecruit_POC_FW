@@ -1,0 +1,58 @@
+var role = document.getElementById("hdnRole").value;
+var AppRole = document.getElementById("hdnAppRole").value;
+
+
+stm_bm(["menu567b", 900, "../images/layout/", "blank.gif", 0, "", "", 2, 0, 250, 0, 250, 1, 1, 1, "", "", 0, 0, 1, 2, "default", "hand", "", 1, 25], this);
+stm_bp("p0", [0, 4, 0, 0, 1, 1, 0, 7, 100, "", -2, "", -2, 50, 0, 0, "#999999", "transparent", "", 3, 0, 0, "#000000"]);
+stm_ai("p0i0", [6, 1, "transparent", "globalNavSeparator.gif", 10, 15, 0]);
+
+stm_ai("p0i1", [0, "Home", "", "", -1, -1, 0, "javascript:__doPostBack('ctl00$lbtnChangeRole','')", "_self", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#80b1d2", "#FFFFFF", "#FFFFFF", "11px 'Arial','Verdana'", "11px 'Arial','Verdana'", 0, 0, "", "", "", "", 0, 0, 0], 0, 15);
+stm_aix("p0i2", "p0i0", []);
+
+stm_aix("p0i4", "p0i1", [0, "Change Role ", "", "", -1, -1, 0, "", "_self", "", "", "", "", 0, 0, 0, "globalNavDownArrow.gif", "globalNavDownArrow.gif", 7, 7], 0, 15);
+stm_bp("p1", [1, 4, -5, -2, 0, 3, 0, 0, 100, "stEffect(\"rect\")", -2, "", -2, 100, 0, 0, "#999999", "#cce6fa", "", 3, 1, 1, "#4d8bbb"]);
+
+var val = new Array();
+val = AppRole.split('$');
+
+var len = val.length;
+
+for (i = 0; i < len; i++) {
+    var RoleName = val[i].substring(0, val[i].indexOf('@'));
+    var RoleCode = val[i].substring(val[i].indexOf('@') + 1, val[i].length);
+    
+    stm_aix("p1i0", "p0i1", [0, RoleName, "", "", -1, -1, 0, "javascript:SetChangedRoleId('" + RoleCode + "');__doPostBack('ctl00$lbtnChangeRole','')", "_self", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+    
+    //var RoleName = val[i].substring(0, val[i].indexOf('@'));
+    //var RoleUrl = "\..\\" + val[i].substring(val[i].indexOf('@') + 1, val[i].length);
+    //stm_aix("p1i0", "p0i1", [0, RoleName, "", "", -1, -1, 0, RoleUrl, "_self", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+}
+
+stm_mc("p1", [4, "#000000", 1, 1, "", 3]);
+stm_ep();
+stm_aix("p0i2", "p0i0", []);
+
+
+stm_aix("p0i5","p0i1",[0,"My Role(s)","","",-1,-1,0,"../Home/MyRoles.aspx"],0,15);
+stm_aix("p0i6","p0i0",[]);
+stm_aix("p0i4", "p0i1", [0, "Help ", "", "", -1, -1, 0, "", "_self", "", "", "", "", 0, 0, 0, "globalNavDownArrow.gif", "globalNavDownArrow.gif", 7, 7], 0, 15);
+stm_bpx("p2","p1",[1,4,-105]);
+stm_aix("p2i0", "p1i0", [0, "Overview", "", "", -1, -1, 0, "../Document/Overview.doc", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_aix("p2i1", "p1i0", [0, "FAQs", "", "", -1, -1, 0, "../FAQ/FAQ.htm", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_aix("p2i2", "p2i2", [0, "User Manual", "", "", -1, -1, 0, "../Document/Business Process Document - SR.DOCX", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_aix("p2i3", "p2i2", [0, "PPT", "", "", -1, -1, 0, "../Document/SmartRecruit 2.0.pptx", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_aix("p2i5", "p2i5", [0, "Release Notes", "", "", -1, -1, 0, "../Document/Release Notes.docx", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_aix("p2i6", "p2i2", [0, "Gloassary", "", "", -1, -1, 0, "../Document/Glossary.docx", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_aix("p2i7", "p2i5", [0, "Voiceover", "", "", -1, -1, 0, "http://wf13.myhcl.com/sites/MyHCL/bprconnect/syspages/e-learning.htm", "new", "", "", "", "", 0, 0, 0, "", "", 0, 0, 0, 0, 1, "#", 1, "", 1, "", "", 3, 3, 0, 0, "#005fa2", "#337bb1", "#000000", "#000000", "10px 'Arial','Verdana'", "10px 'Arial','Verdana'", 0, 1]);
+stm_mc("p2",[4,"#000000",1,1,"",3]);
+stm_ep();
+stm_aix("p0i2", "p0i0", []);
+
+stm_ep();
+stm_em();
+
+
+
+function SetChangedRoleId(SelectedRole) {
+    document.getElementById("hdnRole").value = SelectedRole;
+}

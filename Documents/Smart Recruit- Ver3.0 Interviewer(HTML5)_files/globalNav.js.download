@@ -1,0 +1,58 @@
+var Favs=document.getElementById("hdnFavs").value;
+var Quick=document.getElementById("hdnQuick").value;
+
+stm_bm(["menu567b",900,"../images/layout/","blank.gif",0,"","",2,0,250,0,250,1,1,0,"","",0,0,1,2,"default","hand","",1,25],this);
+stm_bp("p0",[0,4,0,0,1,1,0,0,100,"",-2,"",-2,50,0,0,"#999999","","",3,0,0,"#000000"]);
+stm_ai("p0i0",[6,1,"transparent","globalNavSeparator.gif",10,26,0]);
+stm_ai("p0i1",[2,"","globalMyFavs.gif","globalMyFavs.gif",90,20,0,"#","_self","","","","",0,0,0,"","",-1,-1,0,0,1,"#",1,"",1,"","",3,3,0,0,"#005fa2","#337bb1","#FFFFFF","#FFFFFF","11px 'Arial','Verdana'","11px 'Arial','Verdana'",0,0,"","","","",0,0,0],60,15);
+stm_bp("p1",[1,4,3,-2,0,2,0,0,100,"",-2,"",-2,100,0,0,"#999999","","",3,0,0,"#4d8bbb"]);
+
+var val = new Array();
+val = Favs.split('$');
+
+var len = val.length;
+
+for (i=0;i<len;i++)
+{
+    var AppName = val[i].substring(0,val[i].indexOf('@'));
+    var AppUrl = val[i].substring(val[i].indexOf('@')+1,val[i].length);
+    stm_aix("p1i0","p0i1",[0,AppName,"","",-1,-1,0,AppUrl,"_self","","","","",0,0,0,"","",0,0,0,0,1,"#0771be",0,"#087bcf",0],0,20);
+}
+stm_ai("p1i10",[2,"","","",-1,-1,0,"","_self","","","","",0,0,0,"","",0,0,0,0,1,"#",1,"#",1,"favMenu-centerBg.gif","favMenu-centerBg.gif",3,3,0,0,"#005fa2","#337bb1","#FFFFFF","#FFFFFF","10px 'Arial','Verdana'","10px 'Arial','Verdana'",0,0,"favMenu-leftBorder.gif","favMenu-leftBorder.gif","favMenu-rightBorder.gif","favMenu-rightBorder.gif",5,5,6],0,0);
+stm_ep();
+
+
+stm_aix("p0i3","p0i1",[2,"","Qlink.gif","Qlink.gif",81],60,15);
+stm_bpx("p2","p1",[]);
+
+
+var val = new Array();
+val = Quick.split('$');
+
+var len = val.length;
+
+for (i=0;i<len;i++)
+{
+    var AppName = val[i].substring(0,val[i].indexOf('@'));
+    var AppUrl = val[i].substring(val[i].indexOf('@')+1,val[i].length);
+    stm_aix("p2i0","p1i0",[0,AppName,"","",-1,-1,0,AppUrl,"_self"],0,20);
+}
+
+stm_ep();
+stm_aix("p0i4","p0i0",[]);
+stm_aix("p0i5","p0i1",[0,"My HCL","","",-1,-1,0,"http://www.myhcl.com/bprhome/Webpages/myhcl.aspx","_self","","","","",0,0,0,"","",0,0,0,0,1,"#",1,"",1,"","",3,3,1,1,"#005fa2","#80b1d2"],0,15);
+stm_aix("p0i4", "p0i0", []);
+//Start : Chandrima (Penetration Observation Fix)
+//stm_aix("p0i6", "p0i5", [0, "Logout", "", "", -1, -1, 0, "javascript:window.close();", "_self"], 0, 15);
+stm_aix("p0i6", "p0i5", [0, "Logout", "", "", -1, -1, 0, "javascript:window.open('../Home/Logout.aspx', '_self'); window.close();", "_self"], 0, 15);
+//End : Chandrima (Penetration Observation Fix)
+
+
+stm_ep();
+stm_em();
+
+
+
+
+
+ 

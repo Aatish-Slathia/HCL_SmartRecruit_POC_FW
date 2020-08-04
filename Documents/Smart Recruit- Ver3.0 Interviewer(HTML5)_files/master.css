@@ -1,0 +1,523 @@
+/* Copyright (c) 2010. HCL Technologies Ltd. All rights reserved. */
+
+/* Master.css - Revision: New Release*/
+/* HCL Master CSS files mainly used for all internal based applications */
+/* The name of all the classes starts with "global-"
+/* PLEASE NOTE: DON'T ADD/DELETE/APPEND ANY OF THE CLASS/ID/SELECTOR GIVEN HERE*/ 
+/* In case of any specific class is required in master.css file, please contact BPR design team */
+
+/* ----------------------------------- HTML Tag ----------------------------------- */
+/* Start : Rahul Kumar Ray Date 01-05-2015*/
+html, body{ height:100%;}
+#form1{ height:100%;}
+html {		
+	margin:0;
+	padding:0;
+}
+/* End : Rahul Kumar Ray Date 01-05-2015*/
+body {		
+	padding:0;
+	margin:0;
+	color: #000000;
+	height:100%;
+	background-color: #006cb7;
+	background-image: url(../images/layout/main_bg.gif);
+	background-repeat: repeat-x;
+	background-position: left top;
+	font-size: 100%;
+	font-family: Arial, Helvetica, sans-serif;
+}
+img { 
+	border: 0;
+}
+h1 {
+	color: #FFFFFF;
+	font-size: 230%;
+	margin-top: 15px;
+	left: 5px;
+	position: absolute;
+}
+textarea, Select, input {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px; /*Pixel value given intentionally */
+}
+hr {
+	margin: 0px;
+	padding: 0px;
+}
+/* ----------------------------------- General ----------------------------------- */
+/*start rahul kumar ray date: 25-05-2015 */
+#global-mainContent {		/* Main Container */
+	min-height:100%;
+	margin-left:5px;
+	margin-right:5px;
+	margin-bottom:-25px;
+	color: #000000;
+	background-color: #FFFFFF;
+	background-image: url(../images/layout/tint.gif);
+	background-repeat: repeat-x;
+	background-position: left 70px;
+	font-size:0.68em;
+	
+}
+/*End rahul kumar ray date: 25-05-2015 */
+
+#global-clearheader{	/*Dummy container from top*/
+	height:75px;
+}
+#global-clearfooter {clear:both;height:25px;width:100%;} /*Dummy container from bottom*/
+#global-header{					/* header container */
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:75px;
+	overflow:hidden;
+	color:#000000;
+	background-image: url(../images/layout/headerBg.jpg);
+	background-repeat: repeat;
+	font-size: 0.68em;
+}
+#global-headerGraphic {		/*Header Background Graphic */
+	background-image: url(../images/layout/header-Graphic.jpg);
+	background-repeat: no-repeat;
+	height: 75px;
+}
+#global-masterNav { 		/* Global navigation container */
+	float: right;
+	width: 300px;	/*Adjust global nav width from here */
+	text-align: right;
+	padding-right: 5px;
+}
+.globalmasterNav { 		/* Global navigation container */
+	float: right;
+	width: 300px;	/*Adjust global nav width from here */
+	text-align: right;
+	padding-right: 5px;
+}
+#global-welcome {
+	font-weight: bold;
+	color: #FFFFFF;
+	text-align: right;
+	padding-right:5px;
+	padding-top: 7px;
+}
+#global-appMainNav {		/* Application navigation container */
+	position:absolute;		
+	right:4px;				/*Shift from right*/
+	top:55px;				/*Application main navigation position from top*/
+}
+#global-topRightControl {		/* Header Right Control Panel */
+	margin-left: 300px; /* Header right control start after 300 pixels from left*/
+	padding-left: 5px; /* Spacing between logo title and right control */
+}
+.global-breadcrumb {
+	padding-top: 10px;	
+	padding-bottom: 10px;
+	color: #000;
+}
+.global-breadcrumb a:link {
+	text-decoration:none;
+	color: #005B9E;
+}
+.global-breadcrumb a:visited {
+	text-decoration:underline;
+	color: #005B9E;
+}
+.global-pagetitle {		/* Current page label after breadcrumb */
+	font-size: 130%;
+	font-weight: bold;
+}
+.global-note {				/* Add caption */
+	color: #F00;
+	font-size:90%;
+}
+.global-btn {					/*Styling for form based buttons*/
+	filter:progid:DXImageTransform.Microsoft.Gradient (GradientType=0, 
+	StartColorStr='#c4e1ff', EndColorStr='#feffff');
+	border: 1px solid #0080bc;
+	font-weight:bold;
+	height:20px;
+	padding-left:4px;
+	padding-right:4px;
+	background-color: #d3e8ff;
+}
+.global-btnHov {				/*Hover styling for form based buttons*/
+	filter:progid:DXImageTransform.Microsoft.Gradient (GradientType=0, 
+	StartColorStr='#00599e', EndColorStr='#0086c1');
+	border:1px #053e6a solid;
+	background-color: #039;
+	color: #fff;
+}
+.global-caption {			/*Common text*/
+	font-size:90%;
+}
+.global-caption a:link{
+	color: #000;
+	text-decoration: underline;
+	font-weight: bold;
+}
+.global-caption a:hover{
+	color: #00579C;
+	text-decoration: none;
+	font-weight: bold;
+}
+.global-mandatory {		/*Mandatory remarks*/
+	color:#F00;
+}
+.global-smallTxt1{			/*Small Text*/
+	font-size:100%;
+}
+.global-smallTxt1 a:link{
+	color: #000;			
+	font-weight: bold;
+	text-decoration: underline;
+}
+.global-smallTxt1 a:visited{
+	color: #000;
+	font-weight: bold;			
+	text-decoration: underline;
+}
+.global-smallTxt1 a:hover{
+	color: #000;
+	font-weight: bold;			
+	text-decoration: none;
+}
+.global-left {
+	text-align: left;
+}
+.global-right {
+	text-align: right;
+}
+.global-center {
+	text-align: center;
+}
+
+/* ----------------------------------- Grid ----------------------------------- */
+.global-dataTbl {
+	border-collapse:collapse;
+	text-align: left;
+}
+.global-dataTbl a:link{
+	text-decoration: underline;
+	color: #000;
+	font-weight: bold;
+}
+.global-dataTbl a:visited{
+	text-decoration: underline;
+	color: #000;
+	font-weight: bold;
+}
+/*Start :rahul Kumar Ray Date 05-05-2015*/
+/*.global-dataTbl a:hover{
+	text-decoration: none;
+	color: #000;
+	
+	font-weight: bold;
+}*/
+.global-dataTbl a:hover{
+	text-decoration: none;
+	color: #000;
+	cursor: hand;
+	cursor: pointer;
+	font-weight: normal;
+}
+/*End :rahul Kumar Ray Date 05-05-2015*/
+.global-dataTbl TH {				/* display data grid header*/
+	background-color: #D9ECFF;
+	font-weight: bold;
+	text-align:center;
+	padding: 2px;
+	border: 1px solid #bac7fe;
+}
+.global-dataTbl TD {				/* display data grid*/
+	border: 1px solid #bac7fe;
+	padding: 2px;
+}
+.global-dataTbl table TD {			/* For nested table inside data table */
+	padding: 2px;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+}
+.global-dataTblCaption   {				/* display data grid caption*/
+	border-collapse:collapse;
+	background-color: #c4e1ff;
+	font-weight:bold;
+	border: 1px solid #bac7fe;
+	border-bottom-style: none;
+}
+.global-dataTblCaption TD {				/* display data grid caption*/
+	padding: 2px;
+}
+.global-r1 {						/*Grid Master heading if appliable*/
+	background-color: #c4e1ff;
+	text-align: left;
+	font-weight:bold;
+}
+.global-r2 {						/*Grid Column Heading*/
+	background-color: #D9ECFF;
+	font-weight: bold;
+	text-align:center;
+}
+.global-rA {						/*Grid first row*/
+	background-color: #EAF4FF;
+}
+.global-rB {						/*Grid second row*/
+	background-color: #fff;
+}
+.global-rTotal {					/* Grid Total*/
+	background-color: #b8d5f4;
+	font-weight: bold;
+}
+.global-rActive {					/*Active Row highlighter*/
+	background-color:#FFF4CA;
+}
+.global-filterTbl {				/* to define table search criteria */
+	border-collapse:collapse;
+	text-align: left;
+}
+.global-filterTbl a:link{
+	text-decoration: underline;
+	color: #000000;
+	font-weight: bold;
+}
+.global-filterTbl a:visited{
+	text-decoration: underline;
+	color: #000;
+	font-weight: bold;
+}
+.global-filterTbl a:hover{
+	text-decoration: none;
+	color: #000;
+	font-weight: bold;
+}
+.global-filterTbl TD {
+	border: 1px solid #bac7fe;
+	padding: 2px;
+}
+.global-filterTbl TD table td {	/* For nested table inside filter table */
+	padding: 2px;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: none;
+	border-left-style: none;
+}
+.global-focusField {						/*To highlight active form component*/
+	border:1px solid #73A6FF;
+	background:#EFF5FF;				/*Background Color for active form componenet */ 
+}
+.global-idleField {						/*To restore normal stage of form component*/
+	background-color: #fff;
+	border: 1px solid #7f9db9;
+}
+/* ----------------------------------- Popup ----------------------------------- */
+#global-popup-fade {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	opacity: .10;
+	z-index:0;
+	background-image: url(../images/others/mwBlock.gif);
+	background-repeat: repeat;
+	background-position: left top;
+	background-color: #000;
+}
+.global-popup-block {
+	display: none;
+	float: left;
+	position: fixed;
+	top: 50%;
+	left: 55%;
+	z-index:99999;
+}
+img.global-btn-close {
+	float: right;
+	margin-bottom: 0;
+	margin-left: 0;
+	position: relative;
+	z-index: auto;
+	top: 26px;
+	right: 10px;
+}
+*html #global-popup-fade {
+	position: absolute;
+}
+*html .global-popup-block {
+	position: absolute;
+}
+.global-popup-outer-border {
+	border: 1px solid #005A9D;
+	padding: 3px;
+	margin: 0px;
+	background-color: #fff;
+}
+.global-popup-heading {
+	font-weight: bold;
+	color: #fff;
+	padding: 3px;
+	text-align: left;
+	width: 100%;
+	border: 1px solid #0065B0;
+	background-color: #0085C0;
+	height: 20px;
+}
+/* ----------------------------------- Alert/Error Messages ----------------------------------- */
+.global-errorHead			/*Message */
+	{
+	font-size:220%;
+	font-weight:bold;
+	color:#F00;
+	text-align:left;
+	}
+.global-errorText
+	{
+		font-size:120%;
+	}
+.global-errorText a
+	{
+		color:#000;
+	}
+.global-alertMessage {
+	border: 1px solid #ffcc33;
+	background-color: #ffeecc;
+	padding: 5px;
+	font-weight: bold;
+	color: #000000;
+	font-size: 120%;
+}
+
+.global-alertMessage a:link{
+	font-weight: bold;
+	text-decoration: underline;
+	color: #000000;
+}
+
+.global-alertMessage a:hover{
+	font-weight: bold;
+	text-decoration: none;
+	color: #000000;
+}
+.global-alertMessage a:visited{
+	font-weight: bold;
+	text-decoration: underline;
+	color: #000000;
+}
+.global-alertError {
+	border: 1px solid #FF8E88;
+	background-color: #FFE8E8;
+	padding: 5px;
+	font-weight: bold;
+	color: #000000;
+	font-size: 120%;
+}
+.global-alertSuccess {
+	border: 1px solid #51C139;
+	background-color: #ECF9EE;
+	padding: 5px;
+	font-weight: bold;
+	color: #000000;
+	font-size: 120%;
+}
+.global-alertInfo {
+	border: 1px solid #0585E2;
+	background-color: #EBF7FA;
+	padding: 5px;
+	font-weight: bold;
+	color: #000000;
+	font-size: 120%;
+}
+/* ----------------------------------- Custom Tool Tip ----------------------------------- */
+#global-custTip{
+	position: absolute;
+	left: -300px;
+	width: 150px;
+	border: 1px solid #0164a7;
+	padding: 4px;
+	background-color: #e4f4ff;
+	visibility: hidden;
+	z-index:100;
+/*Remove below line to remove shadow. Below line should always appear last within this CSS*/
+	filter: progid:DXImageTransform.Microsoft.Shadow(color=gray,direction=135);
+	font-size: 0.68em;
+}
+#global-custTipPointer{
+	position:absolute;
+	left: -300px;
+	z-index: 101;
+	visibility: hidden;
+}
+/* ----------------------------------- Footer ----------------------------------- */
+/*--------------------Start: On Requested by Design team, Modified by: Anjnesh Yadav Date : 01-july-2014  --------------------*/
+/*
+#global-footer {
+	clear:both;
+	height:25px;
+	color: #000;
+	text-align:center;
+	position:relative;
+	background-image: url(../images/layout/hcl-logo.gif);	// HCL Logo 
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-color: #0570bd;
+}
+*/
+
+#global-footer { clear:both; min-width:1002px; height:25px; color: #000; text-align:center; position:relative; background-color: #0570bd;}
+#global-footer .hclLogo {background-image: url(../images/layout/allGraphic.gif); background-repeat: no-repeat;	background-position: -37px -20px; position:relative;}
+#global-footer .footer-info{ float:left; font-size:11px; color:#FFF; margin:6px 0 0 5px;}
+#global-footer .footer-hclLogo{ float:right; margin:0 4px 0 0;}
+
+/*--------------------End: On Requested by Design team, Modified by: Anjnesh Yadav Date : 01-july-2014 ----------------------*/
+/* ----------------------------------- Paging ----------------------------------- */
+.global-paging {
+	font-weight: bold;
+	color: #000;
+}
+.global-paging a:link, a:visited {
+	font-weight: normal;
+	color: #000;
+	text-decoration: underline;
+}
+.global-paging a:hover {
+	color: #000;
+	text-decoration: none;
+}
+
+.ModalPopup
+{
+    background-color:transparent;
+    padding:0;
+    border: none;
+}
+.Processing
+{
+	font-size:13px;
+	font-family:Calibri, Arial, Helvetica, sans-serif;
+	color:Gray;
+	font-weight:bold;
+}
+
+.tblProcessing
+{
+	width:300px;
+	height:27px;
+}
+.ProcessingDIV TD
+{
+    border-top-style:none;
+    border-bottom-style:none;
+	border-right-style:none;
+	border-left-style:none;
+	background:white;
+}
+/*--start :rahul kuamr ray date :08-05-2015*/
+#local-popupmaincontent{ color:#000; font-size:0.68em; background-color:#FFF; height:100%;}
+
+.global-tableIN TH { border:1px solid #bac7fe !important;}
+.global-tableIN TD { border-right: 1px solid #bac7fe !important; padding:2px !important;}
+/*--End :rahul kuamr ray date :08-05-2015*/

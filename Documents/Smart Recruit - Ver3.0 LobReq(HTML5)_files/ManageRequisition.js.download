@@ -1,0 +1,249 @@
+﻿var IsFromCopyLob = $("#hdnIsCopyLob").val();
+var qStringConditionA = GetParameterValues("IsFromCopyLob"); // for copy lob atma nand
+var app = angular.module('ManageRequisition', ['datatables']);
+app.controller('Ctrl_ManageRequisition', ['$scope', '$http', 'DTOptionsBuilder', 'DTColumnBuilder',
+    function ($scope, $http, DTOptionsBuilder, DTColumnBuilder) {
+        $scope.dtColumns = [
+            DTColumnBuilder.newColumn(-1).withOption('name', '0').
+            withTitle('Requisition Number').renderWith(function (data, type, full)
+            {
+                return '<a onclick="OpenProgress();" title="Click to view SR details" id="viewReq" class="modal-link btn btn-sm" href="../Home/ViewRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=0">' + full["Requisition_Number"] + '</a>';
+            }),
+            DTColumnBuilder.newColumn("Requisition_Date", "Requisition Date").withOption('name', '1'),
+            DTColumnBuilder.newColumn("Customer_Project", "Customer/Project").withOption('name', '2'),
+            DTColumnBuilder.newColumn("Country", "Country").withOption('name', '3'),
+            DTColumnBuilder.newColumn("Band", "Band").withOption('name', '4'),
+            DTColumnBuilder.newColumn("Designation", "Designation").withOption('name', '5'),
+            DTColumnBuilder.newColumn("Skills", "Skills").withOption('name', '6'),
+            DTColumnBuilder.newColumn("Pending_With", "Pending With").notSortable()
+            .renderWith(function (data, type, full)
+            {
+                return '<a onclick="OpenProgress();" class="modal-link btn btn-sm" href="../Home/ViewPendingWith?PRFID=' + full["PRFID_Encrypted"] + '" id="pendWith" data-target="#modal-container" data-toggle="modal">' + full["Pending_With"] + '</a>';
+            }),
+            DTColumnBuilder.newColumn("Status", "Status").withOption('name', '8'),
+            DTColumnBuilder.newColumn("ReqSource", "Requisition/Request Type").withOption('name', '9'),
+            DTColumnBuilder.newColumn(-1).withOption('name', '10').
+                //start SR_336 Suhasini Srivastava
+            withTitle('Head Count Deviation').renderWith(function (data, type, full) {
+                if (full["IsDeviation"] == true) {
+                    return 'Yes';
+                }
+                else {
+                    return 'No';
+                }
+                //end SR_336
+            }),
+            DTColumnBuilder.newColumn(-1).withTitle('Actions').notSortable().renderWith(function (data, type, full)
+            {
+                // for copy lob atma nand
+                if (qStringConditionA.toUpperCase() != 'C') {          
+                    var a = "<div class='anchor-inBlock'>";
+                    if ((full["TRStatus"] == "0")) {
+                        var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                        a += '&nbsp;&nbsp;<a  id="HMLink" name="HMLink" onclick="alert(' + msgValidate + ')" title="itap-Edge" href="#">'
+                            + '<span class="input-group" data-toggle="" data-target=""><img src="../Content/images/HAlogo_24.png" width="13" height="15" /></span></a>';
+                    }
+                    else {
+                        if (full["HiringManager"] == true) {
+                            var HM_link = 'http://staging.myhcl.com/ssoha/home/HAmidway.aspx?UserID=' + full["Initiator"] + '&Role=INH&Prf=' + full["PRFID"] + '';
+                            a += '&nbsp;&nbsp;<a  id="HMLink" name="HMLink" title="itap-Edge" target="_blank" href=' + HM_link + '>'
+                                + '<span class="input-group" data-toggle="" data-target=""><img src="../Content/images/HAlogo_24.png" width="13" height="15" /></span></a>';
+                        }
+                    }
+                    if ((full["TRStatus"] == "0")) {
+                        var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                        a += '&nbsp;<a  id="edit" name="edit" onclick="alert(' + msgValidate + ')" title="Edit Requisition" href="#">'
+                            + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span> </a>';
+                    }
+                    else {
+                        if (full["IsFormCopyLob"] == true) {
+                            if (full["EditMode"] == 1 && full["IsSimplifyReq"] == 0) {
+
+                                a += '&nbsp;<a onclick="OpenProgress();" id="edit" name="edit" title="Edit Requisition" href="../Requisitions/RaiseRequisitions?_ActiveID=' + btoa("1") + '&_SR=' + full["PRFID_Encrypted"] + '">'
+                                    + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span> </a>';
+
+                            }
+                            //start atma nand CR0019293
+                            else if ((full["Status_ID"] == "17")) {
+                                a += '&nbsp;<a onclick="OpenProgress();" id="edit" name="edit" title="Edit Requisition" href="' + SimplifyHRUrl + 'Requisition/EditRequisition?_EmpCode=' + full["Initiator"] + '&_PRFID=' + full["PRFID"] + '">'
+                                    + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span> </a>';
+                            }
+                            //end atma nand CR0019293
+                            else if (full["EditMode"] == 1 && full["IsSimplifyReq"] == 1) {
+                                a += '&nbsp;<a onclick="OpenProgress();" id="edit' + full["PRFID"] + '" name="edit" title="Edit Requisition" href="' + SimplifyHRUrl + 'Requisition/EditRequisition?_EmpCode=' + full["Initiator"] + '&_PRFID=' + full["PRFID"] + '">'
+                                    + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span> </a>';
+                        }
+                        else if (full["EditMode"] == 2) {
+                            if (full["Entity"] == 1) {
+                                if (full["IsPartiallyFulfilled"] == 0 && full["FullEdit"] == "1" && (full["Status_ID"] == "17" || full["Status_ID"] == "18" || full["Status_ID"] == "19" || full["Status_ID"] == "20") && full["IsSimplifyReq"] == 0) {
+                                    a += '&nbsp;<a onclick="OpenProgress();" id="edit" name="edit" title="Edit Requisition" href="../Requisitions/RaiseRequisitions?_ActiveID=' + btoa("1") + '&_SR=' + full["PRFID_Encrypted"] + '">'
+                                            + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span> </a>';
+                                    }
+                                    else if (full["IsPartiallyFulfilled"] == 0 && full["FullEdit"] == "1" && (full["Status_ID"] == "17" || full["Status_ID"] == "18" || full["Status_ID"] == "19" || full["Status_ID"] == "20") && full["IsSimplifyReq"] == 1) {
+                                        a += '&nbsp;<a onclick="OpenProgress();" id="edit" name="edit" title="Edit Requisition" href="' + SimplifyHRUrl + 'Requisition/EditRequisition?_EmpCode=' + full["Initiator"] + '&_PRFID=' + full["PRFID"] + '">'
+                                            + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span> </a>';
+                                    }
+                                    else {
+                                        a += '&nbsp;<a onclick="OpenProgress();" id="edit" class="modal-link btn" name="edit" title="Edit Requisition" href="../Home/ResubmitRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&Status_ID=' + full["Status_ID"] + '">'
+                                            + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span></a>';
+                                    }
+                                }
+                                else {
+                                    a += '&nbsp;<a onclick="OpenProgress();" id="edit" class="modal-link btn" name="edit" title="Edit Requisition" href="../Home/ResubmitRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&Status_ID=' + full["Status_ID"] + '">'
+                                        + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-edit"></span></span></a>';
+                                }
+                            }
+                        }
+                    }
+                    if ((full["TRStatus"] == "0")) {
+                        var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                        a += '&nbsp;<a href="#" onclick="alert(' + msgValidate + ')" id="copy" name="copy" title="Copy Requisition">'
+                            + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-copy"></span></span></a>';
+                    }
+                    else {
+
+                        if (IsDeliveryUnit != "True") {
+                            if (full["IsSimplifyReq"] != 1) {
+                                a += '&nbsp;<a onclick="OpenProgress();" href="../Requisitions/CopyRequisitions?_PRFID=' + full["PRFID_Encrypted"] + '" id="copy" name="copy" title="Copy Requisition">'
+                                    + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-copy"></span></span></a>';
+                            }
+                            else
+                            {
+                                a += '&nbsp;<a onclick="OpenProgress();" href="' + SimplifyHRUrl + 'Requisition/CopyRequisition?_EmpCode=' + $('#Initiator_Encrypted').val() + '&_PRFID=' + full["PRFID_Encrypted"] + '" id="copy" name="copy" title="Copy Requisition">'
+                                    + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-copy"></span></span></a>';
+                            }
+                        }
+                        else {
+                            if (full["IsSimplifyReq"] != 1) {
+                                a += '&nbsp;<a onclick="OpenProgress();" href="../Requisitions/CopyRequisitions?_PRFID=' + full["PRFID_Encrypted"] + '" id="copy" name="copy" title="Copy Requisition">'
+                                    + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-copy"></span></span></a>';
+                            }
+                            else {
+                                // full["Initiator_Encrypted"]
+                                a += '&nbsp;<a onclick="OpenProgress();" href="' + SimplifyHRUrl + 'Requisition/CopyRequisition?_EmpCode=' + $('#Initiator_Encrypted').val() + '&_PRFID=' + full["PRFID_Encrypted"] + '" id="copy" name="copy" title="Copy Requisition">'
+                                    + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-copy"></span></span></a>';
+                            }
+                        }
+                    }
+
+                    if (full["IsFormCopyLob"] == true) {
+                        if (full["IsVisibleEditClose"] == true && full["Status_ID"] != "23") {
+                            var Requisition_NumberOR_PRFID = full["Requisition_Number"] == "" ? full["PRFID"] : full["Requisition_Number"];
+                            if ((full["TRStatus"] == "0")) {
+                                var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                                a += '&nbsp;<a onclick="alert(' + msgValidate + ')" href="#" title="Drop Vacancy" data-toggle="modal">'
+                                    + '<span class="input-group"><span class="glyphicon glyphicon-minus-sign note"></span></span></a>';
+                            }
+                            else {
+                                a += '&nbsp;<a onclick="OpenProgress();" href="#" id="' + Requisition_NumberOR_PRFID + '" name="' + full["PRFID"] + '" class="DropVacency" title="Drop Vacancy" data-toggle="modal">'
+                                    + '<span class="input-group"><span class="glyphicon glyphicon-minus-sign note"></span></span></a>';
+                            }
+                            if ((full["TRStatus"] == "0")) {
+                                var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                                a += '&nbsp;<a onclick="alert(' + msgValidate + ')" href="#">'
+                                    + '<span class="input-group" data-toggle="" data-target="" ><span class="glyphicon glyphicon-remove note"></span></span></a>'
+                            }
+                            else {
+
+                                a += '&nbsp;<a onclick="OpenProgress();" id="close" name="close"  class="modal-link btn" title="Close Requisition" href="../Home/ApprovePendingRequisitionsFromManageReq?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=1&IsFirmDemand=' + full["IsFirmDemand"] + '&IsDPT=' + full["IsDPT"] + '&IsFromManageReq=1&IsFromCloseLink=1">'
+                                    + '<span class="input-group" data-toggle="" data-target="" ><span class="glyphicon glyphicon-remove note"></span></span></a>'
+                            }
+                        }
+                        if ((full["TRStatus"] == "0")) {
+                            var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                            a += '&nbsp;<a onclick="alert(' + msgValidate + ')" href="#" id="TSC" name="TSC" class="modal-link btn" title="TSC Remarks">'
+                                + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-folder-open"></span></span></a>'
+                        }
+
+                        else {
+
+                            a += '&nbsp;<a onclick="OpenProgress();" class="modal-link btn" href="../Home/ProfileStatistics?SR_ID=' + full["PRFID_Encrypted"] + '" id="profiledetail" name="profiledetail" title="Profile Statistics">'
+                                + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-eye-open"></span></span></a>';
+                        }
+
+                        //else {
+
+                        //    a += '&nbsp;<a onclick="OpenProgress();" id="TSC" name="TSC" class="modal-link btn" title="TSC Remarks" href="../Home/ViewRequisitionsTSCRemarks?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=1">'
+                        //        + '<span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-folder-open"></span></span></a>'
+                        //}
+
+                    }
+
+                    if ((full["TRStatus"] == "0")) {
+                        var msgValidate = "'You cannot perform action on this SR since it is pending with Transferee.'";
+                        a += '&nbsp;<a  href="#" id="WIPSR" onclick="alert(' + msgValidate + ')"  title="SR Transfer" data-toggle="modal">'
+                            + '<span class="input-group"><span class="glyphicon glyphicon-transfer"></span></span></a>';
+                    }
+                    else {
+                        if ((full["Status_ID"] == "44") || (full["Status_ID"] == "42") || (full["Status_ID"] == "4") || (full["Status_ID"] == "23")) {
+                            var msg = "'You cannot transfer this SR only WIP SR can be transferred'";
+                            a += '&nbsp;<a  href="#" id="WIPSR" onclick="alert(' + msg + ')"  title="SR Transfer" data-toggle="modal">'
+                                + '<span class="input-group"><span class="glyphicon glyphicon-transfer"></span></span></a>';
+
+                        }
+
+                        else {
+
+                            var Requisition = full["Requisition_Number"] == "" ? full["PRFID"] : full["Requisition_Number"];
+                            a += '&nbsp;<a onclick="OpenProgress();" href="#" TRid="' + Requisition + '" TRname="' + full["PRFID"] + '" class="SRTransfer" title="SR Transfer" data-toggle="modal">'
+                                + '<span class="input-group"><span class="glyphicon glyphicon-transfer"></span></span></a>';
+
+                        }
+                    }
+
+                    //a += '&nbsp;<a onclick="OpenProgress();" href="../Requisitions/CopyRequisitions?_PRFID=3059126&_TSS=1&SAPCode_OJT=51681296&ZZ_BATCH=E1N&LoginID=40170924" id="copytss" name="copytss" title="Copy TSS - Manual">'
+                    //    + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-user"></span></span></a>';
+                }
+                // for copy lob atma nand
+                else {
+                    var a = "<div class='anchor-inBlock'>";
+                   
+                        a += '&nbsp;<a onclick="OpenProgress();" href="' + SimplifyHRUrl + 'Requisition/CopyRequisition?_EmpCode=' + $('#Initiator_Encrypted').val() + '&_PRFID=' + full["PRFID_Encrypted"] + '" id="copy" name="copy" title="Copy Requisition">'
+                            + ' <span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-copy"></span></span></a>';
+                    
+                }
+                   
+
+                return a + "</div>";
+            })
+        ];
+
+        var Sourceurl = re.exec(window.location.href)
+        var postUrl;
+        var qStringVal = GetParameterValues("Status");
+        var qStringCondition = GetParameterValues("IsFromCopyLob");      
+        var qStringValDtFrom = GetParameterValues("dateFrom");
+        var qStringValDtTo = GetParameterValues("dateTo");
+        var qReqNo = GetParameterValues("ReqNo");//pankajk-kmr      
+        if (qStringCondition == undefined)
+        {
+            qStringCondition = "";
+        }
+        if (qStringVal != "null" && qStringVal != undefined) {
+            postUrl = Sourceurl + "/ManageRequisition_Json?Status=" + qStringVal + "&IsFromCopyLob=" + qStringCondition;
+        }
+        else if ((qStringValDtFrom != "null" || qStringValDtTo != "null" || qStringVal != "null" || qStringCondition != "null") && (qStringValDtFrom != undefined && qStringValDtTo != undefined && qStringVal != undefined && qStringCondition != undefined)) {
+            postUrl = Sourceurl + "/ManageRequisition_Json?dateFrom=" + qStringValDtFrom + "&dateTo=" + qStringValDtTo + "&Status=" + qStringVal + "&IsFromCopyLob=" + qStringCondition + "&ReqNo=" + qReqNo;
+        }
+      
+      else if (qStringCondition != null && qStringCondition != "") {
+          postUrl = Sourceurl + "/ManageRequisition_Json?IsFromCopyLob=" + qStringCondition;
+      }
+      else
+      {
+          postUrl = Sourceurl + "/ManageRequisition_Json";
+      }
+            
+
+        $scope.dtOptions = DTOptionsBuilder.newOptions().withOption('ajax', {
+            dataSrc: "data",
+            url: postUrl,
+            type: "POST"
+        })
+        .withOption('processing', true)  
+        .withOption('serverSide', true)  
+        .withPaginationType('simple_numbers')
+        .withDisplayLength(10)  
+        .withOption('aaSorting', [0, 'asc'])  
+    }])
+
