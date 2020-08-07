@@ -1,0 +1,868 @@
+﻿var re = new RegExp(/^.*\//);
+var Sourceurl = SimplifyHRUrl;
+
+
+/*ConstentTP Group*/
+$('.constentRadio input').on('change', function () {
+	if ($(this).is(':checked')) {
+		var tpValue = $(this).val();
+
+		if (tpValue === "TPYes") {
+			$('.constentInputs').removeClass('hide').show();
+			//ValidateFTETOTP("True");
+		}
+		else {
+			$('.constentInputs').hide();
+		}
+	}
+});
+var EmployeeGroupID;
+var bandIdG;
+var RequisitionSource;
+var IsTPtoFTEResource;
+var ISCAS;//Added by Rupesh CR00018206
+var ISSOT;//Added by Rupesh CR00018206
+/*Empployee Group*/
+function EmployeeGroupLogic(EmpGroupID, BandID, ReqSource, IsTPtoFTEResource, IsCas, IsSOT) {
+	EmployeeGroupID = EmpGroupID;
+	bandIdG = BandID;
+	RequisitionSource = ReqSource;
+	ISCAS = IsCas;//Added by Rupesh CR00018206
+	ISSOT = IsSOT;//Added by Rupesh CR00018206
+	if (EmpGroupID === "5") {
+		$('.employeeGroupInputs').removeClass('hide').show();
+		$('.employeeGroupNoSOT').show();//Added by Rupesh CR00018206
+		$('.constentRadio, .constentInputs').hide();
+		BuyRateSellRate(BandID);
+	}
+    else if (ReqSource == 18 || ReqSource == 20) {
+        $('.employeeGroupSOT').hide();
+        //Start: Added by Reshman for the bug Contract From/To was visible in case of FTE SR
+        if (EmpGroupID === "5") {
+            $('.employeeGroupNoSOT, .employeeGroupInputs').removeClass('hide').show();
+        }
+        else {
+            $('.employeeGroupInputs').hide();
+        }
+        //End: Added by Reshman for the bug Contract From/To was visible in case of FTE SR
+	}
+	else if (IsTPtoFTEResource == true) {
+		$('.employeeGroupInputs').hide();
+		$('.constentRadio, .constentInputs').hide();
+	}
+	//Added by Rupesh CR00018206
+	else if (IsCas === 1 && IsSOT === '1' && EmpGroupID === "1") {
+		$('.employeeGroupSOT, .employeeGroupInputs').removeClass('hide').show();
+		$('.employeeGroupNoSOT').hide();
+		$('.constentRadio, .constentInputs').hide();
+		BuyRateSellRate(BandID);
+	}
+	else {
+		$('.employeeGroupInputs').hide();
+		$('.constentRadio').show();
+		$('.constentRadio input').removeAttr('checked');
+	}
+
+};
+$(document).ready(function () {
+	ExternalViewValidate();
+	//Start : Added by Neha Basetia CR00020307
+	var referbackreason = $("#hdnReferBackReasonCode").val();
+	var pRFRoleStatusActionID = $("#hdnSR_PRFRoleStatusActionID").val();
+	if (referbackreason == "64" && (pRFRoleStatusActionID == "17" || pRFRoleStatusActionID == "18" || pRFRoleStatusActionID == "19" || pRFRoleStatusActionID == "20")) {
+		$('#ddlPA').prop("disabled", true);
+		$('#ddlSecondaryPA').prop("disabled", true);
+		$('#ddlJoiningLocation').prop("disabled", true);
+		$('#ddlSecondaryJoiningLocation').prop("disabled", true);
+		$('#TxtClientJoiningLocation').prop("disabled", true);
+		$('#TxtSecondaryClientJoiningLocation').prop("disabled", true);
+	}
+	//End : Added by Neha Basetia CR00020307
+
+	ValidateFTETOTP("True");
+	BuyRateSellRate(bandIdG);
+
+	$('#SaveAsDraft').on('click', function (e) {
+		OpenProgressN();
+		var confirmMsg = "";
+		confirmMsg += "Are you sure you want to save the requisition?"
+		var _confrimResponse = confirm(confirmMsg);
+
+		if (_confrimResponse == true) {
+			return true;
+		}
+		else {
+			e.preventDefault();
+			$.unblockUI();
+			return false;
+		}
+
+	});
+	$('#btnPrev').on('click', function (e) {
+		if (ExtrnlViewData.PRFID == null || ExtrnlViewData.PRFID == "" || ExtrnlViewData.PRFID === undefined) {
+			location.href = SimplifyHRUrl + "/Requisition/LeanRequisition";
+		}
+		else {
+			_ObjExternalFormData.PRFID = ExtrnlViewData.PRFID;
+			location.href = SimplifyHRUrl + "/Requisition/LeanRequisition?_PRFID=" + ExtrnlViewData.EnCryptedPrfID;
+		}
+	});
+});
+
+//External View data validation
+function ExternalViewValidate() {
+	$('#ExternalRequisition').bootstrapValidator({
+		feedbackIcons: {
+			valid: null,
+			invalid: null,
+			validating: null
+		},
+		fields: {
+			ddlExperience: {
+				validators: {
+					notEmpty: {
+						message: 'Please Select Experience!'
+					}
+				}
+			},
+			ddlQualification: {
+				validators: {
+					callback: {
+						message: 'Please Select atleast one Qualification.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							if ($("#ddlQualification :selected").text() == "") {
+								message: 'Please Select atleast one Qualification.';
+								var options = validator.getFieldElements('ddlQualification').val();
+								return (options != null && options.length >= 1 && options.length <= 100);
+							}
+							else {
+								return { valid: true, message: '' }
+							}
+						}
+					}
+
+				}
+			},
+			TxtjobDesription: {
+				validators: {
+					callback: {
+						message: 'Job description should not be blank!',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('TxtjobDesription').val();
+							return (options != null && options.length > 0);
+						}
+					}
+				}
+			},
+			ddlDesignationCode: {
+				validators: {
+					callback: {
+						message: 'Please Select designation.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlDesignationCode').val();
+							//$('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlDesignationCode')
+							if (options == "" || options == undefined) {
+								return { valid: false, message: 'Please Select designation.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+			ddlPA: {
+				validators: {
+					callback: {
+						message: 'Please Select Personal area.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlPA').val();
+							if (options == "" || options == undefined) {
+								return { valid: false, message: 'Please Select Personal area.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+			ddlJoiningLocation: {
+				validators: {
+					different: {
+						field: 'ddlSecondaryJoiningLocation',
+						message: 'Primary CWL and Secondary CWL cannot be same.'
+					},
+					callback: {
+						message: 'Please Select joining location.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlJoiningLocation').val();
+							if (options == "" || options == undefined) {
+								return { valid: false, message: 'Please Select joining location.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+
+			//Start : Added by Neha Basetia CR00020307
+			ddlSecondaryJoiningLocation: {
+				validators: {
+					different: {
+						field: 'ddlJoiningLocation',
+						message: 'Primary CWL and Secondary CWL cannot be same.'
+					}
+				}
+			},
+			//End : Added by Neha Basetia CR00020307
+
+			TxtcontractFrom: {
+				validators: {
+					callback: {
+						message: 'Contract From Date cannot be blank.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var _ContractFrom = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TxtcontractFrom').val());
+							dtCurrent = myApp.getFormattedDate(new Date());
+							$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtContractTo')
+							if (parseInt(EmployeeGroupID) == 5) {
+								if (_ContractFrom.trim() == "") { return { valid: false, message: 'Contract From date cannot be blank.' } }
+								else if (_ContractFrom < dtCurrent) {
+									//return false;
+									return { valid: false, message: 'Contract From date cannot be less then Today date.' }
+								}
+								else {
+									return { valid: true }
+								}
+							}
+							else { return { valid: true } }
+						}
+					}
+				}
+			},
+			TxtContractTo: {
+				validators: {
+					callback: {
+						message: 'Contract To Date cannot be blank.',
+						callback: function (value, validator, $field) {
+							var _ContractFrom = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TxtcontractFrom').val());
+							var _ContractTo = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TxtContractTo').val());
+							var dtCurrent = myApp.getFormattedDate(new Date());
+							
+							var isCampus = $("#hdnIsCampus").val();
+
+							
+							if (isCampus.toUpperCase() == "TRUE") {
+								var _Programduration = ExtrnlViewData.ContractDuration;
+
+								if (_Programduration > 0) {
+									var start = new Date(_ContractFrom);
+									var end = new Date(_ContractTo);
+									var diffDate = (end - start) / (1000 * 60 * 60 * 24);
+									var days = Math.round(diffDate);
+									var maxDate = new Date();;
+									maxDate.setDate(start.getDate() + _Programduration);
+									if (days >= _Programduration)
+										return { valid: false, message: 'Contract duration >' + _Programduration + ' days.Please select End date before ' + maxDate.toDateString() };
+								}
+							}
+							if (parseInt(EmployeeGroupID) == 5 || isCampus.toUpperCase() == "TRUE") {
+								if (_ContractTo.trim() == "") {
+									return {
+										valid: false, message: 'Contract To Date cannot be blank.'
+									}
+								}
+								else if (_ContractTo < dtCurrent) {
+									return { valid: false, message: 'Contract to date cannot be less then today date.' }
+								}
+								else if (_ContractTo < _ContractFrom) {
+									return { valid: false, message: 'Contract to date cannot be less then Contract From date.' }
+								}
+								else {
+									return { valid: true }
+
+								}
+							}
+							else { return { valid: true } }
+						}
+					}
+				}
+			},
+			ddlJoiningL1: {
+				validators: {
+					callback: {
+						message: 'Please Select joining L1.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlJoiningL1').val();
+							if (options == "" || options == undefined || (options.indexOf("?") != -1)) {
+								return { valid: false, message: 'Please Select Joining L1.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+			ddlJoiningL4: {
+				validators: {
+					callback: {
+						message: 'Please Select joining L4.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlJoiningL4').val();
+							if (options == "" || options == undefined || (options.indexOf("?") != -1)) {
+								return { valid: false, message: 'Please Select Joining L4.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+			tp: {
+				excluded: false,
+				validators: {
+					callback: {
+						message: 'Please select TP Consent.',
+						callback: function (value, validator, $field) {
+
+                            var isVisibleDiv = $("#TPConsent").is(":visible");
+                            if (!isVisibleDiv) {
+                                { return { valid: true, message: '' } }
+                            }
+
+							var t = $("input[name='tp']").is(':checked');
+							if (!t) {
+								{ return { valid: false, message: 'Please select TP Consent.' } }
+							}
+							else {
+								{ return { valid: true, message: '' } }
+							}
+						}
+					}
+				}
+			},
+			ddlState: {
+				validators: {
+					callback: {
+						message: 'Please Select State.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlState').val();
+							if (options == "" || options == undefined) {
+								return { valid: false, message: 'Please Select State.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+			ddlCity: {
+				validators: {
+					callback: {
+						message: 'Please Select City.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var options = validator.getFieldElements('ddlCity').val();
+							if (options == "" || options == undefined) {
+								return { valid: false, message: 'Please Select City.' };
+							}
+							else { return { valid: true, message: '' }; }
+						}
+					}
+				}
+			},
+		}
+	}).on('error.form.bv', function (e) {
+		e.preventDefault();
+		$.unblockUI();
+	}).on('success.form.bv', function (e) {
+		e.preventDefault();
+		SaveExternalViewData();
+	});
+
+}
+
+function ValidateFTETOTP(IsTPConversion) {
+	$.unblockUI();
+	try {
+		if (IsTPConversion == 'True') {
+			$('#ExternalRequisition').bootstrapValidator('addField', 'ddlTPBand', {
+				validators: {
+					callback: {
+						message: 'Please Select TP Band',
+						callback: function (value, validator, $field) {
+							value = validator.getFieldElements('ddlTPBand').val();
+
+							if (value == undefined || value == "" || options == "--Select--") {
+								$('#ddlTPSubBand').val("");
+								$('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlTPSubBand');
+							}
+							if (value != undefined && value != "" && options != "--Select--") {
+								$('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlTPSubBand');
+							}
+							// Get the selected options
+							var options = value;
+							return (options != null && options != undefined && options != "--Select--" && options.length >= 1);
+						}
+					}
+				}
+			});
+
+			$('#ExternalRequisition').bootstrapValidator('addField', 'ddlTPSubBand', {
+				validators: {
+					callback: {
+						message: 'Please Select TP Sub-Band',
+						callback: function (value, validator, $field) {
+
+							// Get the selected options
+							value = validator.getFieldElements('ddlTPSubBand').val();
+							if (value == undefined || value == "" || options == "--Select--") {
+								$('#ddlTPDesignation').val("");
+								$('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlTPDesignation');
+							}
+							if (options != undefined && options != "" && options != "--Select--") {
+								$('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlTPDesignation');
+							}
+							var options = value;
+							return (options != null && options != undefined && options != "--Select--" && options.length >= 1);
+						}
+					}
+				}
+			});
+
+			$('#ExternalRequisition').bootstrapValidator('addField', 'ddlTPDesignation', {
+				validators: {
+					callback: {
+						message: 'Please Select TP Designation',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							//debugger;
+							value = validator.getFieldElements('ddlTPDesignation').val();
+							if (value != "--Select--" && value != "") {
+								$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TPcontractfrom');
+							}
+							var options = value; //validator.getFieldElements('DesignationTPid').val();
+							return (options != null && options != undefined && options != "--Select--" && options.length >= 1 && options.length <= 10);
+						}
+					}
+				}
+			});
+
+			$('#ExternalRequisition').bootstrapValidator('addField', 'TPcontractfrom', {
+				validators: {
+					callback: {
+						message: 'Contract From date cannot be blank.',
+						callback: function (value, validator, $field) {
+							var _dtCurrent = myApp.getFormattedDate(new Date());
+							var _fromDate = validator.getFieldElements('TPcontractfrom').val()
+							var _toDate = validator.getFieldElements('TPcontracto').val()
+							if (_fromDate != null && _fromDate != "") {
+								_fromDate = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TPcontractfrom').val());
+								if (_fromDate < _dtCurrent) {
+									return { valid: false, message: 'TP Contract from date cannot be back date from current date.' }
+								}
+								else {
+									if (_fromDate != null && _fromDate != "" && _toDate != null && _toDate != "") {
+										_toDate = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TPcontracto').val());
+										if (_fromDate > _toDate) {
+											return { valid: false, message: 'TP Contract from date cannot be greater date than TP contract to date.' }
+										}
+										else {
+											return { valid: true, message: '' }
+										}
+									}
+									else {
+										return { valid: true, message: '' }
+									}
+								}
+							}
+							else { return { valid: false, message: 'TP Contract From date cannot be blank.' } }
+						}
+					}
+				}
+			});
+
+			$('#ExternalRequisition').bootstrapValidator('addField', 'TPcontracto', {
+				validators: {
+					callback: {
+						message: 'Contract To date cannot be blank',
+						callback: function (value, validator, $field) {
+
+							var _dtCurrent = myApp.getFormattedDate(new Date());
+							var _toDate = validator.getFieldElements('TPcontracto').val()
+							var _fromDate = validator.getFieldElements('TPcontractfrom').val()
+							if (_toDate != null && _toDate != "") {
+								_toDate = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TPcontracto').val());
+
+								if (_toDate < _dtCurrent) {
+									return { valid: false, message: 'TP Contract to date cannot be back date from current date.' }
+								}
+								else {
+									if (_fromDate != null && _fromDate != "" && _toDate != null && _toDate != "") {
+										_fromDate = myApp.ConvertDateToStandredFormat(validator.getFieldElements('TPcontractfrom').val());
+										if (_fromDate > _toDate) {
+											return { valid: false, message: 'TP Contract to date cannot be less date than TP Contract from date.' }
+										}
+										else {
+
+											return { valid: true, message: '' }
+										}
+									}
+									else {
+										return { valid: true, message: '' }
+									}
+								}
+							}
+							else { return { valid: false, message: 'TP Contract to date cannot be blank.' } }
+						}
+					}
+				}
+			});
+
+			$('#ExternalRequisition').bootstrapValidator('addField', 'TPbuyrate', {
+				validators: {
+					callback: {
+						message: 'Please enter TP Buy Rate.',
+						callback: function (value, validator, $field) {
+							var buyRateTPId = value;
+							if ($.trim(buyRateTPId) == "" || buyRateTPId == undefined || buyRateTPId == null) {
+								return { valid: false, message: 'Please enter valid Buy Rate.' }
+							}
+							else if (!$.isNumeric(buyRateTPId)) {
+								return { valid: false, message: 'Please enter numeric value in Buy Rate.' }
+							}
+							else {
+								$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TPsellrate');
+								return { valid: true, message: '' }
+							}
+						}
+					}
+				}
+			});
+
+			$('#ExternalRequisition').bootstrapValidator('addField', 'TPsellrate', {
+				validators: {
+					callback: {
+						message: 'Please enter TP Sell Rate.',
+						callback: function (value, validator, $field) {
+							// Get the selected options
+							var sellRate = value;
+
+							if ($.trim(sellRate) == "" || sellRate == undefined || sellRate == null) {
+
+								return { valid: false, message: 'Please enter valid Sell Rate.' }
+							}
+							else if (!$.isNumeric(sellRate)) {
+								return { valid: false, message: 'Please enter numeric value in Sell Rate..' }
+							}
+							else {
+								//$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TPbuyrate');
+								return { valid: true, message: '' }
+							}
+						}
+					}
+				}
+			});
+		}
+		else if (IsTPConversion == 'False') {
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'ddlTPBand');
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'ddlTPSubBand');
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'ddlTPDesignation');
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'TPcontractfrom');
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'TPcontracto');
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'TPbuyrate');
+			$('#ExternalRequisition').bootstrapValidator('removeField', 'TPsellrate');
+		}
+
+	} catch (e) {
+
+		alert(e);
+
+	}
+}
+
+function BuyRateSellRate(bandId) {
+	$.unblockUI();
+	if (bandId == "TP" || bandId == "CR" || (EmployeeGroupID === '1' && ISCAS === 1 && ISSOT === '1')) {//Added by Rupesh CR00018206
+		$('#ExternalRequisition').bootstrapValidator('addField', 'TxtBuyRate', {
+			validators: {
+				callback: {
+					message: 'Reason can not be blank.',
+					callback: function (value, validator, $field) {
+
+						var buyRateId = $.trim(validator.getFieldElements('TxtBuyRate').val());
+
+						//if (bandId == "TP" || bandId == "CR" || (EmployeeGroupID === '1' && ISCAS == 1 && ISSOT === '1')) {
+
+						if (buyRateId == "" || buyRateId == undefined) {
+							//Added by Rupesh CR00018206
+							var result = 'Buy Rate is mandatory for SOT Demand of Apps&SI Lob.'
+							if (bandId == "TP" || bandId == "CR")
+								result = 'Buy Rate is mandatory for TP/CR Band.'
+							return { valid: false, message: result }
+						}
+						else if (!$.isNumeric(buyRateId)) {
+
+							return { valid: false, message: 'Buy Rate should be numeric.' }
+						}
+						else if (buyRateId < 0) {
+							return { valid: false, message: 'Please enter valid Buy Rate.' }
+						}
+						else {
+							return { valid: true, message: '' }
+						}
+						//}
+						//     else {
+						//     return { valid: true, message: '' }
+						//}
+					}
+				}
+			}
+		});
+
+		$('#ExternalRequisition').bootstrapValidator('addField', 'TxtSellRate', {
+			validators: {
+				callback: {
+					message: 'Reason can not be blank.',
+					callback: function (value, validator, $field) {
+
+						var sellRateId = $.trim(validator.getFieldElements('TxtSellRate').val());
+
+						if (bandId == "TP" || bandId == "CR" || (EmployeeGroupID === '1' && ISCAS == 1 && ISSOT === '1')) {
+							if (sellRateId == "" || sellRateId == undefined) {
+								var result = 'Sell Rate is mandatory for SOT Demand of Apps&SI Lob.'
+								if (bandId == "TP" || bandId == "CR")
+									result = 'Sell Rate is mandatory for TP/CR Band.'
+								return { valid: false, message: result }
+							}
+							else if (!$.isNumeric(sellRateId)) {
+
+								return { valid: false, message: 'Sell Rate should be numeric.' }
+							}
+							else if (sellRateId < 0) {
+								return { valid: false, message: 'Please enter valid Sell Rate.' }
+							}
+							else {
+								return { valid: true, message: '' }
+							}
+						}
+						else {
+							return { valid: true, message: '' }
+						}
+					}
+				}
+			}
+		});
+		$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtBuyRate');
+		$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtSellRate');
+	}
+	else {
+		$('#ExternalRequisition').bootstrapValidator('addField', 'TxtBuyRate', {
+			validators: {
+				callback: {
+					message: 'Reason can not be blank.',
+					callback: function (value, validator, $field) {
+
+						var buyRateId = $.trim(validator.getFieldElements('TxtBuyRate').val());
+
+						if ($.trim(buyRateId) != "" && !$.isNumeric(buyRateId)) {
+
+							return { valid: false, message: 'Buy Rate should be numeric.' }
+						}
+						else if (buyRateId < 0) {
+							return { valid: false, message: 'Please enter valid Buy Rate.' }
+						}
+						else {
+							return { valid: true, message: '' }
+						}
+					}
+				}
+			}
+		});
+
+		$('#ExternalRequisition').bootstrapValidator('addField', 'TxtSellRate', {
+			validators: {
+				callback: {
+					message: 'Reason can not be blank.',
+					callback: function (value, validator, $field) {
+
+						var sellRateId = $.trim(validator.getFieldElements('TxtSellRate').val());
+
+						if ($.trim(sellRateId) != "" && !$.isNumeric(sellRateId)) {
+
+							return { valid: false, message: 'Sell Rate is should be numeric.' }
+						}
+						else if (sellRateId < 0) {
+							return { valid: false, message: 'Please enter valid Sell Rate.' }
+						}
+						else {
+							return { valid: true, message: '' }
+						}
+					}
+				}
+			}
+		});
+		$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtBuyRate');
+		$('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtSellRate');
+	}
+}
+
+//Save Form Data
+var _ObjExternalFormData =
+{
+    
+	PRFID: "",
+	SR_PositionID: "",
+	//RequisitionsSourceDemandEntityID: "26",
+
+	ExperienceCode: "",
+	AdditionalRequest: "",
+	DesignationCode: "",
+	PersonalArea: "",
+	JoiningLocation: "",
+	ClientJoiningLocation: "",
+	JoiningL1Code: "",
+	JoiningL4Code: "",
+	ContractPeriodFrom: "",
+	ContractPeriodTo: "",
+	BuyRate: "",
+	SellRate: "",
+	TPConsent: "",
+	TPEmployeeGroupID: "",
+	TPBandID: "",
+	TPSubBandID: "",
+	TPDesignationID: "",
+	TPContractPeriodFrom: "",
+	TPContractPeriodTo: "",
+	TPBuyRate: "",
+	TPSellRate: "",
+	QualificationID: "",
+	COUNTRYSTATE: "",
+	CITY: "",
+	//Start : Added by Neha Basetia CR00020307
+	SecondaryPersonalArea: "",
+	SecondaryJoiningLocation: "",
+	SecondaryClientJoiningLocation: "",
+	//End : Added by Neha Basetia CR00020307
+    //Language: {
+    //    LanguageID1: "",
+    //    LanguageGrad1: "",
+    //    LanguageID2: "",
+    //    LanguageGrad2: "",
+    //    LanguageID3: "",
+    //    LanguageGrad3: "",
+    //},
+  
+   
+}
+
+function InitializeFormData() {
+    _ObjExternalFormData.ExperienceCode = $('#ddlExperience').val();
+    _ObjExternalFormData.AdditionalRequest = $('#TxtAdditionalRequirement').val();
+    _ObjExternalFormData.DesignationCode = $('#ddlDesignationCode').val();
+    _ObjExternalFormData.PersonalArea = $('#ddlPA').val();
+    _ObjExternalFormData.JoiningLocation = $('#ddlJoiningLocation').val();
+	_ObjExternalFormData.ClientJoiningLocation = $('#TxtClientJoiningLocation').val();
+	//Start : Added by Neha Basetia CR00020307
+	_ObjExternalFormData.SecondaryPersonalArea = $('#ddlSecondaryPA').val();
+	_ObjExternalFormData.SecondaryJoiningLocation = $('#ddlSecondaryJoiningLocation').val();
+	_ObjExternalFormData.SecondaryClientJoiningLocation = $('#TxtSecondaryClientJoiningLocation').val();
+	//End : Added by Neha Basetia CR00020307
+    _ObjExternalFormData.JoiningL1Code = $('#ddlJoiningL1').val();
+    _ObjExternalFormData.JoiningL4Code = $('#ddlJoiningL4').val();
+    //----------------Add by Balendra----------------------------------------------
+    _ObjExternalFormData.JobDescription = $('#TxtjobDesription').val();
+    //---------------------END---------------------------------------------------
+    _ObjExternalFormData.QualificationID = $('#ddlQualification').val();
+    // Start: For C3i atma nand
+   // _ObjExternalFormData.Language = $('#ddlLanguage').val();
+    //_ObjExternalFormData.LanguageGrade = $('#ddlLanguageGrade').val();
+    // End: C3i
+	//Employee Group Contract
+	_ObjExternalFormData.ContractPeriodFrom = $('#TxtcontractFrom').val();
+	_ObjExternalFormData.ContractPeriodTo = $('#TxtContractTo').val();
+	_ObjExternalFormData.BuyRate = $('#TxtBuyRate').val();
+	_ObjExternalFormData.SellRate = $('#TxtSellRate').val();
+
+	//TP Consent
+	_ObjExternalFormData.TPConsent = $("input[name='tp']:checked").val();
+	if (_ObjExternalFormData.TPConsent != null || _ObjExternalFormData.TPConsent != undefined) {
+		if (_ObjExternalFormData.TPConsent === "TPYes") {
+			_ObjExternalFormData.TPConsent = true;
+			_ObjExternalFormData.TPEmployeeGroupID = 5;
+		}
+		else if (_ObjExternalFormData.TPConsent === "TPNo") {
+			_ObjExternalFormData.TPConsent = false;
+		}
+	}
+	else {
+		_ObjExternalFormData.TPConsent = false;
+	}
+	//_ObjExternalFormData.TPEmployeeGroupID = $('#TxtTPEmployeeGroup').val();
+	_ObjExternalFormData.TPBandID = $('#ddlTPBand').val();
+	_ObjExternalFormData.TPSubBandID = $('#ddlTPSubBand').val();
+	_ObjExternalFormData.TPDesignationID = $('#ddlTPDesignation').val();
+	_ObjExternalFormData.TPContractPeriodFrom = $('#TxtTPcontractFrom').val();
+	_ObjExternalFormData.TPContractPeriodTo = $('#TxtTPcontractTo').val();
+	_ObjExternalFormData.TPBuyRate = $('#TxtTPBuyRate').val();
+	_ObjExternalFormData.TPSellRate = $('#TxtTPSellRate').val();
+	_ObjExternalFormData.COUNTRYSTATE = $('#ddlState').val();
+	_ObjExternalFormData.CITY = $('#ddlCity').val();
+}
+
+//$(".primary-button").click(function () {
+function SaveExternalViewData() {
+	InitializeFormData();
+	if (ExtrnlViewData != null && (ExtrnlViewData.PRFID == null || ExtrnlViewData.PRFID == "" || ExtrnlViewData.PRFID === undefined)) {
+		return;
+	}
+	else
+		_ObjExternalFormData.PRFID = ExtrnlViewData.PRFID;
+	if (ExtrnlViewData != null && (ExtrnlViewData.SR_PositionID == null || ExtrnlViewData.SR_PositionID == "" || ExtrnlViewData.SR_PositionID === undefined)) {
+		return;
+	}
+	else
+		_ObjExternalFormData.SR_PositionID = ExtrnlViewData.SR_PositionID;
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: Sourceurl + "/Requisition/SaveExternalViewData",
+        data: JSON.stringify({ _oExViewDTO: _ObjExternalFormData }),
+        success: function (data) {
+            //alert("Successfully saved");
+            if (data.status === "success") {
+                //$.unblockUI();                
+                window.location.href = data.redirectUrl + "&active=" + btoa(3);
+                $.unblockUI();
+            }
+            else if (data.status === "Invalid") {
+                $("#invalid").show();
+                $("#invalid p").remove();
+                $.unblockUI();
+                var obj = JSON.parse(data.redirectUrl);
+                // alert(obj[0].Message);
+                for (var i = 0; i < obj.length; i++) {
+                    $("#invalid").append("<p>" + obj[i].Message + "</p>");
+                }
+            }
+            else
+            {
+                window.location.href = data.redirectUrl + "&active=" + btoa(3);
+            }
+        },
+        error: function (xhr, status, error)
+        {
+            window.location.href = myApp.getErrorUrl();
+        }
+    });
+}
+$('#btn_preview').on('click', function () {
+	$('.panel-collapse:not(".in")')
+		.collapse('show');
+	$('.expandAll').addClass('active');
+	$('.collapseAll').removeClass('active');
+
+});

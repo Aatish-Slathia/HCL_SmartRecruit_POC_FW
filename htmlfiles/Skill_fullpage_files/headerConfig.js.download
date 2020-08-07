@@ -1,0 +1,65 @@
+﻿var app = angular.module('myAppHeader', ["ngRoute"]);
+
+app.config(function ($httpProvider) {
+	var token = GetToken();
+	$httpProvider.defaults.headers.common = {
+		'Authorization': token,
+		'Accept': 'application/json'
+	};
+});
+
+function GetToken() {
+	var token = "";
+	$.ajax({
+		type: "Get",
+		dataType: "json",
+		//data: { 'RequisitionSourceID': _reqTypeId, 'Entity': _Entity },
+		url: SimplifyHRUrl + '/Requisition/GetToken',
+		async: false,
+		success: function (data) {
+			token = data.Authorization;
+		},
+		error: function (error) {
+			console.log("Error : " + error.ErrorMessage);
+		}
+	})
+	return token;
+}
+
+
+
+//var mainApp = angular.module("mainApp", ["ngRoute"]);
+//mainApp.config(function ($httpProvider) {
+//	//$httpProvider.interceptors.push('httpRequestInterceptor');
+//	$httpProvider.defaults.headers.common = {
+//		'Authorization': 'Basic ' + '@System.Configuration.ConfigurationManager.AppSettings["TokenId"]',
+//		'Accept': 'application/json'
+//	};
+//});
+
+//mainApp.factory('httpRequestInterceptor', function () {
+//	return {
+//		request: function (config) {
+
+//			config.headers['Authorization'] = 'Basic jhbfsjkj';
+//			config.headers['Accept'] = 'application/json;odata=verbose';
+
+//			return config;
+//		}
+//	};
+//});
+
+
+
+
+//app.config(function ($httpProvider) {
+		//$http.get("http://localhost:30324/Requisition/GetToken").success(function (data) {
+		//	console.log(data);
+		//}).error(function (error) {
+		//	console.log(error);
+		//});
+	//	$httpProvider.defaults.headers.common = {
+	//		'Authorization': 'Basic rupeshrscjkvcjk',
+	//		'Accept': 'application/json'
+	//	};
+	//});

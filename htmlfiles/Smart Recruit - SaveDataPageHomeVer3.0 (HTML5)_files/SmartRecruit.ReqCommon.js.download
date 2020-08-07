@@ -1,0 +1,373 @@
+﻿//=========================================================================================================================================================
+//    Version             Modified By          Modified On     Change Description
+//=========================================================================================================================================================
+//     v1.0               Arvind Kumar         18-Jan-2016     Req Changes
+//     v1.1               Mithilesh Singh      12-Oct-2016     CR00011692(SALES)
+//=========================================================================================================================================================
+
+var $reqSourceArray;
+$(function () {
+
+    $reqSourceArray = ["Rotation", "Attrition", "TP Replacement", "SFA", "Sales – Replacement", "Sales – Succession Plan Hire"];//CR00011692: Added 2 new Sales Req. sources by Mithilesh Singh on 04-Oct-2016
+    $("#TPReplacement").hide();
+    $("#Attritions").hide();
+    $("#SFA").hide();
+
+    var reqSourceValue = $("#RequisitionsSource").val();
+
+    if ((reqSourceValue == "13" || reqSourceValue == "125" || reqSourceValue == "134" || reqSourceValue == "140" || reqSourceValue == "150" || reqSourceValue == "163") && $("#hdnEntity").val() != "3") {//CR00011692: Added Sales Replacement Req. sources by Mithilesh Singh on 04-Oct-2016
+        $("#TPReplacement").show();
+        if ($("#hdnEntity").val() == "1" || $("#hdnEntity").val() == "2") {
+            $('#txtCustomer').prop('disabled', true);
+            $('#ProjectId').prop('disabled', true);
+            $("#ProjSearchIcon").removeAttr("onclick");
+        }
+    }
+    else if (reqSourceValue == "1" || reqSourceValue == "17") {
+        $("#SFA").show();
+        $('#txtCustomer').prop('disabled', false);
+        $('#ProjectId').removeProp("disabled");
+        $("#ProjSearchIcon").attr("onclick", "return OpenProject();");
+    }
+    else if (reqSourceValue == "2" || reqSourceValue == "118" || reqSourceValue == "3" || reqSourceValue == "119" || reqSourceValue == "131" || reqSourceValue == "138" || reqSourceValue == "149" || reqSourceValue == "159" || reqSourceValue == "162") {//CR00011692: Added Sales succession plan hire Req. sources by Mithilesh Singh on 04-Oct-2016
+        $("#Attritions").show();
+        $('#txtCustomer').prop('disabled', false);
+        $('#ProjectId').removeProp("disabled");
+        $("#ProjSearchIcon").attr("onclick", "return OpenProject();");
+    }
+
+    $("#RequisitionsSource").change(function () {
+
+        RequisitionsChange();
+    });
+
+    RequisitionsSource();
+    myApp.GetEmployeeSapCodeName("TPSAPCODE", "TPSAPCODE", "TP");
+    SFAAccount();
+
+    if ($("#ProjectId").val() != "6863") {
+        $("#otherprojectField").hide();
+    }
+    else {
+        $("#otherprojectField").show();
+    }
+});
+
+function RequisitionsChange() {
+
+    $("#TPReplacement").hide();
+    $("#Attritions").hide();
+    $("#SFA").hide();
+    $('#Requisition').bootstrapValidator('addField', 'sfaAccountOppurtunity', {
+        validators: {
+            notEmpty: {
+                message: 'Cannot be blank.'
+            }
+        }
+    });
+    $('#Requisition').bootstrapValidator('addField', 'sfaOppurtunity', {
+        validators: {
+            notEmpty: {
+                message: 'Cannot be blank.'
+            }
+        }
+    });
+    $('#Requisition').bootstrapValidator('addField', 'Oppurtunity', {
+        validators: {
+            notEmpty: {
+                message: 'Cannot be blank.'
+            }
+        }
+    });
+
+    $('#Requisition').bootstrapValidator('addField', 'TPSAPCODE', {
+        validators: {
+            notEmpty: {
+                message: 'Cannot be blank.'
+            }
+        }
+    });
+
+    $('#Requisition').bootstrapValidator('removeField', 'sfaAccountOppurtunity');
+    $('#Requisition').bootstrapValidator('removeField', 'sfaOppurtunity');
+    $('#Requisition').bootstrapValidator('removeField', 'Oppurtunity');
+    $('#Requisition').bootstrapValidator('removeField', 'TPSAPCODE');
+    $("#TPSAPCODE").val("");
+    $("#AttritionRotationSapCode").val("");
+    $("#SfaOppurtunity").val("");
+    $("#Oppurtunity").val("");
+    $("#TPState").val("");
+    $("#txtCustomer").val("");
+    $("#CustomerId").val("");
+    $("#ProjectId").val("");
+    //$("#ProjectL1").val("");
+    //$("#ProjectL4").val("");
+    $("#ProjectArchetypeID").val("");
+    $("#ProjectEndDate").val("");
+    $("#sfaAccountOppurtunity").val("");
+    $("#sfaOppurtunity").val("");
+    $('#Requisition').bootstrapValidator('revalidateField', 'txtCustomer');
+    BindProject();
+
+    BindProjectL1L4();
+    $('#txtCustomer').prop('disabled', false);
+    $('#ProjectId').removeProp("disabled");
+    $("#ProjSearchIcon").attr("onclick", "return OpenProject();");
+    var _Entity = $("#hdnEntity").val();
+
+    $('#Requisition').bootstrapValidator('addField', 'ProjectId', {
+        validators: {
+            callback: {
+                message: 'Please Select Project.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('ProjectId').val();
+                    if (options == "6863") {
+
+                        $('#Requisition').bootstrapValidator('addField', 'txtotherProject', {
+                            validators: {
+                                notEmpty: {
+                                    message: 'Other Project cannot be blank if Project selected as other.'
+                                }
+                            }
+                        });
+                    }
+                    else { $('#Requisition').bootstrapValidator('removeField', 'txtotherProject'); }
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+    });
+
+
+    if (_Entity == "1"
+            || _Entity == "2"
+            || _Entity == "3"
+            || _Entity == "4"
+        ) {
+
+        if ($("#RequisitionsSource").val() == 1 || $("#RequisitionsSource").val() == 17)// SFA
+        {
+            $("#SFA").show();
+            $('#Requisition').bootstrapValidator('addField', 'sfaAccountOppurtunity', {
+                validators: {
+                    notEmpty: {
+                        message: 'SFA Account Code cannot be blank in case of Requisitions Source selected as SFA'
+                    }
+                }
+            });
+            $('#Requisition').bootstrapValidator('addField', 'sfaOppurtunity', {
+                validators: {
+                    notEmpty: {
+                        message: 'SFA Oppurtunity cannot be blank in case of Requisitions Source selected as SFA'
+                    }
+                }
+            });
+        }//SFA End
+        else if (($("#RequisitionsSource").val() == 13 || $("#RequisitionsSource").val() == 125 || $("#RequisitionsSource").val() == 134 || $("#RequisitionsSource").val() == 140 || reqSourceValue == "150" || reqSourceValue == "163") && _Entity != "3")// TP ReplaceMent & CR00011692: Added Sales Replacement
+        {
+            $("#Attritions").hide();
+            $("#TPReplacement").show();
+            $("#SFA").hide();
+            $('#Requisition').bootstrapValidator('addField', 'TPSAPCODE', {
+                validators: {
+                    //Start rahul ray CR00010740
+                    notEmpty: {
+                        message: 'Third party SAP ID entered is presently not active.'
+                        //'You are allowed to raise a requisition for TP Replacement within your own LOB only. Please enter valid employee code/name.'
+                        //End rahul ray CR00010740
+                    }
+                }
+            });
+
+        }// End TP ReplaceMent
+        else {
+            $('#txtCustomer').prop('disabled', false);
+            $('#ProjectId').removeProp("disabled");
+            $("#ProjSearchIcon").attr("onclick", "return OpenProject();");
+        }
+    }
+
+    RequisitionsSource();
+
+    //if (reqSourceValue == "13" && $("#hdnEntity").val() != "3" && $("#TPSAPCODE").val() != "") {
+    //    $("#clProjectL1").html("<input Type='Text' id='ProjectL1' readonly class='form-control input-sm' name ='ProjectL1' value='Project L1'/>");
+    //    $("#clProjectL4").html("<input Type='Text' id='ProjectL4' readonly class='form-control input-sm' name ='ProjectL4' value='Project L4'/>");
+    //}
+}
+
+function RequisitionsSource() {
+
+    var reqSource = $('#RequisitionsSource :selected').text();
+    var indexReqSource = $.inArray(reqSource, $reqSourceArray)
+
+    if (indexReqSource != -1) {
+        if (reqSource == "Rotation") {
+            $('#Requisition').bootstrapValidator('addField', 'AttritionRotationSapCode', {
+                validators: {
+
+                    notEmpty: {
+                        message: 'There are no records for the selected criteria.'
+                    }
+                }
+            });
+        }
+        else if (reqSource == "Attrition") {
+            $('#Requisition').bootstrapValidator('addField', 'AttritionRotationSapCode', {
+                validators: {
+
+                    notEmpty: {
+                        message: 'Employee code cannot be blank or Either the EMS case is not initiated or the EMS request is not approved by the concerned HR/RM. Please follow with HR/RM and get the EMS approved. Subsequently, you’ll be able to select the person name/code.'
+                    }
+                }
+            });
+        }
+        //START CR00011692" Added by Mithilesh Singh for Sales – Succession Plan Hire on 04-Oct-2016
+        else if (reqSource == "Sales – Succession Plan Hire") {
+            $('#Requisition').bootstrapValidator('addField', 'AttritionRotationSapCode', {
+                validators: {
+
+                    notEmpty: {
+                        message: 'Employee code cannot be blank or Either...'
+                    }
+                }
+            });
+        }//END CR00011692" Added by Mithilesh Singh for Sales – Succession Plan Hire on 04-Oct-2016
+        //$("#Attritions").show();
+
+        if (reqSource == "Rotation" || reqSource == "Attrition" || reqSource == "Sales – Succession Plan Hire") {//CR00011692:Added Sales succession plan hire SR
+            $("#Attritions").show(); $("#TPReplacement").hide(); $("#SFA").hide();
+        }
+        else if (reqSource == "TP Replacement" || reqSource == "Sales – Replacement" && $("#hdnEntity").val() != "3") {//CR00011692:Added Sales-replacement
+            $("#TPReplacement").show(); $("#Attritions").hide(); $("#SFA").hide();
+        }
+        else if (reqSource == "SFA") {
+            $("#TPReplacement").hide(); $("#Attritions").hide(); $("#SFA").show();
+        }
+        else {
+            $("#TPReplacement").hide(); $("#Attritions").hide(); $("#SFA").hide();
+        }
+
+        if (reqSource == $reqSourceArray[1]) {
+            myApp.GetEmployeeSapCodeName("AttritionRotationSapCode", "AttritionRotationSapCode", "Attrition");
+        }
+        else if (reqSource == $reqSourceArray[2]) {
+            myApp.GetEmployeeSapCodeName("TPSAPCODE", "TPSAPCODE", "TP");
+        }
+        //START CR00011692: Added by Mithilesh Singh on 28-Sept-2016
+        else if (reqSource == $reqSourceArray[4]) {
+            myApp.GetEmployeeSapCodeName("TPSAPCODE", "TPSAPCODE", "TP");
+        }
+        else if (reqSource == $reqSourceArray[5]) {
+            myApp.GetEmployeeSapCodeName("AttritionRotationSapCode", "AttritionRotationSapCode", "SalesSuccessionPlanHire");
+        }
+        //END CR00011692: Added by Mithilesh Singh on 28-Sept-2016
+        else {
+            myApp.GetEmployeeSapCodeName("AttritionRotationSapCode", "AttritionRotationSapCode", "");
+        }
+    }
+    else {
+        $("#Attritions").hide();
+        $('#Requisition').bootstrapValidator('removeField', 'AttritionRotationSapCode');
+    }
+}
+
+function SFAAccount() {
+    var _url = Sourceurl + "GetSFAACcount";
+
+    $("#sfaAccountOppurtunity").typeahead({
+        name: 'sfaAccountOppurtunity',
+        source: function (query, process) {
+            var countries = [];
+            map = {};
+
+            if (query.length > 0) {
+                // This is going to make an HTTP post request to the controller
+                return $.post(_url, { sfaAccountOppurtunity: query }, function (data) {
+
+                    // Loop through and push to the array
+                    $.each(data, function (i, country) {
+                        map[country.Text] = country;
+                        //map[country.CustomerCode] = country.CustomerCode;
+                        countries.push(country.Text);
+                    });
+
+                    // Process the details
+                    process(countries);
+
+                    if (countries.length == 0) {
+                        $("#sfaAccountOppurtunity").val("");
+                        $('#Requisition').bootstrapValidator('addField', 'sfaAccountOppurtunity', {
+                            validators: {
+                                callback: {
+                                    message: 'Please Select BillingType.',
+                                    callback: function (value, validator, $field) {
+                                        // Get the selected options
+                                        var options = validator.getFieldElements('sfaAccountOppurtunity').val();
+                                        return (options != null && options != "--Select--" && options.length >= 1 && options.length <= 100);
+
+                                    }
+                                }
+                            }
+                        });
+                        $('#Requisition').bootstrapValidator('revalidateField', 'sfaAccountOppurtunity');
+                    }
+                });
+            }
+        },
+        updater: function (item) {
+            //alert(map[item]);
+            var selectedShortCode = map[item].Value;
+            // Set the text to our selected id
+            $("#hdn_sfaAccountOppurtunity").val(selectedShortCode);
+            if ($("#hdn_sfaAccountOppurtunity").val() == "" || $("#hdn_sfaAccountOppurtunity").val() == null || $("#hdn_sfaAccountOppurtunity").val() === undefined) {
+                SFAOppurtunity();
+            }
+            SFAOppurtunity();
+            return item;
+
+
+        }
+    });
+
+
+
+}
+
+function SFAOppurtunity() {
+    var _url = Sourceurl + "GetSFAOppurtunity"
+    $.ajax({
+        type: "GET",
+        url: _url,
+        async: false,
+
+        data: { AccoutId: $("#hdn_sfaAccountOppurtunity").val() },
+        success: function (msg) {
+            $("#sfaOppurtunity").html("");
+            var _options = "<option>--Select--</option>"
+            $.each(msg, function (index, data) {
+                _options += "<option value=" + data.Value + ">" + data.Text + "</option>";
+            })
+
+            $("#sfaOppurtunity").append(_options);
+            //$('#Requisition').bootstrapValidator('revalidateField', 'sfaOppurtunity');
+
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            alert(thrownError);
+        }
+    });
+    $('#Requisition').bootstrapValidator('addField', 'sfaOppurtunity', {
+        validators: {
+            callback: {
+                //message: 'Please Select BillingType.',
+                callback: function (value, validator, $field) {
+                    // Get the selected options
+                    var options = validator.getFieldElements('sfaOppurtunity').val();
+                    return (options != null && options != "--Select--" && options.length >= 1 && options.length <= 100);
+
+                }
+            }
+        }
+    });
+    $('#Requisition').bootstrapValidator('revalidateField', 'sfaOppurtunity');
+
+}

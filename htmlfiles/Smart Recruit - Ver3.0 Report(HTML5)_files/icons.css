@@ -1,0 +1,683 @@
+/*/////////////////////////////////////////////16 x 16 Icons///////////////////////////////////////////////*/
+.icons16 {
+	background:url(../images/icons/icons16.png);
+	height:16px;
+}
+.ico-accept {
+	width:16px;
+	background-position:0px 0px;
+}
+.ico-add {
+	width:16px;
+	background-position:-16px 0px;
+}
+.ico-anchor {
+	width:16px;
+	background-position:-32px 0px;
+}
+.ico-pdf {
+	width:16px;
+	background-position:-48px 0px;
+}
+.ico-excel1 {
+	width:16px;
+	background-position:-64px 0px;
+}
+.ico-excel2 {
+	width:16px;
+	background-position:-80px 0px;
+}
+.ico-word {
+	width:16px;
+	background-position:-96px 0px;
+}
+.ico-flash {
+	width:16px;
+	background-position:-112px 0px;
+}
+.ico-clear {
+	width:16px;
+	background-position:-128px 0px;
+}
+.ico-addRecords1{
+	width:16px;
+	background-position:-144px 0px;
+}
+.ico-addRecords2 {
+	width:16px;
+	background-position:-160px 0px;
+}
+.ico-idea {
+	width:16px;
+	background-position:-176px 0px;
+}
+.ico-user {
+	width:16px;
+	background-position:-192px 0px;
+}
+.ico-folder {
+	width:16px;
+	background-position:-208px 0px;
+}
+.ico-process {
+	width:16px;
+	background-position:-224px 0px;
+}
+.ico-save {
+	width:16px;
+	background-position:-240px 0px;
+}
+.ico-quicklinks {
+	width:16px;
+	background-position:-256px 0px;
+}
+.ico-new {
+	width:16px;
+	background-position:-272px 0px;
+}
+.ico-email1 {
+	width:16px;
+	background-position:-288px 0px;
+}
+.ico-email2 {
+	width:16px;
+	background-position:-304px 0px;
+}
+.ico-search1 {
+	width:16px;
+	background-position:-320px 0px;
+}
+.ico-search2 {
+	width:16px;
+	background-position:-336px 0px;
+}
+.ico-search3 {
+	width:16px;
+	background-position:-352px 0px;
+}
+.ico-calendar1 {
+	width:16px;
+	background-position:-368px 0px;
+}
+.ico-calendar2 {
+	width:16px;
+	background-position:-384px 0px;
+}
+/*---------------------------------Row 1 Ends here ----------------------------------------------*/
+.ico-flagBlue{
+	width:16px;
+	background-position:0px -16px;
+}
+.ico-flagGreen{
+	width:16px;
+	background-position:-16px -16px;
+}
+.ico-flagOrange{
+	width:16px;
+	background-position:-32px -16px;
+}
+.ico-flagPink{
+	width:16px;
+	background-position:-48px -16px;
+}
+.ico-flagRed{
+	width:16px;
+	background-position:-80px -16px;
+}
+.ico-bulletRed{
+	width:16px;
+	background-position:-96px -16px;
+}
+.ico-bulletGreen {
+	width:16px;
+	background-position:-112px -16px;
+}
+.ico-inbox {
+	width:16px;
+	background-position:-128px -16px;
+}
+.ico-star1 {
+	width:16px;
+	background-position:-144px -16px;
+}
+.ico-upload {
+	width:16px;
+	background-position:-160px -16px;
+}
+.ico-home {
+	width:16px;
+	background-position:-176px -16px;
+}
+.ico-globe {
+	width:16px;
+	background-position:-192px -16px;
+}
+.ico-ppt {
+	width:16px;
+	background-position:-208px -16px;
+}
+.ico-delegation {
+	width:16px;
+	background-position:-224px -16px;
+}
+.ico-confirm {
+	width:16px;
+	background-position:-240px -16px;
+}
+.ico-sitemap {
+	width:16px;
+	background-position:-256px -16px;
+}
+.ico-plugin {
+	width:16px;
+	background-position:-272px -16px;
+}
+.ico-formula {
+	width:16px;
+	background-position:-288px -16px;
+}
+.ico-previous1 {
+	width:16px;
+	background-position:-304px -16px;
+}
+.ico-next1 {
+	width:16px;
+	background-position:-320px -16px;
+}
+.ico-previous2 {
+	width:16px;
+	background-position:-336px -16px;
+}
+.ico-next2 {
+	width:16px;
+	background-position:-352px -16px;
+}
+.ico-note1 {
+	width:16px;
+	background-position:-368px -16px;
+}
+.ico-note2 {
+	width:16px;
+	background-position:-384px -16px;
+}
+
+/*---------------------------------Row 2 Ends here ----------------------------------------------*/
+
+
+.ico-addAttachment {
+	width:16px;
+	background-position:0px -32px;
+}
+.ico-attachment1 {
+	width:16px;
+	background-position:-16px -32px;
+}
+.ico-attachment2 {
+	width:16px;
+	background-position:-32px -32px;
+}
+.ico-connect {
+	width:16px;
+	background-position:-48px -32px;
+}
+.ico-disConnect{
+	width:16px;
+	background-position:-64px -32px;
+}
+.ico-approve {
+	width:16px;
+	background-position:-80px -32px;
+}
+.ico-information1 {
+	width:16px;
+	background-position:-96px -32px;
+}
+.ico-comment1 {
+	width:16px;
+	background-position:-112px -32px;
+}
+.ico-comment2 {
+	width:16px;
+	background-position:-128px -32px;
+}
+.ico-addComment {
+	width:16px;
+	background-position:-144px -32px;
+}
+.ico-delete1 {
+	width:16px;
+	background-position:-160px -32px;
+}
+.ico-delete2 {
+	width:16px;
+	background-position:-176px -32px;
+}
+.ico-delete3 {
+	width:16px;
+	background-position:-192px -32px;
+}
+.ico-delete4 {
+	width:16px;
+	background-position:-208px -32px;
+}
+.ico-book1 {
+	width:16px;
+	background-position:-224px -32px;
+}
+.ico-book2 {
+	width:16px;
+	background-position:-240px -32px;
+}
+.ico-flowChart {
+	width:16px;
+	background-position:-256px -32px;
+}
+.ico-barChart {
+	width:16px;
+	background-position:-272px -32px;
+}
+.ico-pie {
+	width:16px;
+	background-position:-288px -32px;
+}
+.ico-unLock{
+	width:16px;
+	background-position:-304px -32px;
+}
+.ico-lock1 {
+	width:16px;
+	background-position:-320px -32px;
+}
+.ico-lock2 {
+	width:16px;
+	background-position:-336px -32px;
+}
+
+.ico-verySatisfied {
+	width:16px;
+	background-position:-352px -32px;
+}
+.ico-satisfied {
+	width:16px;
+	background-position:-368px -32px;
+}
+.ico-sad {
+	width:16px;
+	background-position:-384px -32px;
+}
+
+/*---------------------------------Row 3 Ends here ----------------------------------------------*/
+
+
+.ico-up {
+	width:16px;
+	background-position:0px -48px;
+}
+.ico-down {
+	width:16px;
+	background-position:-16px -48px;
+}
+.ico-help1 {
+	width:16px;
+	background-position:-32px -48px;
+	
+}
+.ico-help2 {
+	width:16px;
+	background-position:-48px -48px;
+}
+.ico-edit {
+	width:16px;
+	background-position:-64px -48px;
+}
+
+.ico-report {
+	width:16px;
+	background-position:-96px -48px;
+}
+.ico-dataSource {
+	width:16px;
+	background-position:-112px -48px;
+}
+.ico-contact {
+	width:16px;
+	background-position:-128px -48px;
+}
+.ico-shortcut {
+	width:16px;
+	background-position:-144px -48px;
+}
+.ico-hand {
+	width:16px;
+	background-position:-160px -48px;
+}
+.ico-exclamation1 {
+	width:16px;
+	background-position:-176px -48px;
+}
+.ico-exclamation2 {
+	width:16px;
+	background-position:-192px -48px;
+}
+.ico-database1 {
+	width:16px;
+	background-position:-208px -48px;
+}
+.ico-database2 {
+	width:16px;
+	background-position:-224px -48px;
+}
+.ico-clock1 {
+	width:16px;
+	background-position:-240px -48px;
+}
+.ico-get {
+	width:16px;
+	background-position:-256px -48px;
+}
+.ico-put {
+	width:16px;
+	background-position:-272px -48px;
+}
+.ico-reset {
+	width:16px;
+	background-position:-288px -48px;
+}
+.ico-print1 {
+	width:16px;
+	background-position:-304px -48px;
+}
+.ico-mediaPlayer {
+	width:16px;
+	background-position:-320px -48px;
+}
+.ico-ie {
+	width:16px;
+	background-position:-336px -48px;
+}
+.ico-manual {
+	width:16px;
+	background-position:-352px -48px;
+}
+.ico-tool {
+	width:16px;
+	background-position:-368px -48px;
+}
+.ico-touchPoint {
+	width:16px;
+	background-position:-384px -48px;
+}
+/*---------------------------------Row 4 Ends here ----------------------------------------------*/
+.ico-upArrowRed {
+	background-position:0px -64px;
+}
+.ico-upArrowGray {
+	background-position:-16px -64px;
+}
+.ico-handShake{
+	background-position:-32px -64px;
+}
+.ico-handShakeGray{
+	background-position:-48px -64px;
+}
+.ico-deleteGray {
+	background-position:-64px -64px;
+}
+.ico-resetGray {
+	background-position:-80px -64px;
+}
+.ico-forwardBlue {
+	background-position:-96px -64px;
+}
+.ico-forwardGray {
+	background-position:-112px -64px;
+}
+.ico-signOff {
+	background-position:-128px -64px;
+}
+.ico-signOffGray {
+	background-position:-144px -64px;
+}
+.ico-threeSixty {
+	background-position:-160px -64px;
+}
+.ico-trippleBubble{
+	width:16px;
+	background-position:-176px -64px;
+}
+.ico-doubleBubble{
+	width:16px;
+	background-position:-192px -64px;
+}
+.ico-star2 {
+	width:16px;
+	background-position:-208px -64px;
+}
+.ico-star3 {
+	width:16px;
+	background-position:-224px -64px;
+}
+.ico-print2 {
+	width:16px;
+	background-position:-240px -64px;
+}
+.ico-print3 {
+	width:16px;
+	background-position:-256px -64px;
+}
+.ico-information2{
+	width:16px;
+	background-position:-272px -64px;
+}
+.ico-return {
+	width:16px;
+	background-position:-288px -64px;
+}
+.ico-calendar3 {
+	width:16px;
+	background-position:-304px -64px;
+}
+.ico-fullday {
+	width:16px;
+	background-position:-320px -64px;
+}
+.ico-refresh {
+	width:16px;
+	background-position:-336px -64px;
+}
+.ico-v {
+	width:16px;
+	background-position:-352px -64px;
+}
+.ico-arrowright {
+	width:16px;
+	background-position:-368px -64px;
+}
+.ico-arrowleft {
+	width:16px;
+	background-position:-384px -64px;
+}
+
+/*---------------------------------Row 5 Ends here ----------------------------------------------*/
+.ico-copy {
+	width:16px;
+	background-position:0px -80px;
+}
+.ico-rupee {
+	width:16px;
+	background-position:-16px -80px;
+	}
+.ico-clockRed{
+	width:16px;
+	background-position:-64px -80px;
+}
+.ico-session {
+	width:16px;
+	background-position:-48px -80px;
+	}
+	
+.ico-accessDenied {
+	width:16px;
+	background-position:-64px -80px;
+	}
+.ico-delete5 {
+	width:16px;
+	background-position:-80px -80px;
+	}	
+.ico-email3 {
+	width:16px;
+	background-position:-96px -80px;
+	}	
+.ico-flagYellow {
+	width:16px;
+	background-position:-112px -80px;
+	}	
+.ico-flagGray {
+	width:16px;
+	background-position:-128px -80px;
+	}	
+.ico-star4 {
+	width:16px;
+	background-position:-144px -80px;
+}
+.ico-dollar {
+	width:16px;
+	background-position:-160px -80px;
+}
+.ico-euro {
+	width:16px;
+	background-position:-176px -80px;
+}
+.ico-alert {
+	width:16px;
+	background-position:-192px -80px;
+}
+.ico-feed {
+	width:16px;
+	background-position:-208px -80px;
+}
+.ico-help3{
+	width:16px;
+	background-position:-224px -80px;
+}
+.ico-image {
+	width:16px;
+	background-position:-240px -80px;
+}
+.ico-lock3 {
+	width:16px;
+	background-position:-256px -80px;
+}
+.ico-note3 {
+	width:16px;
+	background-position:-272px -80px;
+}
+.ico-reset1 {
+	width:16px;
+	background-position:-288px -80px;
+}
+.ico-magnify {
+	width:16px;
+	background-position:-304px -80px;
+}
+.ico-flagDarkblue {
+	width:16px;
+	background-position:-320px -80px;
+}
+.ico-q {
+	width:16px;
+	background-position:-336px -80px;
+}
+.ico-a {
+	width:16px;
+	background-position:-352px -80px;
+}
+.ico-commentdisable {
+	width:16px;
+	background-position:-368px -80px;
+}
+.ico-plus {
+	width:16px;
+	background-position:-384px -80px;
+}
+
+/*---------------------------------Row 6 Ends here ----------------------------------------------*/
+.ico-minus {
+	width:16px;
+	background-position:0px -96px;
+}
+.ico-bulletYellow {
+	width:16px;
+	background-position:-16px -96px;
+}
+.ico-clockBlue {
+	width:16px;
+	background-position:-32px -96px;
+}
+.ico-clockRed1 {
+	width:16px;
+	background-position:-48px -96px;
+}
+.ico-hourglass {
+	width:16px;
+	background-position:-64px -96px;
+}
+.ico-alert1 {
+	width:16px;
+	background-position:-80px -96px;
+}
+.ico-sla1 {
+	width:16px;
+	background-position:-96px -96px;
+}
+.ico-sla2{
+	width:16px;
+	background-position:-112px -96px;
+}
+.ico-delete6{
+	width:16px;
+	background-position:-128px -96px;
+}
+.ico-appDelete{
+	width:16px;
+	background-position:-144px -96px;
+}
+.ico-appAdd{
+	width:16px;
+	background-position:-160px -96px;
+}
+.ico-rss{
+	width:16px;
+	background-position:-176px -96px;
+}
+.ico-comments{
+	width:16px;
+	background-position:-192px -96px;
+}
+.ico-comment3{
+	width:16px;
+	background-position:-208px -96px;
+}
+/*---------------------------------Row 7 Ends here ----------------------------------------------*/
+
+/*/////////////////////////////////////////////40 x 40 Icons///////////////////////////////////////////////*/
+.icons40 {
+	background:url(../images/icons/icons40.png);
+	height:40px;
+}
+.ico-session1 {
+	width:40px;
+	background-position:0px 0px;
+}
+.ico-downtime {
+	width:40px;
+	background-position:-40px 0px;
+}
+.ico-accdeined {
+	width:40px;
+	background-position:-80px 0px;
+}
+.ico-auth {
+	width:40px;
+	background-position:-120px 0px;
+}

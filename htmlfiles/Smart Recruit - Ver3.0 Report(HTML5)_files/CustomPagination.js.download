@@ -1,0 +1,160 @@
+﻿ 
+function InitCustomPagination()
+{
+    $(".CustomPager-Grid").each(
+     function () {
+
+         CustomPager.ShowPager($(this).attr("id"), CP_ChangePage);
+
+
+     }
+     );
+
+
+        
+}
+
+
+
+function clsCustomPager() {
+
+    this.ShowPager = function (pTableID, OnPageChange) {
+        //start of CR00003243: Modified by Meena Bisht, dated - 23 Mar 2012
+        try{
+
+            var tableobject = CJS_Get(pTableID);
+        }
+
+        catch(e){
+
+            var a = document.getElementById(pTableID);        
+            tableobject = a;
+        }
+        //End of CR00003243: Modified by Meena Bisht, dated - 23 Mar 2012
+
+        try {
+            tableobject.RecordsCount = parseInt($(tableobject).attr("RecordsCount"));
+            tableobject.PageSize = parseInt($(tableobject).attr("PageSize"));
+            tableobject.CurrentPage = parseInt($(tableobject).attr("CurrentPage")) - 1;
+        }
+        catch (e)
+            { return; }
+
+        this.TotalPages = Math.ceil(tableobject.RecordsCount / tableobject.PageSize);
+
+
+        if (tableobject.CurrentPage >= 0) {
+            var pagerRow = $("<tr class='PagerRow' PagerFor='" + pTableID + "'><td></td>");
+
+
+            var pagerTD = pagerRow.find("td");
+            var pagerHTML;
+            if (tableobject.RecordsCount <= tableobject.PageSize) {
+                return;
+            }
+            var PageIndex, TotalPages, StartPageIndex, EndPageIndex;
+            TotalPages = parseInt(tableobject.RecordsCount / tableobject.PageSize);
+            if (tableobject.RecordsCount % tableobject.PageSize > 0)
+                TotalPages = TotalPages + 1;
+            var StrPageHTML, CurrentPageNumber;
+            StrPageHTML = "";
+            var MaxPageShows;
+            MaxPageShows = 10;
+            CurrentPageNumber = tableobject.CurrentPage + 1;
+            var PagePart, sIndex, EIndex;
+            PagePart = parseInt(CurrentPageNumber / MaxPageShows);
+            if (CurrentPageNumber % MaxPageShows == 0) {
+                PagePart = PagePart - 1;
+                sIndex = parseInt((PagePart * MaxPageShows)) + 1;
+                EIndex = parseInt(sIndex + MaxPageShows) - 1;
+            }
+            else {
+                sIndex = parseInt((PagePart * MaxPageShows)) + 1;
+                EIndex = parseInt(sIndex + MaxPageShows) - 1;
+            }
+            if (TotalPages <= MaxPageShows) {
+                StartPageIndex = 1;
+                EndPageIndex = TotalPages;
+            }
+            else {
+                StartPageIndex = CurrentPageNumber;
+                EndPageIndex = parseInt(CurrentPageNumber) + parseInt(MaxPageShows) - 1;
+            }
+            StrPageHTML = "";
+            var PagerDivObject = $('<div class="pgntn">');
+            PagerDivObject.append('<div class="pgntnLftCntrl"><ul></ul>');
+            var PagerULObject = PagerDivObject.find("ul");
+            var RecordNumberFrom, RecordNumberTo;
+            RecordNumberFrom = (CurrentPageNumber - 1) * tableobject.PageSize + 1;
+            RecordNumberTo = RecordNumberFrom + tableobject.PageSize - 1;
+            if (RecordNumberTo > tableobject.RecordsCount)
+                RecordNumberTo = tableobject.RecordsCount;
+            if (tableobject.RecordsCount > 0) {
+                var PreviousPageIndex;
+                PreviousPageIndex = parseInt(sIndex) - 1;
+                var FirstObject = $("<li PageIndex=1><a>First</a></li><li>|</li>");
+                if (CurrentPageNumber <= 1)
+                    FirstObject.find("a").attr("disabled", "disabled");
+                FirstObject.attr("GridObjectID", this.id);
+                PagerULObject.append(FirstObject);
+                var PrevObject = $("<li PageIndex='" + (parseInt(CurrentPageNumber) - 1) + "'><a>Prev</a></li><li>|</li>");
+                if (CurrentPageNumber <= 1)
+                    PrevObject.find("a").attr("disabled", "disabled");
+                PrevObject.attr("GridObjectID", this.id);
+                PagerULObject.append(PrevObject);
+                for (PageIndex = sIndex; PageIndex <= EIndex && PageIndex <= TotalPages; PageIndex++) {
+                    var PageObject = $("<li PageIndex='" + PageIndex + "'><a>" + PageIndex + "</a></li>");
+                    PageObject.attr("GridObjectID", this.id);
+                    if (CurrentPageNumber == PageIndex) {
+                        PageObject.css("font-weight", "bold");
+                        PageObject.css("text-decoration", "underline");
+                    }
+                    PagerULObject.append(PageObject);
+                }
+
+                var NextObject = $("<li>|</li><li PageIndex='" + (parseInt(CurrentPageNumber) + 1) + "'><a>Next</a></li><li>|</li>");
+                if (CurrentPageNumber >= TotalPages)
+                    NextObject.find("a").attr("disabled", "disabled");
+                NextObject.attr("GridObjectID", this.id);
+                PagerULObject.append(NextObject);
+                var LastObject = $("<li PageIndex='" + parseInt(TotalPages) + "'><a>Last</a></li>");
+                if (CurrentPageNumber >= TotalPages)
+                    LastObject.find("a").attr("disabled", "disabled");
+                LastObject.attr("GridObjectID", this.id);
+                PagerULObject.append(LastObject);
+                PagerULObject.find("a").css("cursor", "pointer");
+                PagerULObject.find("a").each(function () {
+                    this.onclick = function () {
+                        if ($(this).attr('disabled') == true)
+                            return;
+                        OnPageChange(pTableID, $(this).parent().attr("PageIndex"));
+                    }
+                });
+                pagerTD.append(PagerDivObject);
+                pagerTD.find(".pgntn").append($("<div class='pgntnRecDsply'>&nbsp;&nbsp;&nbsp;Record(s) <span class='global-txtBold'>" + parseInt(RecordNumberFrom) + " - " + parseInt(RecordNumberTo) + "</span> of <span class='global-txtBold'>" + tableobject.RecordsCount + "</span></div>"));
+            }
+        }
+
+        $("#" + pTableID).parents("table:eq(0)").find(".PagerRow").remove();
+        $("#" + pTableID).parents("table:eq(0)").append(pagerRow);
+
+    }
+
+}
+
+
+function CP_ChangePage(GridObjectID, pPageNumber){
+
+
+    var PageNumber = pPageNumber;
+
+    var GridObject = $('#' + GridObjectID);
+    $('#' + GridObject.attr("PagerTextID")).val(PageNumber);
+    __doPostBack($('#' + GridObject.attr("PagerTextID")).attr("name"), 'TextChanged');
+
+
+
+}
+
+var CustomPager = new clsCustomPager();
+    

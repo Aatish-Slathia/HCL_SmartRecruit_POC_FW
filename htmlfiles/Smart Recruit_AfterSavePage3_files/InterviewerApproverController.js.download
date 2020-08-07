@@ -1,0 +1,178 @@
+﻿var _ReqObjects = {
+    LoginUserID: "", projectCode: "", RequisitionsourceID: "", EntityID: "", ReferBackFrom: "", CustomerCode: "", IsCAS: "", IsERS: "", IsSOT: "", IsSalesLobuser: "",
+    IsSalesAccess: "", IsCampus: "", CampusProgram: "", CompanyCode: "", JoiningL1Code: "", JoiningL4Code: "", ProjectL1: "", ProjectL4: "", InitiatorL1Code: "",
+    initiatorL4Code: "", EmployeeGroup: "", JobId: "", BandId: "", SubBandId: "", CountryCode: "", PSACode: "", PRFID: ""
+    ,Initiator:"", GraID:""
+}
+//function findIndexInData(data, property, value) {
+//    var result = -1;
+//    data.some(function (item, i) {
+//        if (item[property] === value) {
+//            result = i;
+//            return true;
+//        }
+//    });
+//    return result;
+//}
+//var mainApp = angular.module("mainApp", ["ngRoute"]);
+//mainApp.controller('InterviewerApproverController', ['$scope', '$http', '$interval', function ($scope, $http, $interval) {
+////var projlist = [];
+var mainApp = angular.module("mainApp", ["ngRoute","myAppHeader"]);
+mainApp.controller('InterviewerApproverController', function ($scope, $http, $interval) {
+
+    $interval(function () {
+        //$('.selectpicker').selectpicker('refresh');
+        $('.input-field input').each(function () {
+            var value = $(this).val().length;
+            if (value > 0) {
+                $(this).parents('.input-field').addClass('focused');
+            }
+        });
+        
+    }, 1000);
+
+    $scope.InterviewerModel = function () {
+         debugger;
+            $scope.model = InterviewerApproverData;//null;
+            $scope.BillingStartDateID = $scope.model.BillingStartDate;
+            $scope.OnBoardingDate = $scope.model.OnBoardingDate;
+            $scope.ValidTillDate = $scope.model.ValidTillDate;
+            $scope.interviewerid1TP1 = $scope.model.interviewerid1TP1;
+            $scope.interviewerid2TP1 = $scope.model.interviewerid2TP1;
+            $scope.interviewerid1TP2 = $scope.model.interviewerid1TP2;
+            $scope.interviewerid2TP2 = $scope.model.interviewerid2TP2;
+            _ReqObjects.LoginUserID = $scope.model.Initiator;
+            $scope.GraID = $scope.model.GraID;
+			$scope.ReportingManagerID = $scope.model.ReportingManagerID
+			if ($scope.ReportingManagerID == null || $scope.ReportingManagerID== "") {
+				$scope.GetRM();
+			}
+			else {
+				var isCampus = $("#hdnIsCampus").val();
+				//var programCode = $("#hdnProgramCode").val();
+				var mapRM = $scope.model.IsRMMappingExists;
+				if (isCampus.toUpperCase() == "TRUE" && mapRM == true) {
+					$("#ReportingManagerID").prop('disabled', true);
+				}
+			}
+            var x = 0;
+            if (InterviewerApproverData.PRFID != 0) {
+                if ($scope.model.SR_Approver.length == 1) {
+                    $scope.Approver1 = $scope.model.SR_Approver[0]._ApproverName;
+                }
+                else if ($scope.model.SR_Approver.length == 2) {
+                    $scope.Approver1 = $scope.model.SR_Approver[0]._ApproverName;
+                    $scope.Approver2 = $scope.model.SR_Approver[1]._ApproverName;
+                }
+                else {
+                    $scope.Approver1 = $scope.model.SR_Approver[0]._ApproverName;
+                    $scope.Approver2 = $scope.model.SR_Approver[1]._ApproverName;
+                    $scope.Approver3 = $scope.model.SR_Approver[2]._ApproverName;
+                    //changes by Ankit for Bserv
+                    $scope.Approver4 = $scope.model.SR_Approver[3]._ApproverName;
+                    //end
+                }
+            }
+        }
+   // var _url = ServiceApiUrl+"/api/Fulfillment/";
+    var _url = GetWayUrl;//Added By Ankit
+    //var _url = "http://localhost:30346/api/Fulfillment/"
+    $scope.GetBillType = function () {
+        $http({
+            url: _url + "Billtype",
+            method: 'GET'
+        }).success(function (data) {
+            $scope.BillingTypeList = data;
+            var index = findIndexInData($scope.BillingTypeList, "Value", "" + $scope.model.BillingTypeID + "");
+            $scope.BillingTypeID = data[index];
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+    //$scope.GetCategory = function () {
+    //    $http({
+    //        url: _url + "GetCategory",
+    //        method: 'GET'
+    //    }).success(function (data) {
+    //        $scope.DemandCategorylist = data;
+    //        var index = findIndexInData($scope.DemandCategorylist, "Value", "" + $scope.model.Category + "");
+    //        $scope.DemandCategory = data[index];
+    //    }).error(function (data, status) {
+    //        console.error('Error:', status, data);
+    //    });
+    //}
+    $scope.GetDemandProbability = function () {
+        $http({
+            url: _url + "GetDemandProbability",
+            method: 'GET'
+        }).success(function (data) {
+            $scope.DemandProbabilitylist = data;
+            var index = findIndexInData($scope.DemandProbabilitylist, "Value", "" + $scope.model.Category + "");
+            $scope.DemandProbabilityModel = data[index];
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+    $scope.GetRM = function () {
+        $http({
+            url: _url + "ReportingManager",
+            method: 'GET',
+            params: { _LoginEmpCode: _ReqObjects.LoginUserID}
+        }).success(function (data) {
+            var data = data;//Added By ankit
+            data = data.replace(/"/g, "");//Added By ankit
+            $scope.ReportingManagerID = (data);
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+    $scope.GetBSDReason = function () {
+        $http({
+            url: _url + "BSDReason",
+            method: 'GET'
+        }).success(function (data) {
+            $scope.BSDReasonList = data;
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.LoadStep3 = function () {
+        $('.step2').hide();
+        $('.step3').fadeIn().removeClass('hide');
+        $('.formSteps li').removeClass('active');
+
+        $('.stp1').addClass('prevSt');
+        $('.stp2').addClass('prevSt');
+
+        $('.stp1 a').html('<i class="icon-check"></i>');
+        $('.stp2 a').html('<i class="icon-check"></i>');
+        $('.stp3').addClass('active');
+
+        $(this).hide();
+        $('.next1Btn').hide().addClass('hide');
+        $('.next2Btn').hide().addClass('hide');
+        $('.prev1Btn').removeAttr("disabled").show().removeClass('hide');
+    }
+});
+
+mainApp.directive("repeatOptionsEnd", function ($parse, $timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            var ngModel = $parse(attrs.ngModel);
+            var selectSourceArray = attrs.ngOptions.split(' ');
+            var regex = /List/;
+            var resultArray = $.grep(selectSourceArray, function (item) {
+                return regex.test(item);
+            });
+            var selectSource = jQuery.trim(resultArray[0]);
+            var scopeCollection = $parse(selectSource);
+            scope.$watchCollection(scopeCollection, function (newVal) {
+                $timeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 400);
+            });
+        }
+    };
+});

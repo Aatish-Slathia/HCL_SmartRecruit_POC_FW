@@ -1,0 +1,65 @@
+﻿
+$(function () {
+    var remove = new RegExp(/^.*\//);
+    actionurl = remove.exec(window.location.href.split("?")[0]);
+    SearchJob(actionurl);
+    $('.updatejob').click(function () {
+        var jobtext = $('.jobList li.active').text();
+        $('.autocompleteJob').val(jobtext);
+        $('.jobDropdown .input-field').addClass('focused');
+        angular.element(document.getElementById('LeanViewDataController')).scope().JobCallBack(jobtext);
+        angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+    });
+    $('.removeJob').click(function () {
+        $('.jobFilter').css({ 'opacity': '1', 'pointer-events': 'auto' });
+    });
+});
+
+function SearchJob(actionurl) {
+    var L0Code = $("#hdnL0Code").val();
+    actionurl = actionurl + "/GetJob?L0Code=" + L0Code + "";
+
+    var JobList = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: actionurl + '&Job=' + '%QUERY',
+            wildcard: '%QUERY',
+        }
+    });
+    $("#txtJob").typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 2
+    }, {
+        name: "Job",
+        source: JobList,
+        limit: Infinity,
+        name: 'Text',
+        displayKey: 'Text',
+        
+    }).on('typeahead:selected', function (obj, datum) {
+        AddSearchJob(actionurl, datum.Text);
+        $('.removeJob').show();
+        $('.jobFilter').css({ 'opacity': '0', 'pointer-events': 'none' });
+    });
+    $("#txtJob").val('');
+}
+
+function AddSearchJob(actionurl, item)
+{
+    var test = '"' + item + '"';
+    var jobtext = "<li onclick='SelectJob("+test+")' id='" + item + "'><span class='leftJob'>" + item + "</span><i class='icon-check selectJobIcon'></i></li>";
+    $(".jobListUL").append(jobtext);
+    $("#txtJob").val('');
+}
+
+function SelectJob(item) {
+    $('.jobList li').removeClass('active');
+    var selectedid = '"' + item + '"';;
+    $("li[id=" + selectedid + "]").addClass('active');
+    $('.updatejob').removeAttr('disabled');
+    $('.jobDropdown label').addClass('active');
+    $('.updatejob').attr('data-dismiss', 'modal');
+}
+

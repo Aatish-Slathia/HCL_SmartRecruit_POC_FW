@@ -1,0 +1,1348 @@
+﻿// JScript File
+// function to perform validation for class object VJS_ValidatePageControls : Created by : Avinash
+
+
+
+function  CJS_clsGlobal()
+{
+    this.PageClientID="ctl00_CP1_";
+    this.PageURL=window.location.href;
+    this.PageStartIndex=this.PageURL.lastIndexOf("/")+1;
+    this.PageEndIndex=this.PageURL.indexOf(".aspx")+5;
+    this.PageName=this.PageURL.substring(this.PageStartIndex,this.PageEndIndex);
+   
+}
+var CJS_Global= new CJS_clsGlobal();
+
+//////////////////////////////////////////////////
+// Function to Get Any element of html page  // Created By : Avinash
+// this function return object of any control (HTML/ Server) 
+// in case of HTML Control this function use ObjectName as control name and in case of server control 
+// this function using CJS_PageClientID variable to get page Client ID 
+// funtion first serach control without page client id and then with page client ID
+// Changed History :  
+function CJS_Get(objectName)
+{
+try {
+
+    if ($get(objectName) == null) { return $get(CJS_Global.PageClientID + objectName); } else {
+        return $get(objectName);
+      
+     }
+        
+ 
+}
+catch(ex)
+{    
+       if(document.all(objectName) == null){ return document.all(CJS_Global.PageClientID + objectName);}else{return document.all(objectName);}
+        
+ 
+}    
+}  
+
+
+function VJS_ValidateCtrl(CtrlName,Caption,VClass,VType,MaxLength,CompareWith,FunctionName,pCompareWithCaption,pCustomMessage)
+{
+
+
+this.customeMessage=pCustomMessage;this.name=CtrlName;this.caption=Caption;this.vclass=VClass;this.vtype=VType;MaxLength=VJS_Common_GetValueOfUndifinedObject(MaxLength);if(MaxLength=="") MaxLength=0;if(CompareWith==null) CompareWith="";if(FunctionName==null)FunctionName=""; this.functionname=FunctionName;this.maxlength=MaxLength;this.CompareWith=CompareWith;this.CompareWithCaption = pCompareWithCaption ;this.Validate= function (){ return VJS_DoClassWiseValidation(this.name,this.caption,this.vclass,this.vtype,this.maxlength,this.CompareWith,this.functionname,this.CompareWithCaption,this.customeMessage);}}
+
+/// Class for Validation : Created by : Avinash 
+/// this class contains all methods for Validation .
+/// changed History
+function VJS_ValidatePageControls(){
+this.ArrCtrls= new Array();
+this.Add= function(CtrlName,Caption,ValidateClass,ValidateClassType,MaxLength,CompareWith,FunctionName,CompareWithCaption,CustomMessage)
+{
+
+
+var CtrlObj= new VJS_ValidateCtrl(CtrlName,Caption,ValidateClass,ValidateClassType,MaxLength,CompareWith,FunctionName,CompareWithCaption,CustomMessage);this.ArrCtrls[this.ArrCtrls.length]=CtrlObj;}
+this.DoValidate = function (AlertMessage) {
+
+    var iCounter;
+    for (iCounter = 0; iCounter < this.ArrCtrls.length; iCounter++) {
+        try {
+        
+       
+            if ($(CJS_Get(this.ArrCtrls[iCounter].name)).is(':hidden') || $(CJS_Get(this.ArrCtrls[iCounter].name)).attr('disabled') == true)
+                continue;
+
+
+            CJS_Get(this.ArrCtrls[iCounter].name).focus();
+            //alert('Found');
+        }
+        catch (e) {
+            //alert('Not Found');
+            continue;
+        }
+
+        if (!this.ArrCtrls[iCounter].Validate())
+            return false;
+        if (this.ArrCtrls[iCounter].functionname != "") {
+            if (!this.ArrCtrls[iCounter].functionname())
+                return false;
+        }
+
+
+    }
+
+    try {
+        this.AlertMessagelength = AlertMessage.length;
+        return VJS_Common_GetConfirmation(AlertMessage);
+    }
+    catch (ex) {
+        return VJS_Common_GetConfirmation();
+    }
+
+}
+        
+}
+// This is Actual Method called for each object of VJS_ValidatePageControls class  Created By : Avinash
+//
+
+
+function  VJS_DoClassWiseValidation(CtrlName,Caption,VClass,VType,MaxLength,pComparewith,pFunctionName,pCompareWithCaption,pCustomeMessage)
+{ 
+   
+   VClass=VClass.toUpperCase();
+   
+ 
+   
+   var ValidateObj;
+   if(VClass=="DATE")
+     ValidateObj=new VJS_DateValidations(CtrlName,Caption,VType,10,pComparewith,pCompareWithCaption,VClass,pCustomeMessage);
+   else if(VClass=="SELECT" || VClass.toUpperCase()=="TEXT")
+   ValidateObj=new VJS_TextValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage);
+   else if(VClass=="NUMBER")
+   ValidateObj=new VJS_NumberValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage);
+   else if(VClass=="WEB")
+   ValidateObj=new VJS_WebValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage);
+   else if(VClass=="PHONE")
+    ValidateObj=new VJS_PhoneValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage);
+
+  
+    return ValidateObj.DoValidation();
+    
+  
+}
+
+
+////////////////////////////text Validation  Class ///////////////////////////////////////////////////////////
+
+
+function VJS_TextValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,pClass,pCustomeMessage)
+{
+ 
+ if(pCustomeMessage==null)
+  this.customeMessage="";
+ else
+  this.customeMessage=pCustomeMessage;
+  this.VClass=pClass;
+  this.classname="TEXT";
+  this.obj= CJS_Get(CtrlName);
+
+
+    if(this.VClass=="SELECT")
+        this.messagetype=" select "; 
+    else 
+        this.messagetype=" enter ";
+     
+  
+  this.name=CtrlName;
+  this.value=CJS_Get(CtrlName).value.trim();
+  this.caption=Caption;
+  MaxLength=String(MaxLength);
+ 
+  if(MaxLength!="")
+  { if(MaxLength.indexOf("-")>0)
+     { 
+        this.minlength=MaxLength.substring(0,MaxLength.indexOf("-"));
+        this.maxlength=MaxLength.substring(MaxLength.indexOf("-")+1,MaxLength.length);
+     }
+    else
+     {this.maxlength=MaxLength;this.minlength=0;}
+  }
+  else
+  { this.maxlength=0; this.minlength=0;}
+  
+ 
+   
+  this.Comparewith=pComparewith;
+  this.CompareWithCaption=pCompareWithCaption;
+  this.IsValueExists=function(){if(this.ismendatory==true){if( (this.messagetype==" select " && this.value=="0") || ( this.value=="")) return this.ShowMendatoryAlert(); else return true;} else return true;} 
+  
+  this.ShowMendatoryAlert=function () { if(this.customeMessage.length>0) alert(this.customeMessage); else alert ("Please" + this.messagetype + this.caption); this.obj.focus(); return false;} 
+ 
+ 
+  if(VType.substring(VType.length-2)=="_M")
+    {this.ismendatory=true; VType=VType.substring(0,VType.length-2)} else this.ismendatory=false;
+  this.type=VType.toUpperCase(); 
+ 
+  this.DoValidation=function() {
+
+          if ($(this.obj).is(':hidden'))
+              return true;
+
+
+     if(this.ismendatory==true)
+       if(this.type!="WITHOTHEROPTION")
+         if(!this.IsValueExists())
+              return false;
+     if(this.type=="FROMTIME_TOTIME")
+     {
+       
+       if(!this.Validate_FROMTIME_TOTIME())
+        return false; 
+      
+     }
+     if(this.type=="ALL")
+     {
+       
+       if(!this.Validate_All())
+        return false; 
+      
+     }
+     else if(this.type=="ALPHABETONLY")
+     {
+       if(!this.Validate_ALPHABETONLY())
+        return false; 
+     
+     }
+     else if(this.type=="WITHINONE")
+     {
+       if(!this.Validate_WITHINONE())
+        return false; 
+     
+     }
+     else if(this.type=="WITHOTHEROPTION")
+     {
+         if(!this.Validate_WITHOTHEROPTION())
+        return false; 
+     }
+     
+     if(this.maxlength>0)
+     {
+        if(this.type!="WITHOTHEROPTION")
+         if(!VJS_Common_IsValid_MaxLength(this.obj,this.caption,this.maxlength,this.minlength))
+            return false;
+     }
+
+    
+     return true;
+     
+  }
+      
+  this.Validate_FROMTIME_TOTIME= function ()
+     {
+        
+        this.FromTime_HHObj=this.obj;
+        this.FromTime_MIObj=CJS_Get(this.name.replace("_HH","_MI"));
+        this.FromTime_AMObj=CJS_Get(this.name.replace("_HH","_AM"));
+        this.ToTime_HHObj=CJS_Get(this.Comparewith);
+        this.ToTime_MIObj=CJS_Get(this.ToTime_HHObj.id.replace("_HH","_MI"));
+        this.ToTime_AMObj=CJS_Get(this.ToTime_HHObj.id.replace("_HH","_AM"));
+       
+        if(this.FromTime_HHObj.selectedIndex!=0 && this.FromTime_MIObj.selectedIndex!=0 && this.ToTime_HHObj.selectedIndex!=0 && this.ToTime_MIObj.selectedIndex!=0)
+        {
+            if(this.FromTime_AMObj.selectedIndex==1 && this.ToTime_AMObj.selectedIndex==0 && parseInt(this.ToTime_HHObj.value)==12) ///PM- to AM
+                    this.ErrFalg="Y";
+            else if(this.FromTime_AMObj.selectedIndex==1 && this.ToTime_AMObj.selectedIndex==0) ///PM- to AM
+                    this.ErrFalg="Y"; 
+            else if(this.FromTime_AMObj.selectedIndex==this.ToTime_AMObj.selectedIndex) ///AM- to AM or PM to PM
+            {
+                if(this.FromTime_HHObj.selectedIndex>this.ToTime_HHObj.selectedIndex)
+                     this.ErrFalg="Y"; 
+                else if(this.FromTime_HHObj.selectedIndex==this.ToTime_HHObj.selectedIndex)      
+                {
+                    if(this.FromTime_MIObj.selectedIndex>=this.ToTime_MIObj.selectedIndex)
+                    this.ErrFalg="Y"; 
+                }
+                
+            }
+            else if(this.FromTime_HHObj.selectedIndex==this.ToTime_HHObj.selectedIndex)
+            {   if(this.FromTime_MIObj.selectedIndex>=this.ToTime_MIObj.selectedIndex)
+                    this.ErrFalg="Y"; 
+            }
+            else if(this.FromTime_AMObj.selectedIndex==0 && this.ToTime_AMObj.selectedIndex==1) ///AM- to PM
+            {
+                    this.ErrFalg="N"; 
+            }
+            return this.ShowFromTimeToTimeAlert();
+            
+        }
+        return true;
+       
+       
+   
+     }   
+       
+  this.ShowFromTimeToTimeAlert= function()
+  {
+    if(this.ErrFalg=="Y")
+    {   alert("'" + this.caption + "' should be less than '" + this.CompareWithCaption + "'");
+        this.FromTime_HHObj.focus();
+        return false;
+    }
+    else
+    return true;
+    
+  }     
+          
+  this.Validate_All= function () 
+    { 
+        
+        
+        if(!VJS_Text_IsValid_WhereNotExists(this.obj,"<>",this.caption))
+          return false;
+          
+        
+       
+        return true;  
+        
+    }
+  this.Validate_ALPHABETONLY=function ()
+  {
+     
+     if(!VJS_Text_IsValid_WhereExists(this.obj,"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",this.caption))
+      return false;
+      
+     return true;  
+  }     
+  
+  this.Validate_WITHINONE=function()
+  {
+    
+    var iCounter;
+    this.Comparewith= this.name + ';' + this.Comparewith ;
+    this.CompareWithCaption=this.caption + ';' +  this.CompareWithCaption;
+    this.ArrCompairWith = new Array();
+    this.ArrCompairWithCaption = new Array();
+    this.ArrCompairWith=this.Comparewith.split(";");
+    this.ArrCompairWithCaption=this.CompareWithCaption.split(";");
+ 
+   try
+   {
+    var CompairWithObj,CompareWithCaptions;
+    CompareWithCaptions='';
+    for(iCounter=0;iCounter<this.ArrCompairWith.length;iCounter++)
+    {
+        CompairWithObj=CJS_Get(this.ArrCompairWith[iCounter]);
+        if(CompairWithObj.value!="")
+            return true; 
+     
+        CompareWithCaptions=CompareWithCaptions + ' , ' + this.ArrCompairWithCaption[iCounter];
+        
+    }
+   
+    if(iCounter==this.ArrCompairWith.length)
+    {
+        if(CompareWithCaptions.indexOf(" ,")==0)
+            CompareWithCaptions=CompareWithCaptions.substring(2,CompareWithCaptions.length);
+        alert("Please enter any one of these values(" + CompareWithCaptions + ")" );
+        
+    }
+    }
+    catch(ex)
+    {
+    alert(ex);
+    return false;
+    }
+    
+    
+  }
+  this.Validate_WITHOTHEROPTION= function()
+  {
+     this.CompairWithObj=CJS_Get(this.Comparewith);
+     if(this.ismendatory==true)
+     {
+         
+         if(this.obj.selectedIndex<=0 && this.CompairWithObj.value.trim() =="")
+           {
+              alert('Select '  + this.caption + ' from Drop Down or Enter ' +  this.CompareWithCaption  +' ');
+              this.obj.focus();
+              return false;
+           }
+        else if(this.obj.selectedIndex>0 && this.CompairWithObj.disabled==false && this.CompairWithObj.value.trim() =="" )
+          {
+              alert('Please Enter ' +  this.CompareWithCaption  +' ');
+              this.CompairWithObj.focus();
+              return false;
+          }
+     
+     
+     } 
+   
+     this.CompairWithObj.value=this.CompairWithObj.value.trim();
+     if(this.CompairWithObj.disabled==false)
+     {
+          if(this.ismendatory==true && this.CompairWithObj.value.length>0)
+            if(!VJS_Common_IsValid_MaxLength(this.CompairWithObj,this.CompareWithCaption,this.maxlength,this.minlength))
+                  return false;
+     } 
+     
+     
+    
+     if(!VJS_Text_IsValid_WhereExists(this.CompairWithObj,"1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._()[]- ",this.CompareWithCaption))
+      return false;
+          
+     return true;
+        
+        
+  }
+ 
+}
+
+////////////////////////////End of text Validation  Class ///////////////////////////////////////////////////////////
+
+
+
+////////////////////////////DATE Validation  Class ///////////////////////////////////////////////////////////
+
+
+function VJS_DateValidations(CtrlName,Caption,VType,MaxLength,pCompareWith,pCompareWithCaption,VClass,pCustomeMessage)
+{
+  
+  if(pCustomeMessage==null)
+   this.customeMessage="";
+  else
+   this.customeMessage=pCustomeMessage;
+  
+  this.DateSeprator="/";
+  this.MinYearValue="2000";
+  this.MaxYearValue="2099";
+  this.compareWith=pCompareWith;
+  this.classname="DATE";
+  this.obj= CJS_Get(CtrlName);
+  if(this.obj.tagName.toUpperCase()=="SELECT") this.messagetype=" select "; else this.messagetype=" enter ";
+  this.name=CtrlName;
+  this.value=CJS_Get(CtrlName).value.trim();
+  this.caption=Caption;
+  this.compareWithCaption=pCompareWithCaption;
+  this.maxlength=MaxLength;
+  this.IsValueExists=function(){if(this.ismendatory==true){if (this.value=="") return this.ShowMendatoryAlert(); else return true;} else return true;} 
+  this.ShowMendatoryAlert=function () { if(this.customeMessage.length>0) alert(this.customeMessage); else alert ("Please" + this.messagetype + this.caption); this.obj.focus(); return false;} 
+ 
+  
+  if(VType.substring(VType.length-2)=="_M")
+    {this.ismendatory=true; VType=VType.substring(0,VType.length-2)} else this.ismendatory=false;
+  this.type=VType.toUpperCase(); 
+  
+  
+  this.DoValidation=function() {
+     
+          if ($(this.obj).is(':hidden'))
+              return true;
+
+  
+
+    
+     if(this.ismendatory==true)
+        if(!this.IsValueExists())
+              return false;
+    
+     if(this.value.length>0)
+        if(!this.IsValidDate())
+                return false;
+    
+    
+     if(this.type.indexOf("LESST")==0 || this.type.indexOf("GREATERT")==0)
+     {
+       
+         
+          if(this.value.length>0)
+          {
+               if(this.compareWith=="")
+               {
+                    this.CWithDate=new Date();
+                    this.CWithDate=new Date(this.CWithDate.getFullYear(),this.CWithDate.getMonth(),this.CWithDate.getDate());
+                    this.CWithDateText=this.CWithDate.getMonth() + this.DateSeprator +  this.CWithDate.getDate() +   this.DateSeprator  + this.CWithDate.getFullYear();
+                    this.CWithDate=Date.parse(this.CWithDate);
+                    this.compareWithCaption='Current date';  
+               }
+               else
+               {
+                   
+                    
+                    if(CJS_Get(this.compareWith)==null)
+                        {
+                           try
+                           {
+                            this.CWithDate=this.compareWith;
+                            this.isCheckWithCuurentDate="Y";
+                            this.CCurrentDateValue=new Date();
+                            this.CCurrentDateValue=new Date(this.CCurrentDateValue.getFullYear(),this.CCurrentDateValue.getMonth(),this.CCurrentDateValue.getDate());
+                            this.CCurrentDateValue=Date.parse(this.CCurrentDateValue);
+                            this.OpType="WithPassedValue";
+                            
+                            
+                            
+                           }
+                           catch(ex)
+                           {
+                            alert(ex);
+                           }
+                        }   
+                        
+                    else
+                    {
+                        this.CWithDate=CJS_Get(this.compareWith).value;
+                        this.CWithDateText=this.CWithDate;
+                        //alert(this.CWithDateText);
+                     }   
+                    if(this.CWithDate.length==0)
+                    {alert("please select " + pCompareWithCaption);return false;}  
+                    this.CWithDate=Date.parse(this.CWithDate);
+                    this.compareWithCaption=pCompareWithCaption; 
+               }
+               
+               
+               if(!this.Validate_CompareWith())
+                return false; 
+          
+        
+         }
+        
+     
+     }
+     
+     return true;
+     
+  }
+  this.IsValidDate= function()
+  { 
+   
+    
+    var dtStr;
+    dtStr=this.value;  
+	var daysInMonth = this.DaysArray();
+    this.errorMessage="Please enter a valid date for '" + this.caption + "'";
+	var pos1=dtStr.indexOf(this.DateSeprator)
+	var pos2=dtStr.indexOf(this.DateSeprator,pos1+1)
+	var strMonth=dtStr.substring(0,pos1)
+	var strDay=dtStr.substring(pos1+1,pos2)
+	var strYear=dtStr.substring(pos2+1)
+	strYr=strYear;
+	
+	if (strDay.charAt(0)=="0" && strDay.length>1) strDay=strDay.substring(1)
+	if (strMonth.charAt(0)=="0" && strMonth.length>1) strMonth=strMonth.substring(1)
+	for (var i = 1; i <= 3; i++) {
+		if (strYr.charAt(0)=="0" && strYr.length>1) strYr=strYr.substring(1)
+	}
+	month=parseInt(strMonth)
+	day=parseInt(strDay)
+	year=parseInt(strYr)
+	if (pos1==-1 || pos2==-1){
+		alert(this.errorMessage);
+		return false
+	}
+	
+	
+	if (strMonth.length<1 || month<1 || month>12){
+		alert(this.errorMessage);
+		return false
+	}
+	
+	if (strDay.length<1 || day<1 || day>31 || (month==2 && day>this.daysInFebruary(year)) || day > daysInMonth[month]){
+		alert(this.errorMessage);
+		return false
+	}
+	
+	
+	if (strYear.length != 4 || year==0 || year<this.MinYearValue || year>this.MaxYearValue){
+		alert(this.errorMessage);
+		return false
+	}
+
+//    if (dtStr.indexOf(dtCh,pos2+1)!=-1 || this.isInteger('1')==false){
+//    	alert(this.errorMessage);
+//  	    return false
+ //	}
+ 
+ 
+	return true
+   
+    
+   
+  }  
+    
+ 
+  this.Validate_CompareWith= function()
+  {
+ 
+   
+   this.DateValue=Date.parse(this.value);
+        
+   if(this.OpType==null)
+   { 
+        if(this.type.indexOf("LESSTHAN")==0)
+        {
+            this.OpType="<";        
+            if(this.type.indexOf("LESSTHANE2")=="0")
+                this.OpSubType=1;
+            else
+                this.OpSubType=0;
+        }
+        else if(this.type.indexOf("GREATERTHAN")==0)
+        {
+            this.OpType=">";        
+            if(this.type.indexOf("GREATERTHANE2")=="0")
+                this.OpSubType=1;
+            else
+                this.OpSubType=0;  
+            
+        }
+   }
+   
+    
+    if(this.OpType=="<")
+    {
+        if(this.DateValue>this.CWithDate && this.OpSubType==1)
+        {
+           alert(this.caption + ' can\'t be greater than ' +  this.compareWithCaption + '(' + this.CWithDateText  + ')');
+           return false;
+        }
+        else if (this.DateValue>=this.CWithDate && this.OpSubType==0)
+        {
+           alert(this.caption + ' can\'t be greater than or equal to ' +  this.compareWithCaption + '(' + this.CWithDateText  + ')');
+           return false;
+        }
+        else
+         return true;
+    
+    }
+    else if(this.OpType==">")
+    {
+       if(this.DateValue<this.CWithDate && this.OpSubType==1)
+        {
+           alert(this.caption + ' can\'t be less than ' +  this.compareWithCaption + '(' + this.CWithDateText  + ')');
+           return false;
+        }
+        else if (this.DateValue<=this.CWithDate && this.OpSubType==0)
+        {
+           alert(this.caption + ' can\'t be less than or equal to ' +  this.compareWithCaption + '(' + this.CWithDateText  + ')');
+           return false;
+        }
+        else
+         return true;
+    
+    }
+    else if(this.OpType=="WithPassedValue")
+    {
+        
+        if(this.DateValue<this.CWithDate)
+        {
+           if(this.compareWithCaption.indexOf("CM")==0)
+               alert(this.caption + ' can\'t be less than ' + this.compareWithCaption.replace("CM_",""));
+           else     
+                alert(this.caption + ' can\'t be less than ' +  this.compareWithCaption + '(' + this.CWithDateText  + ')');
+           return false;
+        }
+        if(this.isCheckWithCuurentDate=="Y")
+        {
+            if(this.type.indexOf("LESSTHAN")==0)
+            {
+                if(this.DateValue>this.CCurrentDateValue)
+                {
+                
+                    if(this.compareWithCaption.indexOf("CM")==0)
+                        alert(this.caption + ' can\'t be greater than ' + this.compareWithCaption.replace("CM_",""));
+                    else  
+                        alert(this.caption + ' can\'t be greater than current date');
+                    return false;
+                }
+           }
+           else
+           { 
+            if(this.DateValue<this.CCurrentDateValue)
+            {
+            
+                if(this.compareWithCaption.indexOf("CM")==0)
+                    alert(this.caption + ' can\'t be less than ' + this.compareWithCaption.replace("CM_",""));
+                else  
+                    alert(this.caption + ' can\'t be less than current date');
+                return false;
+            }
+           }
+             
+            
+        }
+        
+    }
+   
+    return true;
+    
+} 
+  
+ 
+  
+  this.DaysArray=function() {
+	for (var i = 1; i <= 12; i++) {
+		this[i] = 31
+		if (i==4 || i==6 || i==9 || i==11) {this[i] = 30}
+		if (i==2) {this[i] = 29}
+   } 
+   return this
+}
+
+//this.DaysArray=function(n) {for (var i = 1; i <= n; i++) {this[i] = 31; if (i==4 || i==6 || i==9 || i==11) {this[i] = 30;}
+//if (i==2) {this[i] = 29;}} 
+//return this;
+//}
+
+this.isInteger= function(s){
+	alert('in isint');var i; for (i = 0; i < s.length; i++){   var c = s.charAt(i);if (((c < "0") || (c > "9"))) return false;}
+    return true;
+}
+
+this.stripCharsInBag=function(s, bag){
+	var i;
+    var returnString = "";
+    // Search through string's characters one by one.
+    // If character is not in bag, append to returnString.
+    for (i = 0; i < s.length; i++){   
+        var c = s.charAt(i);
+        if (bag.indexOf(c) == -1) returnString += c;
+    }
+    return returnString;
+}
+  
+     
+   this.daysInFebruary = function (year){
+	return (((year % 4 == 0) && ( (!(year % 100 == 0)) || (year % 400 == 0))) ? 29 : 28 );
+   }
+   
+ 
+}
+
+////////////////////////////End of text Validation  Class ///////////////////////////////////////////////////////////
+
+
+
+////////////////////////////Number Validation  Class ///////////////////////////////////////////////////////////
+
+function VJS_NumberValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage)
+{
+ 
+ 
+  if(pCustomeMessage==null)
+   this.customeMessage="";
+  else
+   this.customeMessage=pCustomeMessage;
+ 
+  this.VClass=VClass;
+  this.classname="NUMBER";
+  this.obj= CJS_Get(CtrlName);
+  this.messagetype=" enter ";
+  this.name=CtrlName;
+  this.caption=Caption;
+  MaxLength=String(MaxLength);
+  if(MaxLength!="")
+  { if(MaxLength.indexOf("-")>0)
+     { 
+        this.minlength=MaxLength.substring(0,MaxLength.indexOf("-"));
+        this.maxlength=MaxLength.substring(MaxLength.indexOf("-")+1,MaxLength.length);
+     }
+    else
+     {this.maxlength=MaxLength;this.minlength=0;}
+  }
+  else
+  { this.maxlength=0; this.minlength=0;}
+  
+  this.value=CJS_Get(CtrlName).value.trim();
+  this.IsValueExists=function(){if(this.ismendatory==true){if (this.value=="") return this.ShowMendatoryAlert(); else return true;} else return true;} 
+  this.IsValueZero=function(){if(this.isallowzero==true) return true; else {if (parseInt(this.value,10)==0) return this.ShowZeroAlert(); else return true;}} 
+  
+  this.ShowMendatoryAlert=function () { if(this.customeMessage.length>0) alert(this.customeMessage); else alert ("Please" + this.messagetype + this.caption); this.obj.focus(); return false;} 
+ 
+ 
+  this.ShowZeroAlert=function () { if(this.customeMessage.length>0) alert(this.customeMessage);  else alert ("'" + this.caption +"' can't be 0."); this.obj.focus(); return false;}  
+   
+  if(VType.substring(VType.length-2)=="_M")
+    {this.ismendatory=true; VType=VType.substring(0,VType.length-2)} else this.ismendatory=false;
+  this.type=VType.toUpperCase();
+  this.DoValidation=function()
+  {
+
+
+      if (CtrlName == "txtSfaOppurtunity") {
+
+          if ($(this.obj).is(':hidden'))
+              return true;
+
+
+      }
+  
+
+   if(this.ismendatory==true)
+    if(!this.IsValueExists())
+          return false;
+    
+   
+     if(this.type=="ALL")
+     {
+        if(!this.Validate_All())
+          return false;
+     }
+     else if(this.type=="NUMBERONLY")
+     {
+        this.isallowzero=true;
+        if(!this.Validate_NUMBERONLY())
+          return false;
+     }
+     else if(this.type=="DECIMALONLY")
+     {
+        this.isallowzero=true;
+        if(this.value.length>0)
+            if(!this.Validate_DECIMALONLY())
+                return false;
+     }
+     
+     else if(this.type=="NUMBER_WITHOUTZERO")
+     {
+        this.isallowzero=false;
+         if(this.value.length>0)
+            if(!this.Validate_NUMBERONLY())
+                return false;
+     }
+    
+     else if(this.type=="DECIMAL_WITHOUTZERO")
+     {
+        this.isallowzero=false;
+         if(this.value.length>0)
+            if(!this.Validate_DECIMALONLY())
+                return false;
+     }
+    
+     if(this.maxlength>0)
+     {
+         
+         if(this.value.length>0)
+            if(!VJS_Common_IsValid_MaxLength(this.obj,this.caption,this.maxlength,this.minlength))
+                return false;
+     }
+
+     return true;
+     
+     
+  }
+  this.Validate_All = function ()
+  { 
+     if(!VJS_Text_IsValid_WhereExists(this.obj,"1234567890.",this.caption))
+      return false;
+     
+     if(!VJS_Number_IsValidDecimal(this.obj,this.caption))
+      return false;
+     
+     if(!this.IsValueZero())
+       return false;
+     
+     return true;
+      
+  }
+  this.Validate_NUMBERONLY= function ()
+  {
+     
+     if(!VJS_Text_IsValid_WhereExists(this.obj,"1234567890",this.caption))
+      return false;
+      
+     if(!this.IsValueZero())
+       return false;
+     
+     return true; 
+  }
+  this.Validate_DECIMALONLY= function ()
+  {
+     
+     if(!VJS_Text_IsValid_WhereExists(this.obj,"1234567890.",this.caption))
+      return false;
+     
+     if(!VJS_Number_IsValidDecimal(this.obj,this.caption))
+      return false;
+      
+     if(!VJS_Number_IsValidDecimalWithPrecision(this.obj,this.caption,2))
+      return false;
+     
+     if(!this.IsValueZero())
+       return false;
+       
+       
+     return true; 
+  }
+  
+}
+
+////////////////////////////End of Number Validation  Class ///////////////////////////////////////////////////////////
+
+
+////////////////////////////Web Validation  Class ///////////////////////////////////////////////////////////
+
+function VJS_WebValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage)
+{
+  if(pCustomeMessage==null)
+   this.customeMessage="";
+  else
+  this.customeMessage=pCustomeMessage;
+  
+  
+  this.VClass=VClass;
+  this.classname="WEB";
+  this.obj= CJS_Get(CtrlName);
+  this.messagetype=" enter ";
+  this.name=CtrlName;
+  this.caption=Caption;
+   MaxLength=String(MaxLength);
+  if(MaxLength!="")
+  { if(MaxLength.indexOf("-")>0)
+     { 
+        this.minlength=MaxLength.substring(0,MaxLength.indexOf("-"));
+        this.maxlength=MaxLength.substring(MaxLength.indexOf("-")+1,MaxLength.length);
+     }
+    else
+     {this.maxlength=MaxLength;this.minlength=0;}
+  }
+  else
+  { this.maxlength=0; this.minlength=0;}
+  
+  
+  this.value=CJS_Get(CtrlName).value.trim();
+  this.IsValueExists=function(){if(this.ismendatory==true){if (this.value=="") return this.ShowMendatoryAlert(); else return true;} else return true;} 
+  
+  this.ShowMendatoryAlert=function () { if(this.customeMessage.length>0) alert(this.customeMessage); else alert ("Please" + this.messagetype + this.caption); this.obj.focus(); return false;} 
+  
+   
+  if(VType.substring(VType.length-2)=="_M")
+    {this.ismendatory=true; VType=VType.substring(0,VType.length-2)} else this.ismendatory=false;
+  this.type=VType.toUpperCase();
+  this.DoValidation=function()
+  {
+
+      
+          if ($(this.obj).is(':hidden'))
+              return true;
+
+
+
+   
+   if(this.ismendatory==true)
+    if(!this.IsValueExists())
+          return false;
+    
+    
+    
+     if(this.type=="EMAILID")
+     {  
+        
+        if(!this.Validate_EMAILID())
+          return false;
+     }
+     else if(this.type=="WEBSITE")
+     {
+       
+        if(!this.Validate_WEBSITE())
+          return false;
+     }
+     
+      if(this.maxlength>0)
+     {
+         
+         if(this.value.length>0)
+            if(!VJS_Common_IsValid_MaxLength(this.obj,this.caption,this.maxlength,this.minlength))
+                return false;
+     }
+     return true;
+     
+     
+  }
+  this.Validate_EMAILID = function ()
+  { 
+     if(!VJS_WEB_IsValidEmailID(this.obj,this.caption))
+      return false;
+     
+     return true;
+      
+  }
+  this.Validate_WEBSITE = function ()
+  { 
+     if(!VJS_WEB_IsValidWebSite(this.obj,this.caption))
+      return false;
+     
+     return true;
+      
+  }
+  
+}
+
+////////////////////////////End of Web Validation  Class ///////////////////////////////////////////////////////////
+
+
+////////////////////////////Phone Validation  Class ///////////////////////////////////////////////////////////
+
+function VJS_PhoneValidations(CtrlName,Caption,VType,MaxLength,pComparewith,pCompareWithCaption,VClass,pCustomeMessage)
+{
+  this.VClass=VClass;
+  if(pCustomeMessage==null)
+   this.customeMessage="";
+  else
+  this.customeMessage=pCustomeMessage;
+  
+  this.classname="PHONE";
+  this.obj= CJS_Get(CtrlName);
+  this.messagetype=" enter ";
+  this.name=CtrlName;
+  this.caption=Caption;
+  if(MaxLength=="")
+    MaxLength="30";
+  MaxLength=String(MaxLength);
+  
+  if(MaxLength!="")
+  { if(MaxLength.indexOf("-")>0)
+     { 
+        this.minlength=MaxLength.substring(0,MaxLength.indexOf("-"));
+        this.maxlength=MaxLength.substring(MaxLength.indexOf("-")+1,MaxLength.length);
+     }
+    else
+     {this.maxlength=MaxLength;this.minlength=0;}
+  }
+  else
+  { this.maxlength=0; this.minlength=0;}
+  
+ 
+ 
+   
+  this.value=CJS_Get(CtrlName).value.trim();
+  this.IsValueExists=function(){if(this.ismendatory==true){if (this.value=="") return this.ShowMendatoryAlert(); else return true;} else return true;} 
+  
+   this.ShowMendatoryAlert=function () { if(this.customeMessage.length>0) alert(this.customeMessage); else alert ("Please" + this.messagetype + this.caption); this.obj.focus(); return false;} 
+ 
+  
+  if(VType.substring(VType.length-2)=="_M")
+    {this.ismendatory=true; VType=VType.substring(0,VType.length-2)} else this.ismendatory=false;
+  this.type=VType.toUpperCase();
+  this.DoValidation=function()
+  {
+  
+      if(this.ismendatory==true)
+        if(!this.IsValueExists())
+          return false;
+    
+     if(this.type=="PHONE")
+     {
+       if(!this.Validation_PHONE())
+         return false;
+         
+     }
+     else if(this.type=="MOBILE")
+     {
+       if(this.value.length>0)
+        if(!this.Validation_MOBILE())
+            return false;
+     }
+     else if(this.type=="FAX")
+     {
+        if(this.value.length>0)
+            if(!this.Validation_FAX())
+                return false;
+     
+     }
+     else if(VType=="PINCODE")
+     {
+       if(this.value.length>0)
+        if(!this.Validation_PINCODE())
+             return false;
+     }
+     else if(VType=="EXTN")
+     {
+      
+       if(this.value.length>0)
+        if(!this.Validation_EXTN())
+             return false;
+     }
+     
+     if(this.maxlength>0)
+     {
+        
+         if(!VJS_Common_IsValid_MaxLength(this.obj,this.caption,this.maxlength,this.minlength))
+            return false;
+     }
+     
+    
+     
+     return true;
+     
+  }
+  this.Validation_PHONE= function () 
+  { 
+     
+     if(!VJS_Text_IsValid_WhereNotExists(this.obj,"<>'\"",this.caption))
+          return false;
+          
+     return true;
+       
+       
+  }
+
+  this.Validation_MOBILE= function () 
+  { 
+      if(!VJS_Text_IsValid_WhereNotExists(this.obj,"<>'\"|",this.caption))
+          return false;
+          
+       return true;
+     
+  }
+ this.Validation_FAX= function () 
+  { 
+      if(!VJS_Text_IsValid_WhereNotExists(this.obj,"<>'\"",this.caption))
+          return false;
+          
+       return true;
+     
+  }
+  this.Validation_PINCODE= function () 
+  { 
+      if(!VJS_Text_IsValid_WhereNotExists(this.obj,"<>'\"|",this.caption))
+          return false;
+     
+      return true;
+      
+       
+  }
+  this.Validation_EXTN= function () 
+  { 
+      if(!VJS_Text_IsValid_WhereNotExists(this.obj,"<>'\"",this.caption))
+          return false;
+          
+       return true;
+     
+  }
+  
+  
+}
+
+
+////////////////////////////// Common Methods for Text / Number or others ////////////////////////////
+
+function VJS_ShowErrorAlert(CtrlObj,ErrorMessage)
+{alert(ErrorMessage);CtrlObj.focus();return false;}
+
+function VJS_WEB_IsValidEmailID(CheckedForObj,Caption)
+{
+ var isValid;
+ 
+ str = CheckedForObj.value.trim();
+ if(str=="")
+     return true;
+     
+ if (str.length <8)    isValid= false;else if (str.indexOf('@') == -1)    isValid= false;
+ else if (str.indexOf('@') == 0)    isValid= false;else if (str.indexOf('@') == (str.length-1))    isValid= false;
+ else if (str.indexOf("@@") != -1)    isValid= false;else if (str.indexOf('@') != str.lastIndexOf('@'))    isValid= false;
+ else if (str.indexOf('.@') != -1)    isValid= false;else if (str.indexOf('@.') != -1)    isValid= false;
+ else if (str.indexOf(' ') != -1)    isValid= false;else if (str.indexOf('.') == -1)    isValid= false;
+ else if (str.indexOf('.') == 0)    isValid= false;else if (str.indexOf('.') == (str.length-1))    isValid= false;
+ else if (str.indexOf('..') != -1)    isValid= false;else if (str.indexOf('<') != -1) isValid= false;
+ else if (str.indexOf('>') != -1)    isValid= false;else if (str.indexOf('=') != -1)  isValid= false;
+ else if (str.indexOf('~') != -1)    isValid= false;else if (str.indexOf('^') != -1)  isValid= false;
+ else if (str.indexOf('%') != -1)    isValid= false;else if (str.indexOf('+') != -1)  isValid= false;
+ else if (str.indexOf('$') != -1)    isValid= false;else if (str.indexOf('#') != -1)  isValid= false;
+ else if (str.indexOf('!') != -1)    isValid= false;else if (str.indexOf('(') != -1)    isValid= false;
+ else if (str.indexOf(')') != -1)    isValid= false;else if (str.indexOf('\\') != -1)   isValid= false;
+ else if (str.indexOf('/') != -1)    isValid= false;else if (str.indexOf('\"') != -1)   isValid= false;
+ else if (str.indexOf('\'') != -1)   isValid= false;else if (str.indexOf('?') != -1)    isValid= false;
+ else if (str.indexOf(';') != -1)    isValid= false;else if (str.indexOf(',') != -1)    isValid= false;
+ else if (str.indexOf('\t') != -1)    isValid= false;else if (str.indexOf('*') != -1)    isValid= false;
+ else if (str.indexOf('|') != -1)    isValid= false;
+ if(isValid==false){alert("Invalid E-MailID for the field '" + Caption + "'");CheckedForObj.focus();return false;}
+ return true;   
+ 
+}
+
+ 
+function VJS_WEB_IsValidWebSite(WebSiteObject,Caption)
+{
+    var ValidStr,isValid=true;
+    ValidStr="_-.\/|() ";
+    WebSiteValue=WebSiteObject.value.trim();
+
+    if(WebSiteValue=="")
+     return true;
+   
+
+     for (Count=0; Count < ValidStr.length; Count++)
+        {
+                TempChar= ValidStr.charAt(Count);
+                  
+                if (WebSiteValue.charAt(0)==TempChar)
+                    { isValid=false;}
+                
+                if (WebSiteValue.charAt(WebSiteValue.length-1)==TempChar)
+                { isValid=false;}
+                
+                
+                
+        }
+    for (Count=0; Count < WebSiteValue.length; Count++)
+        {
+                TempChar= WebSiteValue.charAt(Count);
+                        if( Count<WebSiteValue.length-1)
+                         {
+                                if (TempChar=="." &&  WebSiteValue.charAt(Count+1)==".")
+                                {    isValid=false; break; }
+                        }
+                    
+        }
+    
+   
+    if (WebSiteValue.indexOf(".",0) == -1)
+    {
+              isValid=false;
+                
+    }
+    
+    if (WebSiteValue.indexOf(' ') != -1)    
+       {isValid=false;}
+       
+       
+    if(isValid==false)   
+        return VJS_ShowErrorAlert(WebSiteObject,"Invalid WebSite Address for the field '" + Caption + "'");
+            
+    return true;
+    
+}
+ 
+    
+
+function VJS_Number_IsValidDecimal(ObjforCheck,Caption)
+{
+    var DecimalCount=0,i=0;
+    var ValueforCheck=ObjforCheck.value.trim();
+    if(ValueforCheck.indexOf(".")>=0)
+    {
+        
+        for(i=0;i<ValueforCheck.length;i++){
+            TempChar= ValueforCheck.substring(i,i+1);
+                if(TempChar==".")
+                    DecimalCount++;
+                if(DecimalCount>1)
+                    {return VJS_ShowErrorAlert(ObjforCheck,"\Field '" + Caption + "' contains invalid decimal value");}
+        }
+        
+        
+    }
+    return true;
+}   
+
+function VJS_Number_IsValidDecimalWithPrecision(ObjforCheck,Caption,PrecisionValue)
+{   
+  var ValueforCheck=ObjforCheck.value.trim();
+   
+  if(!VJS_Number_IsValidDecimal(ObjforCheck,Caption))
+    return false;
+    
+  if(ValueforCheck.indexOf(".")>=0)
+  {
+    valueAfetrDecimal=ValueforCheck.substring(ValueforCheck.indexOf(".")+1);
+   
+    if(valueAfetrDecimal.length>parseInt(PrecisionValue))
+        {   
+            return VJS_ShowErrorAlert(ObjforCheck,"Please enter valid decimal value for '" + Caption + "' (Only 2 digits allow after decimal).");
+        }
+  }
+  return true;
+  
+}
+     
+          
+//Validate String for Specific String Set
+
+function VJS_Text_IsValid_WhereExists(FieldObject,RefString,Caption) 
+{
+
+this.obj=FieldObject;this.caption=Caption;this.ShowErrorAlert=function (Message) { alert(Message);this.obj.focus();return false; }
+InString=FieldObject.value;
+for (Count=0; Count < InString.length; Count++)
+{ TempChar= InString.substring (Count, Count+1);
+  if (RefString.indexOf (TempChar, 0)==-1) return this.ShowErrorAlert("\Field '" + this.caption + "' contains some invalid characters");
+}
+
+return true;
+}
+
+function VJS_Text_IsValid_WhereNotExists(FieldObject,RefString,Caption) 
+{
+this.obj=FieldObject;this.caption=Caption;this.ShowAlert=function (Message) { alert(Message);this.obj.focus();return false; }
+InString=FieldObject.value;
+for (Count=0; Count < InString.length; Count++)
+{ TempChar= InString.substring (Count, Count+1);
+  if (RefString.indexOf(TempChar,0)>=0) return this.ShowAlert("\Field '" + this.caption + "' contains some invalid characters");
+}
+return true;
+
+}
+function VJS_Common_IsValid_MaxLength(FieldObject,Caption,Length,MinLength) 
+{
+  var intMinLength;
+  if(VJS_Common_GetValueOfUndifinedObject(MinLength)=="")
+     intMinLength=0;
+  else
+     intMinLength=MinLength;
+  if(intMinLength>0)
+  {
+    if(FieldObject.value.length<MinLength || FieldObject.value.length>Length) 
+    {
+        if(MinLength==Length)
+        return VJS_ShowErrorAlert(FieldObject,"\Field '" + Caption + "' value must be " + Length + " characters long"); 
+        else
+        return VJS_ShowErrorAlert(FieldObject,"\Field '" + Caption + "' value must be in range of " + MinLength + "-" + Length + " characters"); 
+    }
+        
+    else return true;  
+  }
+  else
+  {      
+    if(FieldObject.value.length>Length) 
+       return VJS_ShowErrorAlert(FieldObject,"\Field '" + Caption + "' can't be greater than " + Length + " characters"); 
+    else return true;
+  }
+  
+  return true;
+  
+}
+function VJS_Common_GetValueOfUndifinedObject(ObjforCheck)
+{
+    try
+    {
+        if(ObjforCheck!="")
+            return ObjforCheck;
+    }
+    catch(ex)
+    {
+        return "";
+    }
+}
+//arrValidateControls.Add("txtName","Contact Name","Text_ALL|Text_ValidStr");
+//arrValidateControls.Add("txtPhone","Contact Name","Phone|Fax|PinCode|Mobile|Extn|");
+//arrValidateControls.Add("txtRevenue","Contact Name","Number_WithZeroValue|Number_WithoutZeroValue|Decimal_WithZeroValue|Decimal_WithoutZeroValue");
+//arrValidateControls.Add("txtDate","Contact Name","Date_ALL|Date_LessThenCDate|Date_GreaterThenCDate");
+//arrValidateControls.Add("txtMail","Contact Name","WEB_MailID|");
+
+
+function VJS_Common_GetConfirmation(){
+
+    if (VJS_Common_GetConfirmation.arguments.length > 0) {
+        if (VJS_Common_GetConfirmation.arguments[0] != "")
+            return confirm(VJS_Common_GetConfirmation.arguments[0]);
+        else
+            return true;
+    }
+    else {
+        if (CJS_Global.IsFinalValidation == 1)
+            return confirm("Are you sure you want to save this information ?");
+        else
+            return true;
+    }
+}
+
+
+
+
+
+ 

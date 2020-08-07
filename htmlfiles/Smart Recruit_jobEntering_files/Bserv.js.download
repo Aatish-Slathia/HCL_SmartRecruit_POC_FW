@@ -1,0 +1,245 @@
+﻿//=========================================================================================================================================================
+//    Version              Created  By              Created  On            Change Description
+//=========================================================================================================================================================
+//     v1.1               Ankit srivastava         12-Nov-2018            Resubmit Changes
+//=========================================================================================================================================================
+
+var oSR_BservDTO = { BservSourceID: "", SalaryScaleID: "", MaximumSalary: "", TypeOfRequirementID: "", AssesmentCriteriaID: "", AssesmentCriteriaDesc: "", AssesmentCriteriaThresholdLevel: "", AssesmentCriteriaCHK: "" }
+var oSR_AssessmentCriteriaDTO = [];
+var FlgChkAC = false;
+var re = new RegExp(/^.*\//);
+var Sourceurl = ""
+var _SR = "";
+var _ActiveID = "";
+var _PRFAJAX = { Text: "", Value: "", Selected: "" }
+var IsPreventDefault = false;
+
+$(function () {
+   
+    Sourceurl = re.exec(window.location.href.split("?")[0]);
+
+    var bandId = $("#hdnBandId").val();
+
+    ValidateBservSpecificForm();
+
+    //if (myApp.GetParameterValues("_SR") != null || myApp.GetParameterValues("_SR") != undefined) {
+    //    _SR = myApp.GetParameterValues("_SR");
+    //}
+    //if (myApp.GetParameterValues("_ActiveID") != null || myApp.GetParameterValues("_ActiveID") != undefined) {
+    //    _ActiveID = myApp.GetParameterValues("_ActiveID");
+    //}
+    //AdAstricToonlyoneControlonl("BservSourceID");
+    AdAstricToonlyoneControlonl("TypeOfRequirementID");
+    $('#tblInnerHeaderAssessmentCriteria').find('input[type=checkbox]').change(function () {
+        var _TextBox = this.id.replace("Chk", "Txt");
+        if ($(this).is(':checked')) {
+            $('#BservSpecificForm').bootstrapValidator('addField', _TextBox, {
+                validators: {
+                    notEmpty: {
+                        message: 'Cannot be blank.'
+                    }
+                }
+            });
+            $('#BservSpecificForm').bootstrapValidator('removeField', _TextBox);
+            $('#BservSpecificForm').bootstrapValidator('addField', _TextBox, {
+                validators: {
+                    notEmpty: {
+                        message: 'Cannot be blank.'
+                    }
+                }
+            });
+        }
+        else {
+            $('#BservSpecificForm').bootstrapValidator('addField', _TextBox, {
+                validators: {
+                    notEmpty: {
+                        message: 'Cannot be blank.'
+                    }
+                }
+            });
+            $('#BservSpecificForm').bootstrapValidator('removeField', _TextBox);
+        }
+    });
+
+    if (bandId == "E0") {
+
+        $('#BservSpecificForm').bootstrapValidator('addField', 'SalaryScaleID', {
+            validators: {
+                callback: {
+                    message: 'Salary Scale is mandatory for E0 Band.',
+                    callback: function (value, validator, $field) {
+                        var options = validator.getFieldElements('SalaryScaleID').val();
+
+                        if (options == "") {
+
+                            return { valid: false, message: 'Salary Scale is mandatory for E0 Band.' }
+                        }
+                        else { return true; }
+                    }
+                }
+            }
+
+        });
+
+    }
+    else if (bandId == "E1" ||
+        bandId == "E2" ||
+        bandId == "E3" ||
+        bandId == "E4" ||
+        bandId == "E5" ||
+        bandId == "E6") {
+        // Start : Suhasini Srivastava : SalaryScale
+        $("#SalaryScaleID").val("Null");
+        // END : Suhasini Srivastava : SalaryScale
+        $("#SalaryScaleID").prop("disabled", true)
+    }
+
+});
+
+function ValidateBservSpecificForm() {
+    $('#BservSpecificForm')
+        .bootstrapValidator({
+            framework: 'bootstrap',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                BservSourceID: {
+                    validators: {
+                        callback: {
+                            message: 'Please Select Bserv Source.',
+                            callback: function (value, validator, $field) {
+                                // Get the selected options
+                                var options = validator.getFieldElements('BservSourceID').val();
+                                return (options != null && options.length >= 1 && options != "--Select--");
+                            }
+                        }
+                    }
+                }
+                ,
+                TypeOfRequirementID: {
+                    validators: {
+                        callback: {
+                            message: 'Please Select TypeOf Requirement.',
+                            callback: function (value, validator, $field) {
+                                // Get the selected options
+                                var options = validator.getFieldElements('TypeOfRequirementID').val();
+                                return (options != null && options.length >= 1 && options != "--Select--");
+                            }
+                        }
+                    }
+
+                }
+            }
+        }).on('error.form.bv', function (e) {
+
+            //debugger;
+            e.preventDefault();
+            var IsErrorOnLoad = srApp.IsErrorOnPageLoad();
+            if (IsErrorOnLoad) {
+                srApp.ClearRebmitValues();
+            }
+
+        }).on('success.form.bv', function (e) {
+
+            var IsFromLastPage = $("#hdnIsFromLastPage").val();
+            if (IsFromLastPage == "True") {
+                srApp.ReversRebmitValues();
+            }
+            e.preventDefault();
+            if (!IsPreventDefault) {
+                saveprf_AssessmentCriteria();
+                IsPreventDefault = true;
+            }
+            if (!e.isDefaultPrevented()) {
+
+                // handle the invalid form...
+            } else {
+                // everything looks good!
+
+            }
+        });
+}
+
+function saveprf_AssessmentCriteria() {
+
+    var _IntCounter = 1;
+    var vAssessmentCriteriaID = "";
+    var vAssessmentCriteriaDesc = "";
+    var vPRFID = "";
+    var vThresholdLevel = "";
+    var FlgdataFound = false;
+    //var MaxCount=$('#HdnACNo').val();
+    $("#checkboxlist > tbody ").find('tr').each(function () {
+
+        if ($('#Chk_' + _IntCounter).is(":checked") == true) {
+            FlgdataFound = false;
+            $(this).find('td').each(function (i, data) {
+                //debugger;
+                vAssessmentCriteriaID = "";
+                vAssessmentCriteriaDesc = "";
+                vPRFID = "";
+                vThresholdLevel = "";
+                vThresholdLevel = $("#Txt_" + _IntCounter).val();
+                if (vThresholdLevel != "" && FlgdataFound == false) {
+                    vAssessmentCriteriaID = $('#Hdn_AssessmentCriteriaID_' + _IntCounter).val();
+                    FlgdataFound = true;
+                    oSR_AssessmentCriteriaDTO.push({ "AssessmentCriteriaID": vAssessmentCriteriaID, "AssessmentCriteriaDesc": vAssessmentCriteriaDesc, "PRFID": vPRFID, "ThresholdLevel": vThresholdLevel });
+                }
+            });
+        }
+        _IntCounter = _IntCounter + 1;
+
+    });
+   // oSR_BservDTO.BservSourceID = $("#BservSourceID :selected").val();
+    oSR_BservDTO.SalaryScaleID = $("#SalaryScaleID :selected").val();
+    oSR_BservDTO.MaximumSalary = $("#MaximumSalary").val();
+    oSR_BservDTO.TypeOfRequirementID = $("#TypeOfRequirementID :selected").val();
+    var _url = Sourceurl + "SaveSR_BservDTO"
+    $.ajax({
+        type: "POST",
+        url: _url,
+        //data: JSON.stringify({ oSR_SkillDetailsDTO: oSR_SkillDetailsDTO }),
+        data: JSON.stringify({ "oSR_BservDTO": oSR_BservDTO, "oSR_AssessmentCriteriaDTO": oSR_AssessmentCriteriaDTO }),
+        contentType: 'application/json; charset=utf-8',
+        beforeSend: function (msg) {
+            ///alert("Before --->" + msg)
+        },
+        success: function (msg) {
+
+            _ActiveID = Number(atob(decodeURIComponent(_ActiveID))) + 1;
+            window.location.href = "RaiseRequisitions?_ActiveID=" + btoa(_ActiveID) + "&_SR=" + _SR;
+
+        }, error: function (xhr, ajaxOptions, thrownError) {
+        }
+    });
+}
+
+//$(document).ready(function () {
+
+//    srApp.ValidatePageSubmit("#BservSpecificForm", "BservSpecific"); // NOTE : THIS STATEMENT SHOULD BE WRITTEN AT LAST
+
+//});
+
+function AdAstricToonlyoneControlonl(id) {
+    if (id != "") {
+        var $div = $("#" + id).closest('.form-group');
+        var _Html = $div.find("label").find("span").remove();
+        var clone = $div.find("label").clone();
+        $("span", clone).remove();
+        clone = clone.text().replace("*", "");
+        //(" <spna class='note'>*</spna>", "");
+        $div.find("label").html("");
+        $div.find("label").html(clone + " <span class='note'>*</span>");
+    }
+}
+
+$('#btnBservCancel').click(function () {
+    location.href = '../Home/DashBoard';
+});
+
+$('#btnBservReset').click(function () {
+    window.location.reload();
+});

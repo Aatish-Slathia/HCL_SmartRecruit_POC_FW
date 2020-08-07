@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='no-cache'>
+    <meta http-equiv='pragma' content='no-cache'>
+    <title>Smart Recruit - Ver3.0 (HTML5)</title>
+    <link href="/SR_New/Content/css?v=20190925" rel="stylesheet"/>
+
+    <script src="/SR_New/bundles/modernizr?v=20190925"></script>
+
+    <script src="/SR_New/bundles/jquery?v=20190925"></script>
+
+    <script src="/SR_New/bundles/bootstrap?v=20190925"></script>
+
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+        
+
+
+
+
+<div class="welcome">
+
+<ul class="tp-lvnav">
+            <li>Welcome GAUTAM KISHORE  [ 40170924 ]</li>
+            <li class="qu-lnks">
+                <a href="#">My Favorites</a>
+                <ul class="qu-lnks-data">
+                        <li><a href="https://wf5.myhcl.com/profilegen/home/midway.aspx">
+                                                                        Profile Generator </a></li>
+                        <li><a href="https://wf4.myhcl.com/Exitsystem_Revamp/Midway">
+                                                                        Exit Management System </a></li>
+                        <li><a href="https://wf30.myhcl.com/LMS/">
+                                                                        India LMS </a></li>
+                        <li><a href="https://wf4.myhcl.com/TSMS/">
+                                                                        iTime (Time Sheet Management System) </a></li>
+                        <li><a href="https://wf6.myhcl.com/ess/about.aspx">
+                                                                        My Profile (ESS) </a></li>
+                        <li><a href="https://wf30.myhcl.com/SmartRecruitTPG/Home/midway.aspx">
+                                                                        Smart Recruit </a></li>
+                        <li><a href="https://wf6.myhcl.com/AMS/login.aspx?p=myhcl">
+                                                                        Application Access Management </a></li>
+                        <li><a href="https://wf30.myhcl.com/SSDNT/Login/frmNTLogin.aspx">
+                                                                        Smart Service Desk (SSD) </a></li>
+                        <li><a href="https://wf5.myhcl.com/cashvoucherclaim/CVCS_MAINHOME.aspx">
+                                                                        Global Claims System </a></li>
+                        <li><a href="https://wf6.myhcl.com/Flexi/frmMyFlexiDeclarations.aspx">
+                                                                        My Flexi Declaration </a></li>
+                </ul>
+            </li>
+
+            <li class="qu-lnks">
+                <a href="#">Quick Links</a>
+                <ul class="qu-lnks-data">
+                        <li><a href="http://transportal.myhcl.com/transportal/TransportalLogin.aspx?Type=CAS">Cab Approval  </a></li>
+                        <li><a href="https://wf30.myhcl.com/DiversityPortal/Diversity_calender.html">Diversity Calendar  </a></li>
+                        <li><a href="https://wf5.myhcl.com/cashvoucherclaim/CVCS_MAINHOME.aspx">Global Claims System  </a></li>
+                        <li><a href="http://remedy.hcl.com">Remedy  </a></li>
+                        <li><a href="https://wf30.myhcl.com/SSDNT/Login/frmNTLogin.aspx">SSD  </a></li>
+                        <li><a href="https://Wf6.myhcl.com/tas/intermediatepage.aspx">My Travel (TAS)  </a></li>
+                        <li><a href="https://wf4.myhcl.com/TSMS/">iTIME  </a></li>
+                        <li><a href="https://www.myhcl.com/bprhome/webpages/MidWay.aspx?URL=https://touchpoint2.hcl-axon.com/TSMS/login.aspx?Source=H">iTIME Alt  </a></li>
+                        <li><a href="http://ask.hcl.com">Ask HCL-Enterprise Search  </a></li>
+                        <li><a href="http://www.hcl.in">HCL Enterprise  </a></li>
+                        <li><a href="http://www.hcltech.com">HCL Tech  </a></li>
+                </ul>
+            </li>
+            <li><a href="https://www.myhcl.com/">My HCL</a></li>
+				<li> <a href="/SR_New/Home/LogOut">Log Out</a></li>
+        </ul>
+        <input type="hidden" id="hdnLoginUserSapCodeName" value="GAUTAM KISHORE[40170924]"/>
+        <input type="hidden" id="hdnIsMsgShown" value="False"/>
+
+</div>
+<script type="text/javascript">
+    var SimplifyHRUrl = 'https://staging.myhcl.com/SimplifySR/';
+    var IsDeliveryUnit = 'True';
+</script>
+<div class="container blueThemeImage">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../Home/ManageRequisitions">
+            Smart Recruit
+            <span class="version">Ver 3.0</span>
+            <br>
+        </a>
+    </div>
+        <div class="collapse navbar-collapse navbar-ex1-collapse" >
+            <ul class="localNav navbar-right">
+                <li class="notMobile">Current Role: Initiator/Approver</li>
+                <li class="appHome"><a href="../Home/DashBoard">APP Home</a></li>
+                <li class="localNavDD">
+                    <a href="#" >Change Role</a><span class="caret"></span>
+                    <ul class="localNavData">
+
+                            <li><a href="../Home/DashBoard?contoller=Home40170924">INITIATOR/APPROVER  </a></li>
+                            <li><a href="https://staging.myhcl.com/SR_Kenexa/home/midway.aspx?SR_Role=2&amp;SR_Emp=40170924">INTERVIEWER  </a></li>
+                            <li><a href="https://staging.myhcl.com/SR_Kenexa/home/midway.aspx?SR_Role=6&amp;SR_Emp=40170924">Reports  </a></li>
+                            <li><a href="https://staging.myhcl.com/SR_Kenexa/home/midway.aspx?SR_Role=4&amp;SR_Emp=40170924">TAG Manager  </a></li>
+                            <li><a href="https://staging.myhcl.com/SR_Kenexa/home/midway.aspx?SR_Role=14&amp;SR_Emp=40170924">TPG Executive  </a></li>
+                            <li><a href="https://staging.myhcl.com/SR_Kenexa/home/midway.aspx?SR_Role=13&amp;SR_Emp=40170924">TPG Manager  </a></li>
+                    </ul>
+                </li>
+                <li class="appHome">
+
+                        <a href="http://wf6.myhcl.com/SmartRecruit/Home/MyRoles.aspx?UserId=g0Zpfrtpxn5vjXBqwqXdJQ==&RoleID=Iq3FhFJs9Z7PUJH1Edx8gg==&EmpName=u/NBFkTj93IEfxzq6jH7rw==&RoleName=Eld6mOuoPNR56Mdz54JA+Pz/Q28c7FnW65oECx9xsaU=&isDefaultRole=d58kbsBMh9PPtUcTuA80kg==">My Role(s)</a>
+                </li>
+                    
+                <li class="localNavDD disBlockImportant">
+                    <a href="#">Help</a><span class="caret"></span>
+                    <ul class="localNavData">
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/Document/Overview.doc">Overview</a></li>
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/FAQ/FAQ.htm" target="_blank">FAQ's</a></li>
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/Document/SmartRecruit%202.0.pptx">PPT</a></li>
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/Document/Business%20Process%20Document%20-%20SR.DOCX">USER Manual</a></li>
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/Document/Release%20Notes.docx">Release Notes</a></li>
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/Document/Glossary.docx">Glossary</a></li>
+                        <li><a href="http://wf13.myhcl.com/sites/MyHCL/bprconnect/syspages/e-learning.htm">Voice Over</a></li>
+                        <li><a href="https://wf6.myhcl.com/SmartRecruit/Document/iTapEdgeBrochure.pdf">iTap-Edge</a></li>
+                    </ul>
+
+                </li>
+              
+            </ul>
+            <ul class="nav navbar-nav navbar-right" id="cusNav">
+                <li id="fat-menu" class="dropdown active">
+                    <a href="index.html" class="dropdown-toggle" data-toggle="dropdown">Initiator Actions<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                         
+                            <li> <a href="https://staging.myhcl.com/SimplifySR/Login/LoginSR?_EmpCode=40170924">Create New Requisition</a></li>
+                                          
+                        <li> <a href="../Home/CopyLobManageRequisitions?IsFromCopyLob=C">Copy Lob Requisitions</a></li>
+                        <li> <a href="../Home/ManageRequisitions">Manage Requisitions</a></li>
+                        <li> <a href="../Delegation/ShowApproverDelegation">Manage Delegation</a></li>
+                        <li> <a href="../Home/ManageOnBehalfRequisitions?OnBehalfOf=Y">Requisitions Raised On-behalf</a></li>
+                </ul>
+                </li>
+                <li id="fat-menu" class="dropdown active">
+                    <a href="index.html" class="dropdown-toggle" data-toggle="dropdown">Approver Actions<span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li> <a href="../Home/ManageApproverng">My Approvals</a></li>
+                        <li> <a href="../Home/ManageApprovedRequisition">Approved by me</a></li>
+                        <li> <a href="../Home/ManageSRTransferApprover">Accept transfer SR</a></li>
+                    </ul>
+                </li>
+
+                <li id="fat-menu" class="dropdown active">
+                    <a href="http://staging.myhcl.com/SimplifySR/Login/LoginSR?_EmpCode=40170924&qsupply=SupplySearch">Search Supply</a>
+                </li>
+            </ul>
+        </div>
+</div>
+<script src="/SR_New/Scripts/LocalNav.js?v=20190925"></script>
+
+
+
+
+
+
+    </nav>
+
+    <div class="container global_maincontent">
+
+        <style>
+            #ajaxSpinnerContainer {
+                height: 11px;
+            }
+
+            #ajaxSpinnerImage {
+                display: none;
+            }
+
+            .ajaxLoad {
+            }
+
+            #preloader {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #fefefe;
+                z-index: 99;
+                height: 100%;
+            }
+
+            #status {
+                width: 200px;
+                height: 200px;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                background-image: url(../images/AjaxtPageLoader.gif);
+                background-position: center;
+                background-repeat: no-repeat;
+                margin: -100px 0 0 -100px;
+            }
+
+
+            .loader {
+                position: fixed;
+                left: 0px;
+                top: 0px;
+                width: 100%;
+                height: 100%;
+                z-index: 9999;
+                background: url('../images/AjaxtPageLoader.gif') 50% 50% no-repeat rgb(249,249,249);
+            }
+        </style>
+        <div class="row" style="display:none">
+            <div class="col-sm-4">
+            </div>
+            <div class="col-sm-5">
+                <div id="ajaxSpinnerContainer">
+                    <img src="/SR_New/images/AjaxtPageLoader.gif" class="ajaxLoad" id="ajaxSpinnerImage" title="working...">
+                </div>
+            </div>
+            <div class="col-sm-3">
+            </div>
+        </div>
+        <div class="loader" id="divLoader"></div>
+        <script type="text/javascript">
+            $(window).load(function () {
+                $(".loader").fadeOut("slow");
+            })
+        </script>
+        
+<script type="text/javascript">
+    jQuery.ajaxSetup({
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        }
+    });
+</script>
+
+
+
+<h1 class="text-danger">Oops!</h1>
+<h2 class="text-danger">
+	Something went wrong while processing your last request. Possible causes for this unexpected behaviour
+	are  <span class="glyphicon glyphicon-hand-down"></span>
+</h2>
+<div class="col-lg-12">
+	<br />
+	<ul class="list-unstyled error">
+		<li> <span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;<span>There was an attempt to load a page from a bookmark.</span></li>
+		<li><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;<span>There was an attempt to load a page via the URL Address.</span></li>
+		<li><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;<span>There was an error initializing the session.</span></li>
+		<li><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;<span>The page required a cookie that was not accepted or blocked.</span></li>
+		<li><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;<span>The current Session has been expired..</span></li>
+		<li><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;<span>The application is supported with <u>Internet Explorer</u> 9.0 or above. </span></li>
+	</ul>
+</div>
+	<h2>Please <a href="https://wf6.myhcl.com/SmartRecruit/Home/Midway.aspx" title="SmartRecruit">Re-login</a> and try again. If the issue persists kindly raise a SSD Ticket, technical team will look into this with the utmost urgency.</h2>
+<script src="/SR_New/Scripts/Local/OverlayClose.js"></script>
+
+    </div>
+    <div id="divBackground" style="position: fixed; z-index: 999; height: 100%; width: 100%;
+        top: 0; left:0; background-color: Black; filter: alpha(opacity=20); opacity: 0.6; -moz-opacity: 0.8;display:none;" onclick="focusPopup()">
+    </div>
+    <footer class="hm_footer">
+        <span>This application is best viewed on Microsoft Internet Explorer 9 and above</span>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+﻿//=========================================================================================================================================================
+//    Version             Modified By          Modified On             Change Description
+//=========================================================================================================================================================
+//     v1.0               Arvind Kumar         13-Apr-2016             Added new fields
+//=========================================================================================================================================================
+
+var re = new RegExp(/^.*\//);
+var Sourceurl = ""
+
+$(function () {
+    Sourceurl = re.exec(window.location.href)
+    $('div.accordion-body').on('shown', function () {
+        $(this).parent("div").find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-up");
+
+    });
+
+    $('div.accordion-body').on('hidden', function () {
+        $(this).parent("div").find(".icon-chevron-up").removeClass("icon-chevron-up").addClass("icon-chevron-down");
+    });
+    
+    if ($("#rbForecastYes").is(":checked"))
+    { $("#trForecastID").show(); }
+
+    if ($("#rbForecastNo").is(":checked"))
+    { $("#trForecastID").hide(); }
+    
+    $("#rbForecastYes").change(function () {
+        if ($(this).is(":checked")) {
+            $("#trForecastID").show();
+        }
+    });
+
+    $("#rbForecastNo").change(function () {
+        if ($(this).is(":checked")) {
+            $("#trForecastID").hide();
+        }
+    });
+
+    $('#collapseOne').collapse("hide");
+    $('#collapse2').collapse("hide");
+    $('#collapse3').collapse("hide");
+    $('#collapse4').collapse("hide");
+    $('#collapse5').collapse("hide");
+    $('#collapse6').collapse("hide");
+    $('#collapse7').collapse("hide");
+
+    $("#Forward").click(function (e) {
+        e.preventDefault();
+        $("#lnkForward").click();
+    });
+    $("#Released").click(function (e) {
+        e.preventDefault();
+        $("#lnkReleased").click();
+    });
+    $("#Shortlist").click(function (e) {
+        e.preventDefault();
+        $("#lnkShortlist").click();
+    });
+    $("#Rejected").click(function (e) {
+        e.preventDefault();
+        $("#lnkRejected").click();
+    });
+    $("#Blocked").click(function (e) {
+        e.preventDefault();
+        $("#lnkBlocked").click();
+    });
+    $("#Select").click(function (e) {
+        e.preventDefault();
+        $("#lnkSelect").click();
+    });
+    $("#ForcefulSel").click(function (e) {
+        e.preventDefault();
+        $("#lnkForceful").click();
+    });
+
+    $('#ExportToExcel').bind('click', function (e) { 
+        $('#tblForwarded').tableExport({ type: 'excel', escape: 'false' });
+    });
+
+    $("#div-Reason").hide();
+    $("#Action").change(function () {
+        $('#ViewRequestions').bootstrapValidator('addField', 'Reason', {
+            validators: {
+                callback: {
+                    message: 'Reason cannot be blank incase of Refferback and Close.',
+                    callback: function (value, validator, $field) {
+                        // Get the selected options
+                        var options = validator.getFieldElements('Reason').val();
+
+                        if (options == "--Select--")
+                            return false;
+                        else {
+                            return (options != null && options.length >= 1);
+                        }
+                    }
+                }
+
+            }
+        });
+
+        if ($("#Action").val() > 1) {
+            $("#div-Reason").show();
+            BindReason();
+            $('#ViewRequestions').bootstrapValidator('revalidateField', 'Reason')
+        }
+        else { $("#div-Reason").hide(); $('#ViewRequestions').bootstrapValidator('removeField', 'Reason'); }
+    })
+    
+    myApp.AddingAstricToFormControl();
+
+    CloseProgress();
+});
+
+function BindReason() {
+    var _url = Sourceurl + "GetRefferbackCloseReason"
+    $.ajax({
+        type: "GET",
+        url: _url,
+        async: false,
+
+        data: { _Flag: $("#Action").val() },       
+        success: function (msg) {
+            $("#Reason").html("");
+            var _options = "<option>--Select--</option>"
+            $.each(msg, function (index, data) {
+                _options += "<option value=" + data.Value + ">" + data.Text + "</option>";
+            })
+
+            $("#Reason").append(_options);
+
+        }, error: function (xhr, ajaxOptions, thrownError) {
+            alert(thrownError);
+        }
+    });
+}
+
+$(".btn-App").click(function (e) {
+
+    var hdnIsPartiallyFulfilled = $("#hdnIsPartiallyFulfilled").val();
+    var ActionID = $("#Action").val();
+    var hdnReqNo = $("#hdnREquisitionNo").val();
+    var hdnBrNo = $("#hdnKenexaReqId").val();
+    var PendingWith = $("#hdnPendingWith").val();
+    if (hdnIsPartiallyFulfilled == "1" && ActionID == "4")
+    {
+        e.preventDefault();
+        //alert("This Requisition is partially fulfilled you can not close the Requisition.");
+        var msg = 'This Requisition is partially fulfilled you can not close the Requisition.there is a profile attached in SR No [' + hdnReqNo + '] and BR No [' + hdnBrNo + '] connect with [' + PendingWith + '].'
+        alert(msg);
+        return false;
+    }
+});
+
+function ExportReport(type) {
+    var ReqID = $("#hdnReqID").val();
+    if (type != '') {
+        location.href = '../Home/ExportToExcelProfiles?Condition=' + type + '&PRFID=' + ReqID;
+    }
+}

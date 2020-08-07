@@ -1,0 +1,141 @@
+/* Custom CSS file for Cab Approval System */
+#local-appTopNav {	/* Application top navigation */
+	float: right;
+	clear:right;
+	text-align: right;
+	width: 292px;		 /* Req : adjust application top navigation width */
+	margin-right: 10px;  /* Margin from right */
+	padding-top:3px;	/* Adjust height */
+}
+#local-appInfo {		/* Specify application specific others information */
+	font-weight: bold;
+	color: #FFFFFF;
+	text-align: right;
+	padding-right:0px; 	/*adjust spacing between application top navigation and others info*/
+	padding-top:4px;
+	float:right;
+	clear:left;
+}
+#local-ver {  	/* Specify Version No. */
+	position:absolute;
+	font-weight:bold;
+	left:-80px; 	/* Adjust horizontal placement of version number */
+	top:45px;
+	width:233px;
+	height:15px;
+	z-index:1;
+	text-align:right;
+	color: #FFFFFF;
+} 
+#window {
+  position:absolute;
+  left:0;
+  top:0;
+  width:440px;
+  height:200px;
+  display:none;
+  z-index:9999;
+  padding:20px;
+}
+
+#mask {
+  position:absolute;
+  left:0;
+  top:0;
+  z-index:9000;
+  display:none;
+ background-color:black;
+ filter:alpha(opacity=20);
+ -moz-opacity:.80;
+ opacity:.80;
+}
+  
+#boxes .window {
+  position:absolute;
+  left:0;
+  top:0;
+  width:440px;
+  height:200px;
+  display:none;
+  z-index:9999;
+  padding:20px;
+}
+
+#boxes #dialog {
+  width:375px; 
+  height:203px;
+  padding:5px;
+  background-color:#ffffff;
+}
+.txtbox
+{
+	behavior: url( '/SSD/ClientScripts/textbox.htc' );
+	font-size: 10px;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+.Processing
+{
+	font-size:12px;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	color:Navy;
+	font-weight:bold;
+}
+.global-filterTbl TD table td {   /* For nested table inside filter table */
+       padding: 0 !important;
+}
+/*Added by manoj*/ 
+.ModalPopupBG
+{
+    background-color: #666699;
+    filter: alpha(opacity=50);
+    opacity: 0.7;
+}
+
+.MWPopup
+{
+    min-width:200px;
+    min-height:150px;
+    background:white;
+}
+/*----------*/
+
+#local-popupmaincontent { color: #000; background-color: #FFF; font-size:0.68em; height:100%;}
+
+/* ----------------------------------- Paging ----------------------------------- */
+.global-paging {
+	font-weight: bold;
+	color: #000;
+}
+.global-paging a:link, a:visited {
+	font-weight: normal;
+	color: #000;
+	text-decoration: underline;
+}
+.global-paging a:hover {
+	color: #000;
+	text-decoration: none;
+}
+
+#local-app{float:left; width:310px; height:70px;}
+#local-app h1 {color: #FFFFFF; font-weight: bold; font-size: 24px; padding: 15px 0 0 10px; }
+#local-app .version { color: #FFF; font-weight: bold; font-size: 12px; padding-left: 115px; }
+
+
+.CustomPager-PageNumberText
+{
+	display:none;
+}
+
+
+
+.pgntn {border-bottom: 1px solid #dbdbdb; border-right: 1px solid #dbdbdb;border-left: 1px solid #dbdbdb;overflow:hidden;height:18px;*height:20px; padding:2px; background:url(../images/bg.gif) repeat-x left -252px;}
+.pgntn .pgntnLftCntrl{float:left; text-align:left;}
+.pgntn .pgntnLftCntrl ul{margin:3px 0px 0px 0px; padding:0px; color:#000;}
+.pgntn .pgntnLftCntrl ul li{float:left; list-style:none; margin-right:5px;color:#000;}
+.pgntn .pgntnLftCntrl ul li a {margin-top:1px;*margin-top:2px;color:#000; text-decoration:none;} 
+.pgntn .pgntnLftCntrl ul li a:hover { text-decoration:underline;} 
+.pgntn .pgntnRecDsply{color:#000;margin:0px 0px 0px 0px; text-align:right; padding-top:2px;}
+.pgntn .pgntnRecCntrl{float:right;}
+.pgntn .pgntnRecCntrl ul li{float:left;list-style:none;margin-right:5px;}
+.pgntn .pgntnVertBal{margin-top:2px;}
+

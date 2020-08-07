@@ -1,0 +1,2594 @@
+﻿var _ObjLeanViewFormData = {
+    PRFID: 0,
+    Initiator: "",
+    ProjectCode: "",
+    ProjectName: "",
+    CustomerCode: "",
+    CustomerName: "",
+    ProjectL1: "",
+    ProjectL4: "",
+    DemandType: "",
+    ClientInterview: "",
+    RequisitionType: "",
+    RequisitionSourceID: "",
+    RequisitionSourceDemandID: "",
+    Skills: "",
+    JobId: "",
+    BandId: "",
+    SubBandId: "",
+    CountryID: "",
+	PersonalSubAreaID: "",
+	SecondaryPersonalSubAreaID: "",   //Start : Added by Neha Basetia CR00020307
+    CompanyID: "",
+    VacancyCount: "",
+    EmployeGroupID: "",
+    BufferSRNumber: "", //Added by Neha Basetia CR00019233
+    IsPositionExclusive: "",
+    SAPIDFofAttritionResource: "",
+    TPState: "",
+    TPSAPCODE: "",
+    AttritionRotationSapCode: "",
+    sfaAccountOppurtunity: "",
+    sfaOppurtunity: "",
+    sfaAccountOppurtunityid: "",
+    sfaOppurtunityId: "",
+    IsTPtoFTEResource: "",
+    CopiedPRF: 0,
+    BatchCode:"",
+    SR_InfraDTO: {
+        BUID: "",
+        DomainID: "",
+        SubDomainID: "",
+        FunctionID: "",
+        CustomerState: "",
+        TRatingID: "",
+        File: "",
+        JobDescFile: "",
+		ReleaseDate: "",
+		//Start : Added by Neha Basetia CR00020307
+		SecondaryBUID: "",
+		SecondaryDomainID: "",
+		SecondarySubDomainID: "",
+		SecondaryFunctionID: "",
+		SecondaryTRatingID: "",
+		//End : Added by Neha Basetia CR00020307
+    },
+    IsDeviationCompany: false,
+    IsDeviationCountry: false,
+    EMEmpSubgroup: "",
+    emSubBand: "",
+    ProsptivCustomerDetail: "",
+    OtherProject: "",
+    SR_BservDTO: {
+        SalaryScalID: "",
+        TypesOfRequirementID: "",
+        MaximumSalary: "",
+        AssesmentCriteriaID: "",
+        AssesmentCriteriaDesc: "",
+        AssesmentCriteriaThresholdLevel: "",
+        AssesmentCriteriaCHK: "",
+        Source: "" ,  // Added by Vinod
+        BulkHiringVoice: false
+    },
+    Language: "", // For C3i atma nand
+    LanguageGrade: "", // For C3i atma nand
+    SR_LanguageMap: {
+        LanguageID1: '0',
+        LanguageText1: '0',
+        LanguageGradeID1: '0',
+        LanguageGradeText1: '0',
+
+        LanguageID2: '0',
+        LanguageText2: '0',
+        LanguageGradeID2: '0',
+        LanguageGradeText2: '0',
+
+        LanguageID3: '0',
+        LanguageText3: '0',
+        LanguageGradeID3: '0',
+        LanguageGradeText3: '0'
+    },
+    ISCampus: false,
+    SR_CampusProgramId: "",
+    BatchYear: "",
+      ReferBackChanageDemandType: '0',
+    IsReferBackChgDemndType: '0'
+}
+//Added by Ankit
+var oSR_AssessmentCriteriaDTO = [];
+var FlgChkAC = false;
+var re = new RegExp(/^.*\//);
+var $reqSourceArray;
+var Sourceurl = "";
+var bandid11 = "";
+var DemandType = "";
+var ReqNo = "";
+var DuplicateStatus = "";
+
+function ABS() {
+
+    // get whatever value you want into a variable
+    bandid11 = $('#BandId').val();
+    BservValidation();
+    // and update the hidden input's value
+
+    //    })
+    //});
+}
+$(document).ready(function () {
+
+    // ShowDynmicallyLuanguage();
+    Sourceurl = re.exec(window.location.href.split("?")[0]);
+
+	//Start : Added by Neha Basetia CR00020307	
+	ValidateLeanRequisition();
+	var referbackreason = $("#hdnReferBackReasonCode").val();
+	var pRFRoleStatusActionID = $("#hdnSR_PRFRoleStatusActionID").val();
+	if (referbackreason == "64" && (pRFRoleStatusActionID == "17" || pRFRoleStatusActionID == "18" || pRFRoleStatusActionID == "19" || pRFRoleStatusActionID == "20")) {
+		$('#PersonalSubAreaID').prop("disabled", true);
+		$('#SecondaryPersonalSubAreaID').prop("disabled", true);
+	}
+	//End : Added by Neha Basetia CR00020307
+
+    var _Entity = $("#hdnEntity").val();
+    var bandId = $("#hdnBandId").val();
+    var _prfId = $("#hdnPRFID").val();
+    var isers = $("#hdnIsERS").val();
+    var referbackreason = $("#hdnReferBackReasonCode").val();
+    if (_prfId != "0") {
+        $('#FresherType').show();
+        if (isers == 1 && referbackreason == 52) {
+            $('#FresherType').hide();
+        }
+
+    }
+    if (_Entity == 2) {
+        $('#InfraSpecific').show();
+		InfraValidation();
+		//Start : Added by Neha Basetia CR00020307
+		if (referbackreason == "64" && (pRFRoleStatusActionID == "17" || pRFRoleStatusActionID == "18" || pRFRoleStatusActionID == "19" || pRFRoleStatusActionID == "20")) {
+
+			$('#BUID').prop("disabled", true);
+			$('#SecondaryBUID').prop("disabled", true);
+			$('#DomainID').prop("disabled", true);
+			$('#SecondaryDomainID').prop("disabled", true);
+			$('#SubDomainID').prop("disabled", true);
+			$('#SecondarySubDomainID').prop("disabled", true);
+			$('#TRatingID').prop("disabled", true);
+			$('#SecondaryTRatingID').prop("disabled", true);
+			$('#FunctionID').prop("disabled", true);
+			$('#SecondaryFunctionID').prop("disabled", true);
+		}
+		//End : Added by Neha Basetia CR00020307
+    }
+    //Added By Ankit For Bserv
+    if (_Entity == 3) {
+        var bulkhiringbserv = $("#hdnBulkHiringVoiceBserv").val();
+        var _prfId = $("#hdnPRFID").val();
+        if (_prfId != "0") {
+            if (bulkhiringbserv == "True") {
+                $("#bulk").prop('checked', true);
+                $('#BulkHiring').hide();
+            }
+        }
+
+        $('#BservSpecific').show();
+        BservValidation();
+
+        AdAstricToonlyoneControlonl("TypeOfRequirementID");
+        AdAstricToonlyoneControlonl("Source");
+        $('#tblInnerHeaderAssessmentCriteria').find('input[type=checkbox]').change(function () {
+            var _TextBox = this.id.replace("Chk", "Txt");
+            if ($(this).is(':checked')) {
+                $('#row').bootstrapValidator('addField', _TextBox, {
+                    validators: {
+                        notEmpty: {
+                            message: 'Cannot be blank.',
+                            return: false
+                        }
+                    }
+                });
+                $('#row').bootstrapValidator('removeField', _TextBox);
+                $('#row').bootstrapValidator('addField', _TextBox, {
+                    validators: {
+                        notEmpty: {
+                            message: 'Cannot be blank.',
+                            return: false
+                        }
+                    }
+                });
+            }
+            else {
+                $('#row').bootstrapValidator('addField', _TextBox, {
+                    validators: {
+                        notEmpty: {
+                            message: 'Cannot be blank.',
+                            return: false
+                        }
+                    }
+                });
+                $('#row').bootstrapValidator('removeField', _TextBox);
+            }
+        });
+    }
+    //END
+
+    $('input[name="dmnd1"]:radio').on("click", function (e) {
+
+        //var projectText = $('#autocompleteinput').val();
+        //var projectCode = ExtractValue(projectText);
+        $('.showonClInter input').removeAttr('disabled checked');
+
+        if ($(this).attr("id") == "sot") {
+            DemandType = "SOT";
+            $(".showonClInter #yes").prop('checked', true);
+            $('.showonClInter').hide().addClass('hide');
+        }
+        else if ($(this).attr("id") != "sot") {
+            DemandType = "NONSOT";
+            $('.showonClInter').show().removeClass('hide');
+            $(".showonClInter #no").prop('checked', true);
+        }
+    });
+
+    $('input[name="ques"]:radio').on("click", function (e) {
+        //$('.radioError input').removeAttr('disabled checked');
+        var IsCAS = $('#hdnIsCAS').val();
+
+        $('.showonClInter input').removeAttr('disabled checked');
+        if ($(this).attr("id") == "exc") {
+            console.log("postion exec");
+            DemandType = "NONSOT";
+
+            if (IsCAS != "1") {
+                $('.radioError').show();
+                $(".radioError #nosot").prop('checked', true);
+            }
+            //$(".radioError #sot").prop('disabled', true);
+            $('.showonClInter').show().removeClass('hide');
+        }
+        else if ($(this).attr("id") == "nonexc") {
+            console.log("postion non exec");
+			DemandType = "SOT";//Added by Rupesh CR00018206
+			$('#FreshersDiv').hide();
+			//Commented by Rupesh CR00018206
+            //$(".radioError #sot").prop('checked', true);
+            //$(".radioError #nosot").prop('disabled', true);
+            if (IsCAS != "1") {
+                $('.radioError').show();
+                $(".radioError #sot").prop('checked', true);
+            }
+            $('.showonClInter').hide().addClass('hide');
+        }
+        if (DemandType != "SOT" && $("#hdnPRFID").val() == 0) {
+            $(".showonClInter #no").prop('checked', true);
+        }
+        SetDemandType();
+        angular.element(document.getElementById('LeanViewDataController')).scope().GetRequisitiontypenSource();
+        angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+        //$('#LeanRequisition').bootstrapValidator('revalidateField', 'dmnd1');
+    });
+    //Added by Rupesh CR00018206
+    function SetDemandType() {
+        //$('input[name="dmnd1"]:radio').on("click", function (e) {
+        var projectText = $('#autocompleteinput').val();
+        var projectCode = ExtractValue(projectText);
+        $('.showonClInter input').removeAttr('disabled checked');
+
+        if (projectCode == "6863" && DemandType == "SOT") {
+            console.log("demand type sot");
+            $(".showonClInter #yes").prop('checked', true);
+            $('.showonClInter').hide().addClass('hide');
+        }
+        else if (projectCode == "6863" && DemandType != "SOT") {
+            console.log("demand type sot");
+            $('.showonClInter').show().removeClass('hide');
+        }
+        if (DemandType != "SOT" && $("#hdnPRFID").val() == 0) {
+            $(".showonClInter #no").prop('checked', true);
+        }
+    }
+    var dropdownElement = $("#empG").find("option[value='5']");
+    $('input[name="IsTPtoFTEResource"]:radio').on("click", function (e) {
+        var reqSourceValue = $("#RequisitionType").val();
+        if (reqSourceValue == "15" && $(this).attr("id") == "TPtoFTEConversionYes") {
+            $("#empG option[value='5']").remove();
+        }
+        else {
+            $('<option label="Contract" value="5">Contract</option>').insertAfter($('#empG').children().first());;
+        }
+        angular.element(document.getElementById('LeanViewDataController')).scope().GetCountry();
+        angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+    });
+
+    InitRequisitionTypeFields();
+
+    $('#SaveAsDraft').on('click', function (e) {
+        //debugger;
+        OpenProgressN();
+        var confirmMsg = "";
+        confirmMsg += "Are you sure you want to save the requisition?"
+        var _confrimResponse = confirm(confirmMsg);
+        //added by Ankit for Bserv
+        if (_Entity == 3) {
+            BservValidation();
+        }
+        //end
+
+        if (_confrimResponse == true) {
+            return true;
+        }
+        else {
+            setTimeout($.unblockUI, 100);
+            e.preventDefault();
+            $.unblockUI();
+            return false;
+        }
+
+    });
+
+
+    $("#AttritionRotationSapCode,#TPSAPCODE").click(function () {
+
+        $('#msgAttrRot,#msgTPRep').removeAttr("style").html('');
+        $('#msgAttrRot,#msgTPRep').hide();
+    });
+});
+
+function ValidateBservSpecificForm() {
+    $('#LeanRequisition')
+        .bootstrapValidator({
+            framework: 'bootstrap',
+            feedbackIcons: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                TypeOfRequirementID: {
+                    validators: {
+                        callback: {
+                            message: 'Please Select TypeOf Requirement.',
+                            callback: function (value, validator, $field) {
+                                // Get the selected options
+                                var options = validator.getFieldElements('TypeOfRequirementID').val();
+                                return (options != null && options.length >= 1 && options != "--Select--");
+                            }
+                        }
+                    }
+
+                }
+            }
+        })
+}
+
+function AdAstricToonlyoneControlonl(id) {
+    if (id != "") {
+        var $div = $("#" + id).closest('.form-group');
+        var _Html = $div.find("label").find("span").remove();
+        var clone = $div.find("label").clone();
+        $("span", clone).remove();
+        clone = clone.text().replace("*", "");
+        //(" <spna class='note'>*</spna>", "");
+        $div.find("label").html("");
+        $div.find("label").html(clone + " <span class='note'>*</span>");
+    }
+}//end Ankit
+function ShowHideProjectFields() {
+
+    DemandType = null;
+    if (DemandTypeModal != null && DemandTypeModal != "") {
+        DemandType = DemandTypeModal;
+        DemandTypeModal = null;
+    }
+    var OpportunityProject = $("#hdnOpportunityProject").val();
+    var ExistingProject = $("#hdnExistingProject").val();
+    var CustomerProject = $("#hdnCustomerProject").val();
+    var IsTnMProject = $("#hdnIsTnMProject").val();
+    var IsNonPartialFulfilled = $("#hdnSR_PRFRoleStatusActionID").val();
+    var InitiatorLobCat = $("#hdnLobCategory").val();
+    var IsCAS = $('#hdnIsCAS').val();
+    var IsDeleveryUnit = $("#hdnIsDeleveryUnit").val();
+    var _Entity = $("#hdnEntity").val();
+    var IsERS = $('#hdnIsERS').val();
+    var IsIBL = $('#hdnIsIBL').val();
+    var IsBRC = $('#hdnIsBRC').val(); // Done by Reshman Raza for the CR00019428
+    var IsTSSLobUser = $('#hdnIsTSSLobUser').val();
+
+    var project1 = $('#ProjectL4').text();
+
+    console.log(OpportunityProject);
+    console.log(ExistingProject);
+    console.log(CustomerProject);
+    console.log(IsTnMProject);
+    console.log(InitiatorLobCat);
+    //Start C3i By Atma nand
+    var project1Text = $('#ProjectL1').val();
+    if ($('#ProjectL1').val().indexOf('C3i') != -1) {
+        $('#div_Language').show();
+    }
+    else {
+        // $('#div_Language').hide();
+    }
+
+    // End C3i
+
+
+    var projectText = $('#autocompleteinput').val();
+    var projectCode = ExtractValue(projectText);
+
+    var projInitial = '';
+    if (typeof projectCode != 'undefined')
+        projInitial = projectCode.charAt(0);
+
+    if (IsERS == "True" && projectCode == "6863") {
+        $('.radioError').show();
+    }
+    else {
+        $('.radioError').hide();
+        $('.radioError input').attr('disabled', true);
+    }
+
+    if (CustomerProject == "true" && IsTnMProject=="true") {
+        $('.showonClInter').show().addClass('hide');
+        $('.radioQuestion').show().removeClass('hide');
+    }
+    else if (CustomerProject == "true" && IsTnMProject != "true") {
+        $('.showonClInter').show().removeClass('hide');
+        $('.radioQuestion').hide().addClass('hide');
+        //Commented by Rupesh CR00018206
+        //$('.radioError input').attr('disabled', true);
+        //$(".radioError #nosot").prop('checked', true);
+        DemandType = "NONSOT";//Added by Rupesh CR00018206
+    }
+    else if (IsCAS == "1" && (projInitial.toUpperCase() == "Y" || projectCode == "6863")  ) {
+        $('.radioQuestion').show().removeClass('hide');
+
+        //Commented by Rupesh CR00018206
+        //$('.radioError').removeClass('hide');
+
+		$('.showonClInter').removeClass('hide');
+    }
+    else if (IsBRC == "1" && projectCode == "6863") {
+        //alert("Show hide projects");
+        $('.showonProjectPL1L4').hide();
+        $('.showonOtherPL1L4').show();
+    }
+//ankit
+    else if (IsTSSLobUser == "1" && projectCode == "6863") {
+        $('.showonProjectPL1L4').hide();
+        $('.showonOtherPL1L4').show();
+    }
+    else if (IsIBL == "True" &&(projInitial.toUpperCase() == "Y" || projectCode == "6863")) {
+        $('.radioQuestion').show().removeClass('hide');
+        $('.showonClInter').removeClass('hide');
+    }//end
+	else if (IsERS == "True" && projectCode == "6863") {
+		$('.radioError input').attr('disabled', false);
+		if (DemandType == "SOT") {
+			$(".radioError #sot").prop('checked', true);
+			$(".showonClInter #yes").prop('checked', true);
+			$('.showonClInter').hide().addClass('hide');
+		}
+		else {
+			$(".radioError #nosot").prop('checked', true);
+			DemandType = "NONSOT";
+		}
+	}
+    else if (CustomerProject != "true" && projectCode != "6863") {
+        $('.showonClInter').show().removeClass('hide');
+        $('.radioQuestion').hide().addClass('hide');
+        //Commented by Rupesh CR00018206
+        //$('.radioError input').attr('disabled', true);
+        //$(".radioError #nosot").prop('checked', true);
+        DemandType = "NONSOT";
+    }
+    // added if other then dissable and nosot is active 
+    else if (projectCode == "6863" && InitiatorLobCat == "2") {
+        $('.showonClInter').show().removeClass('hide');
+        $('.radioQuestion').hide().addClass('hide');
+        //Commented by Rupesh CR00018206
+        //$('.radioError input').attr('disabled', true);
+        //$(".radioError #nosot").prop('checked', true);
+        DemandType = "NONSOT";
+    }
+    else if (projectCode == "6863" && _Entity == 2 && IsDeleveryUnit == "True") {
+        $('.showonClInter').show().removeClass('hide');
+        $('.radioQuestion').addClass('hide');
+        //Commented by Rupesh CR00018206
+        //$('.radioError input').attr('disabled', true);
+        //$(".radioError #nosot").prop('checked', true);
+        DemandType = "NONSOT";
+    }
+    else
+        $('.radioQuestion').hide().addClass('hide');
+    if (DemandType == "NONSOT" && $("#hdnPRFID").val() == 0) {
+        $(".showonClInter #no").prop('checked', true);
+    }
+    console.log("ShowHideProjectFields - 11");
+
+    angular.element($('#LeanViewDataController')).scope().GetRequisitiontypenSource();
+
+    //Commented by Rupesh CR00018206
+    //if (LeanViewData.DemandType != null && LeanViewData.DemandType !="")
+    //{
+    //var $radios = $('input:radio[name="dmnd1"]');
+    //$radios.filter('[value=' + LeanViewData.DemandType + ']').prop('checked', true);
+    //if (LeanViewData.DemandType == "SOT") {
+    //    $('.showonClInter').hide().addClass('hide');
+    //    $("#sot").trigger('click');
+    //    $(".radioError #nosot").prop('disabled', true);
+    //}
+    //else {
+    //    $("#nonsot").trigger('click');
+    //}
+
+    //}
+
+    if (IsNonPartialFulfilled == "17" || IsNonPartialFulfilled == "18" || IsNonPartialFulfilled == "19" || IsNonPartialFulfilled == "20") {
+        ShowHideNonPartialFields();
+    }
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'CustomerCode');
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ProjectL1');
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ProjectL4');
+    //Commented by Rupesh CR00018206
+    //$('#LeanRequisition').bootstrapValidator('revalidateField', 'dmnd1');
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ques');
+}
+
+function ShowHideNonPartialFields() {
+    if ($('#CustomerCode').val() != "707") {
+        $('#CustomerCode').attr("disabled", "disabled");
+    }
+    ////Start atma nand CR00019293
+    var ReferBackReasonCode = $("#hdnReferBackReasonCode").val();
+    var IStatusId = $("#hdnIStatusId").val();
+    var IRoleID = $("#hdnIRoleID").val();
+    if (ReferBackReasonCode == "62" && IStatusId == "1" && IRoleID == "1") {
+    }
+    else {
+        $('#autocompleteinput').attr("disabled", "disabled");
+        $('#Skills').attr("disabled", "disabled");
+    }
+    //End atma nand CR00019293
+    //$('#autocompleteinput').attr("disabled", "disabled");
+    $('.removeProject').attr("disabled", "disabled");
+	$('#NewRequisitionType').attr("disabled", "disabled");
+    $('#txtaddskill').attr("disabled", "disabled");
+    
+    $('#country').attr("disabled", "disabled");
+    var _Entity = $("#hdnEntity").val();
+    if (_Entity == 2) {
+        $('#BUID').attr("disabled", "disabled");
+        $('#DomainID').attr("disabled", "disabled");
+        $('#SubDomainID').attr("disabled", "disabled");
+        $('#NewRequisitionType').attr("disabled", "disabled");
+        $('#country').attr("disabled", "disabled");
+    }
+   // $('#BulkHiringVoice').attr("disabled", "disabled");
+    var _Entity = $("#hdnEntity").val();
+    var bulkhiringbserv = $("#hdnBulkHiringVoiceBserv").val();
+    if (_Entity == 3) {
+        if (bulkhiringbserv == "True") {
+            $("#bulk").prop('checked', true);
+            $('#bulk').attr("disabled", "disabled");
+        }
+        else { $('#BulkHiringVoice').show(); }
+    }
+    $('#BulkHiringVoice').hide();
+
+}
+
+function InitRequisitionTypeFields() {    
+    $reqSourceArray = ["2", "3", "15", "29", "13"];  //Buffer =13, added by Neha Basetia CR00019233
+   
+    $(".subInputTP").hide();
+    $(".subInput").hide();
+    $(".subInputSRNumber").hide();   //Added by Neha Basetia CR00019233
+    var reqSourceValue = $("#RequisitionType").val();
+
+    //if ((reqSourceValue == "15") && $("#hdnEntity").val() != "3") {//commented by ankit for enable bserv
+    if (reqSourceValue == "15") {
+        $(".subInputTP").show();
+    }
+
+    ProcessRequisitionsTypeFields();
+    myApp.GetEmployeeSapCodeName("TPSAPCODE", "TPSAPCODE", "TP", $('#autocompleteinput').val());
+
+    /*
+    if ($("#ProjectId").val() != "6863") {
+        $("#otherprojectField").hide();
+    }
+    else {
+        $("#otherprojectField").show();
+    }
+    */
+}
+
+//$("#RequisitionType").change(function () {
+//    RequisitionTypeChange();
+//});
+
+function RequisitionTypeChange() {
+    $(".subInputTP").hide();
+
+    $("#TPResourceToFTE").hide();
+    $('input:radio[name=IsTPtoFTEResource]').prop('checked', false);
+
+    $(".subInput").hide();
+    $(".subInputSRNumber").hide();   //Added by Neha Basetia CR00019233
+    $("#TPSAPCODE").val("");
+    $("#AttritionRotationSapCode").val("");
+    $("#TPState").val("");
+    //refresh
+    //if ($("#hdnPRFID").val() == 0) {
+    //    $("#Skills").val("");
+    //    angular.element(document.getElementById('LeanViewDataController')).scope().refreshreplacement(null);
+    //}
+    var _Entity = $("#hdnEntity").val();
+    var _reqTypeId = $("#RequisitionType").val();
+    var IsTSSLobUser = $('#hdnIsTSSLobUser').val();
+	if (_reqTypeId == 18 || _reqTypeId == 20) {
+		$('#FreshersDiv').show();
+		$('#FresherType').hide();
+	}
+	else {
+		$('#FreshersDiv').hide();
+		//$('#FresherType').show();
+		angular.element(document.getElementById('LeanViewDataController')).scope().GetEmployeeGroup();
+    }
+    //ankit
+    if ((_reqTypeId == 4 || _reqTypeId == 14) && _Entity === "3") {
+
+        $('#BulkHiringVoice').show();
+    }
+    else { $('#BulkHiringVoice').hide(); }//end
+    if (_Entity == 2) {
+        $.ajax({
+            type: "Get",
+            dataType: "json",
+            data: { 'RequisitionSourceID': _reqTypeId, 'Entity': _Entity },
+            url: SimplifyHRUrl + "/Requisition/GetRequisitionSourceDemandIDEF",
+            success: function (data) {
+                $('#hdn_RequisitionsSourceDemandEntityID').val(data)
+                if (data === 120) {
+                    $('#newposition').show();
+                    $('#CustomerStatedDiv').show();
+                    $('#ReleaseDateDiv').hide();
+                    $('#SubDomainEmpDiv').hide();
+                    Add_NewProjectExtension_Validation();
+                }
+                else if (data === 118 || data === 119) {
+                    $('#ReleaseDateDiv').show();
+                    $('#SubDomainEmpDiv').show();
+                    $('#newposition').hide();
+                    $('#CustomerStatedDiv').hide();
+
+                    Add_AttritionRotation_Validation();
+                }
+                else {
+                    $('#newposition').hide();
+                    $('#CustomerStatedDiv').hide();
+                    $('#ReleaseDateDiv').hide();
+                    $('#SubDomainEmpDiv').hide();
+                }
+            },
+            error: function (xhr, status, error) {
+                window.location.href = myApp.getErrorUrl();
+            }
+        })
+    }
+    angular.element(document.getElementById('LeanViewDataController')).scope().PsaCallBack(_reqTypeId);
+
+    console.log("Req Type : " + _reqTypeId);
+
+
+    //if ((_reqTypeId == 15 // TP REPLACEMENT 
+    // ) && _Entity != "3") { //commented by ankit for enable bserv
+    if (_reqTypeId == 15) // TP REPLACEMENT 
+    {
+        $(".subInput").hide();
+        $(".subInputTP").show();
+        $(".subInputSRNumber").hide();   //Added by Neha Basetia CR00019233
+    }// End TP REPLACEMENT
+
+    if ((_reqTypeId == 2 || _reqTypeId == 3 || _reqTypeId == 15 || _reqTypeId == 29 // Attrition/Rotation/TP Replacement
+    ) && (_Entity === "1" || _Entity === "2" || _Entity === "3")) {//Add _Entity=3 for bserv
+        $('#VacancyCount').val("1");
+        $("#VacancyCount").attr("readonly", "readonly");
+    }
+    else {
+        $('#VacancyCount').removeAttr('readonly');
+    }
+    ProcessRequisitionsTypeFields();
+
+    if (IsTSSLobUser == "1") {
+        if (_reqTypeId == 14 || _reqTypeId == 28)
+            $('#FresherType').hide();
+        else
+            $('#FresherType').show();
+    }
+}
+
+function ProcessRequisitionsTypeFields() {
+    //debugger;
+    var reqSource = $('#RequisitionType').val();
+    var indexReqSource = $.inArray(reqSource, $reqSourceArray) 
+
+    if (indexReqSource != -1) {
+
+        if (reqSource == "2" || reqSource == "3" || reqSource == "26") {//CR00011692" Added for Sales – Succession Plan Hire
+            $(".subInput").show();
+
+            $(".subInputTP").hide();
+            $(".subInputSRNumber").hide();    //Added by Neha Basetia CR00019233
+        }
+        //commented by Ankit for Bserv case
+        //else if ((reqSource == "TP Replacement" || reqSource == "Conversion to FTE") && $("#hdnEntity").val() != "3") {
+        //    $(".subInput").hide();
+
+        //    $(".subInputTP").show();           
+        //}
+        else if ((reqSource == "15" || reqSource == "29")) {
+            // else if ((reqSource == "TP Replacement") && $("#hdnEntity").val() != "3") { //commented by ankit for enable bserv
+            $(".subInput").hide();
+
+            $(".subInputTP").show();
+            $(".subInputSRNumber").hide();   //Added by Neha Basetia CR00019233
+        }
+        //Start : Added by Neha Basetia CR00019233
+        else if (reqSource == "13") {
+            $(".subInput").hide();
+            $(".subInputTP").hide();
+            $(".subInputSRNumber").show();
+        }
+            //End : Added by Neha Basetia CR00019233
+
+        else {
+            $(".subInput").hide(); $(".subInputTP").hide();
+            $(".subInputSRNumber").hide();  //Added by Neha Basetia CR00019233
+        }
+
+        if (reqSource == $reqSourceArray[1]) {
+            myApp.GetEmployeeSapCodeName("AttritionRotationSapCode", "AttritionRotationSapCode", "Attrition", $('#autocompleteinput').val());
+        }
+        else if ((reqSource == $reqSourceArray[2] || reqSource == $reqSourceArray[3]) && $('#autocompleteinput').val().length > 0) {
+            myApp.GetEmployeeSapCodeName("TPSAPCODE", "TPSAPCODE", "TP", $('#autocompleteinput').val());
+        }
+        else {
+            myApp.GetEmployeeSapCodeName("AttritionRotationSapCode", "AttritionRotationSapCode", "Rotation", $('#autocompleteinput').val());
+        }
+    }
+}
+
+function GetSFAAccountDetails(ControliD, ControlName) {
+    // var _url = ServiceApiUrl+"/api/Fulfillment/SFAAccount/";
+    var _url = GetWayUrl;//changes by ankit s
+    var sfaList = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('VCAccountName'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: _url + '?sfaAccountOppurtunity=' + '%QUERY',
+            wildcard: '%QUERY'
+        }
+    });
+    sfaList.initialize();
+    //$("#" + ControliD).typeahead('destroy');
+    $("#" + ControliD).typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+    }, {
+            name: ControlName,
+            source: sfaList.ttAdapter(),
+            limit: Infinity,
+            // This will be appended to "tt-dataset-" to form the class name of the suggestion menu.
+            name: 'SFAAccount',
+            displayKey: 'Text',
+
+        }).on('typeahead:selected', function (event, data) {
+            //sfaaccountlist = [];
+            angular.element(document.getElementById('LeanViewDataController')).scope().GetSFAOpportunity(data.Value);
+            angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+
+        });
+}
+
+function ValidateLeanRequisition() {
+    $('#LeanRequisition').bootstrapValidator({
+        framework: 'bootstrap',
+        feedbackIcons: {
+            valid: null,
+            invalid: null,
+            validating: null
+        },
+        fields: {
+            //autocompleteinput: {
+            //    validators: {
+            //        notEmpty: {
+            //            message: 'Please Provide Valid Project.'
+            //        }
+            //    }
+            //},
+            autocompleteinput: {
+                validators: {
+                    callback: {
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('autocompleteinput').val();
+                            if (!IsValidCustomer(options)) {
+                                return { valid: false, message: 'Please Provide Valid Project' }
+                            }
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Provide Valid Project' }
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+                }
+            },
+            CustomerCode: {
+                validators: {
+                    callback: {
+                        callback: function (value, validator, $field) {
+                            // Get the selected options                           
+                            var options = validator.getFieldElements('CustomerCode').val();
+
+                            if (!IsValidCustomer(options)) {
+                                return { valid: false, message: 'Please Provide Valid Customer.' }
+                            }
+
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Provide Valid Customer' }
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+                }
+            },
+            CustomerCodeOthers: {
+                validators: {
+                    callback: {
+                        callback: function (value, validator, $field) {
+                            // Get the selected options                           
+                            var options = validator.getFieldElements('CustomerCodeOthers').val();
+
+                            if (!IsValidCustomer(options)) {
+                                return { valid: false, message: 'Please Provide Valid Customer.' }
+                            }
+
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Provide Valid Customer' }
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+                }
+            },
+            ProjectL1: {
+                validators: {
+                    callback: {
+                        message: 'Project L1 is not valid.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('autocompleteinput').val();
+                            if (options == "6863") {
+                                return ($("#ProjectL1").val() != "--Select--");
+                            }
+                            else if ($("#ProjectL1").val() == "") {
+                                return false;
+                            }
+                            else { return true; }
+                        }
+                    }
+                }
+            },
+            ProjectL4: {
+                validators: {
+                    callback: {
+                        message: 'Project L4 is not valid.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('autocompleteinput').val();
+                            if (options == "6863") {
+                                return ($("#ProjectL4").val() != "--Select--");
+                            }
+                            else if ($("#ProjectL4").val() == "") {
+                                return false;
+                            }
+                            else { return true; }
+                        }
+                    }
+                }
+            },
+            ddlProjectL1: {
+                validators: {
+                    callback: {
+                        message: 'Project L1 is not valid.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('autocompleteinput').val();
+                            var projectCode = ExtractValue(options);
+                            if (projectCode == "6863") {
+                                return ($("#ddlProjectL1").val() != "");
+                            }
+                            else { return true; }
+                        }
+                    }
+                }
+            },
+            ddlProjectL4: {
+                validators: {
+                    callback: {
+                        message: 'Project L4 is not valid.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('autocompleteinput').val();
+                            var projectCode = ExtractValue(options);
+                            if (projectCode == "6863") {
+                                return ($("#ddlProjectL4").val() != "");
+                            }
+                            else { return true; }
+                        }
+                    }
+                }
+            },
+            ques: {
+                excluded: false,
+                validators: {
+                    callback: {
+                        message: 'Please select Position Type.',
+                        callback: function (value, validator, $field) {
+
+                            var t = $("input[name='ques']").is(':checked');
+
+                            var isVisibleDiv = $(".rbgPositionExclusive").is(":visible");
+                            if (!isVisibleDiv) {
+                                { return { valid: true, message: '' } }
+                            }
+
+                            if (!t) {
+                                { return { valid: false, message: 'Please select Position Type.' } }
+                            }
+                            else {
+                                { return { valid: true, message: '' } }
+                            }
+                        }
+                    }
+                }
+            },
+            //Commented by Rupesh CR00018206
+            //dmnd1: {
+            //    excluded: false,
+            //    validators: {
+            //        callback: {
+            //            message: 'Please select Demand Type.',
+            //            callback: function (value, validator, $field) {
+
+            //                var t = $("input[name='dmnd1']").is(':checked');
+            //                if (!t) {
+            //                    { return { valid: false, message: 'Please select Demand Type.' } }
+            //                }
+            //                else {
+            //                    { return { valid: true, message: '' } }
+            //                }
+            //            }
+            //        }
+            //    }
+            //},
+            //RequisitionType: {
+            //    validators: {
+            //        callback: {
+            //            message: 'Please Select Request Type.',
+            //            callback: function (value, validator, $field) {
+            //                // Get the selected options
+            //                var options = validator.getFieldElements('RequisitionType').val();
+            //                if (options == "" || options == undefined) {
+            //                    return { valid: false, message: 'Please Select Request Type.' };
+            //                }
+            //                else {
+            //                    return { valid: true, message: '' }
+            //                }
+            //            }
+            //        }
+
+            //    }
+            //},
+            AttritionRotationSapCode: {
+                validators: {
+                    callback: {
+                        callback: function (value, validator, $field) {
+                            var options = validator.getFieldElements('AttritionRotationSapCode').val();
+
+                            if (!IsValidSapCode(options)) {
+                                return { valid: false, message: 'There are no records for the selected criteria or the resource is not assigned in project ' + $('#autocompleteinput').val() + ' .' }
+                            }
+
+                            if (options == "") {
+                                return { valid: false, message: 'There are no records for the selected criteria.' }
+                            }
+                            else {
+                                ShowDuplicateAttrition(options); 
+                               if (DuplicateStatus == "-1") {
+                                   $('#hdnIsDuplicateAttr').val(false);
+                                   return { valid: true, message: '' }
+                               }
+                               else if (DuplicateStatus == "0") {
+                                   $('#hdnIsDuplicateAttr').val(true);
+                                   return { valid: false, message: 'Demand is already created in Draft mode.Please submit from your console.' }
+                               }
+                               else {
+                                   $('#hdnIsDuplicateAttr').val(true);
+                                 //------------------CR00018615_ balendra-------------------------------------
+                                   var msg = 'Demand is  ' + ReqNo + ' already in Draft mode with initiator ' + DuplicateStatus + '. Please connect with ' + DuplicateStatus
+                                       + '.Whether you want requisition to transfer to your console';
+                                   GetAutoReqAlert(msg);
+                                   //--------------------END------------------------------------------                                   
+                                   return
+                               }
+                            }
+                        }
+                    }
+                }
+            },
+            TPSAPCODE: {
+                validators: {
+                    callback: {
+                        callback: function (value, validator, $field) {
+
+                            var TPSAPCode = validator.getFieldElements('TPSAPCODE').val();
+                            var selectedL1 = $('#selectedEmpL1').val()
+							var initiatorL1 = $('#hdnL0Code').val();
+							var _reqType = $("#RequisitionType").val()
+                            if (!IsValidSapCode(TPSAPCode)) {
+                                return { valid: false, message: 'Third party SAP ID entered is presently not active Or invalid SapCode or the resource is not assigned in project ' + $('#autocompleteinput').val() + ' .' }
+                            }
+							if (_reqType=="15" && selectedL1 != initiatorL1) {
+                                return { valid: false, message: "You can't raise requisition against this sap code as TP L1 and Your L1 is not same" }
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+                }
+            },
+            IsTPtoFTEResource: {
+                excluded: false,
+                validators: {
+                    callback: {
+                        message: 'TP to FTE Conversion is mandatory.',
+                        callback: function (value, validator, $field) {
+
+                            var IsYesChecked = $('#TPtoFTEConversionYes').is(":checked");
+                            var IsNoChecked = $('#TPtoFTEConversionNo').is(":checked");
+                            var EmpSubgroup = $('#hdnResourceEmpSubgroup').val();
+
+
+                            var isVisibleDiv = $("#TPResourceToFTE").is(":visible");
+                            if (!isVisibleDiv) {
+                                { return { valid: true, message: '' } }
+                            }
+
+                            if (EmpSubgroup != "Third Party" && IsYesChecked == true) {
+                                return { valid: false, message: 'TP to FTE Conversion should be No for resource other than Third party.' }
+                            }
+                            if (IsYesChecked || IsNoChecked) {
+
+                                return { valid: true, message: '' }
+                            }
+                            else {
+                                return { valid: false, message: 'TP to FTE Conversion is mandatory.' }
+                            }
+                        }
+                    }
+                }
+            },
+            //sfaAccountOppurtunity: {
+            //    validators: {
+            //        notEmpty: {
+            //            message: 'SFA Account Code cannot be blank.'
+            //        }
+            //    }
+            //},
+            //sfaOppurtunity: {
+            //    validators: {
+            //        notEmpty: {
+            //            message: 'SFA Oppurtunity cannot be blank.'
+            //        }
+            //    }
+            //},
+            Skills: {
+                excluded: false,
+                validators: {
+                    callback: {
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            var count = $('.skillTag').children('span').length;
+                            // console.info(options);
+                            if (count == null || count < 1) {
+                                return { valid: false, message: 'Please select Skill(s).' };
+                            }
+                            else
+                                return { valid: true, message: '' };
+
+                        }
+                    }
+                }
+            },
+            JobID: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please select Job.'
+                    }
+                }
+            },
+            empG: {
+                validators: {
+                    callback: {
+                        message: 'Please Select Employee Group.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('empG').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Select Employee Group.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+            },
+            BandId: {
+                validators: {
+                    callback: {
+                        message: 'Please Select Band.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('BandId').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Select Band.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+            },
+            subbandid: {
+                validators: {
+                    callback: {
+                        message: 'Please Select Sub Band.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('subbandid').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Select Sub Band.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+            },
+            country: {
+                validators: {
+                    callback: {
+                        message: 'Please Select Country.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('country').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Select Country.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+            },
+
+            //Start : Added by Neha Basetia CR00019233
+            SRNumber: {
+                validators: {
+                    callback: {
+                        message: 'Please Select SR Number.',
+                        callback: function (value, validator, $field) {
+                            var options = validator.getFieldElements('SRNumber').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Select SR Number.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+            },
+            //End : Added by Neha Basetia CR00019233
+
+            ddlCompanyCode: {
+                validators: {
+                    callback: {
+                        message: 'Please Select Company.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('ddlCompanyCode').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please Select Company.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+            },
+            PersonalSubAreaID: {
+				validators: {
+					//Start : Added by Neha Basetia CR00020307
+					different: {
+						field: 'SecondaryPersonalSubAreaID',
+						message: 'Primary PSA and Secondary PSA cannot be same.',
+					},
+					//End : Added by Neha Basetia CR00020307
+                    callback: {
+                        message: 'Please Select PSA.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('PersonalSubAreaID').val();
+                            if (options == "" || options == undefined || (options.indexOf("?") != -1)) {
+                                return { valid: false, message: 'Please Select PSA.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+
+                }
+			},
+
+			//Start : Added by Neha Basetia CR00020307
+			SecondaryPersonalSubAreaID: {
+				validators: {
+					different: {
+						field: 'PersonalSubAreaID',
+						message: 'Primary PSA and Secondary PSA cannot be same.'
+					}
+				}
+			},
+			//End : Added by Neha Basetia CR00020307
+            VacancyCount: {
+                validators: {
+                    callback: {
+                        message: 'No. of Position cannot be blank and should be numeric value.',
+                        callback: function (value, validator, $field) {
+
+                            var hdnEntity = $("#hdnEntity").val();
+                            var hdnReqSourDemandEntityId = $("#RequisitionType").val();
+
+                            var options = validator.getFieldElements('VacancyCount').val();
+                            var t = ConvertToString(options);
+
+                            if (hdnEntity == "1" || hdnEntity == "2" || hdnEntity == "3") {//added by ankit for bserv
+
+                                if ((t.indexOf('.')) < 0) {
+
+                                    if (parseInt(options) > 0 && parseInt(options) < 31) {
+                                        return (options != null && options.length >= 1 && options.length <= 4);
+                                    }
+                                    else if (parseInt(options) == 0) { return { valid: false, message: "No of positions cannot be 0." } }
+                                    else { return { valid: false, message: "No. of Position cannot be greater than 30." } }
+                                }
+                                else {
+                                    return { valid: false, message: "No. of Position cannot be blank and should be numeric value." }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            ProsptiCustomerDetail: {
+                validators: {
+                    callback: {
+                        //notEmpty: {
+                        message: 'Please provide details.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('ProsptiCustomerDetail').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please provide prospective details.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                        //  }
+                    }
+                }
+            },
+            OtherProject: {
+                validators: {
+                    callback: {
+                        // notEmpty: {
+                        message: 'Please provide details.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('OtherProject').val();
+                            if (options == "" || options == undefined) {
+                                return { valid: false, message: 'Please provide other project details.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                        // }
+                    }
+                }
+            },
+            ddlLanguage1: {
+                validators: {
+                    callback: {
+                        // notEmpty: {
+                        message: 'Please provide details.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var l1 = validator.getFieldElements('ddlLanguage1').val();
+                            var g1 = validator.getFieldElements('ddlLanguageGrade1').val();
+
+                            if (!(g1 == "" || g1 == undefined)) {
+                                if (l1 == "" || l1 == undefined) {
+                                    return { valid: false, message: 'Please select language 1.' };
+                                }
+                                else {
+                                    return { valid: true, message: '' }
+                                }
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                    }
+                }
+            },
+            ddlLanguageGrade1: {
+                validators: {
+                    callback: {
+                        // notEmpty: {
+                        message: 'Please provide details.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var ll1 = validator.getFieldElements('ddlLanguage1').val();
+                            var gg1 = validator.getFieldElements('ddlLanguageGrade1').val();
+
+                            if (!(ll1 == "" || ll1 == undefined)) {
+                                if (gg1 == "" || gg1 == undefined) {
+
+                                    return { valid: false, message: 'Please select language grade 1.' };
+                                }
+                                else {
+                                    return { valid: true, message: '' }
+                                }
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                        // }
+                    }
+                }
+            },
+            ddlLanguage2: {
+                validators: {
+                    callback: {
+                        // notEmpty: {
+                        message: 'Please provide details.',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var l1 = validator.getFieldElements('ddlLanguage1').val();
+                            var l2 = validator.getFieldElements('ddlLanguage2').val();
+                            var g2 = validator.getFieldElements('ddlLanguageGrade2').val();
+                            if (l1 != "") {
+                                if (l2 == "" || l2 == undefined) {
+                                    if (!(g2 == "" || g2 == undefined)) {
+                                        return { valid: false, message: 'Please select language 2.' };
+                                    }
+                                    else {
+                                        return { valid: true, message: '' }
+                                    }
+                                }
+                                else {
+                                    return { valid: true, message: '' }
+                                }
+                            }
+                            else if (l2 == "") {
+                                return { valid: true, message: '' }
+                            }
+                            else {
+                                return { valid: false, message: 'Please select language 1.' };
+                            
+                        }
+                    }
+                }
+            }
+        },
+        ddlLanguageGrade2: {
+            validators: {
+                callback: {
+                    // notEmpty: {
+                    message: 'Please provide details.',
+                    callback: function (value, validator, $field) {
+                        // Get the selected options
+
+                        var ll1 = validator.getFieldElements('ddlLanguage2').val();
+                        var gg1 = validator.getFieldElements('ddlLanguageGrade2').val();
+                        if (!(ll1 == "" || ll1 == undefined)) {
+                            if (gg1 == "" || gg1 == undefined) {
+                                return { valid: false, message: 'Please select language grade 2.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                        else {
+                            return { valid: true, message: '' }
+                        }
+                    }
+                    // }
+                }
+            }
+        },
+        ddlLanguage3: {
+            validators: {
+                callback: {
+                    // notEmpty: {
+                    message: 'Please provide details.',
+                    callback: function (value, validator, $field) {
+                        // Get the selected options
+                        var ll1 = validator.getFieldElements('ddlLanguage2').val();
+                        var l3 = validator.getFieldElements('ddlLanguage3').val();
+                        var g3 = validator.getFieldElements('ddlLanguageGrade3').val();
+                        if (l3 == "" || l3 == undefined) {
+                            if (!(g3 == "" || g3 == undefined)) {
+                                return { valid: false, message: 'Please select language 3.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                        else {
+                            return { valid: true, message: '' }
+                        }
+                    }
+                }
+            }
+        },
+        ddlLanguageGrade3: {
+            validators: {
+                callback: {
+                    // notEmpty: {
+                    message: 'Please provide details.',
+                    callback: function (value, validator, $field) {
+                        // Get the selected options
+                        var ll3 = validator.getFieldElements('ddlLanguage3').val();
+                        var gg3 = validator.getFieldElements('ddlLanguageGrade3').val();
+                        if (!(ll3 == "" || ll3 == undefined)) {
+                            if (gg3 == "" || gg3 == undefined) {
+                                return { valid: false, message: 'Please select language grade 3.' };
+                            }
+                            else {
+                                return { valid: true, message: '' }
+                            }
+                        }
+                        else {
+                            return { valid: true, message: '' }
+                        }
+                    }
+                    // }
+                }
+            }
+        }
+    }
+    }).on('error.form.bv', function (e) {
+    //if (this.isIncomplete() || this.hasErrors()) {
+    $(".has-error:first input").focus();   // added this line
+    //e.preventDefault()
+    //}
+    e.preventDefault();
+    $.unblockUI();
+    //var $form = $(e.target);
+    //console.log($form.data('bootstrapValidator').getInvalidFields());
+}).on('success.form.bv', function (e) {
+    e.preventDefault();
+    //SaveLeanViewData();
+
+    var reqSoueDemEntId = $("#RequisitionType").val();
+    var PRFID = "0";
+    var _url = Sourceurl + "ValidateAttitionSAPCode";
+    var ControlID = '';
+    var msgControlId = "";
+    var CustomerCode = "";
+    var ProjectCode = "";
+    var RequisitionsSourceId = "";
+    var Initiator = InitiatorID;
+    var IsBandValidationOK = true;
+
+    if (reqSoueDemEntId == "3" || reqSoueDemEntId == "2" || reqSoueDemEntId == "4") {
+        msgControlId = "#msgAttrRot"
+        ControlID = "#AttritionRotationSapCode";
+        CustomerCode = "#CustomerCode";
+        ProjectCode = "#autocompleteinput";
+    }
+    else if (reqSoueDemEntId == "15" || reqSoueDemEntId == "29") {
+        msgControlId = "#msgTPRep";
+        ControlID = "#TPSAPCODE";
+        CustomerCode = "#CustomerCode";
+        ProjectCode = "#autocompleteinput";
+    }
+    if (reqSoueDemEntId == "4" && $("#hdnEntity").val() == "2") {
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'File');
+
+        }
+        var reqSource = $('#RequisitionType').val();
+        if ($("#hdnEMEmpSubgroup").val() != null && $('#BandId').val() != null && reqSource == "3") {
+            $.ajaxSetup({ async: false });
+            $.ajax({
+
+                type: "GET",
+
+                url: Sourceurl + "ValidationBandSourseJob",
+                data: { 'Band': $('#BandId').val(), 'SubBand': $('#subbandid').val(), 'empBand': $("#hdnEMEmpSubgroup").val(), 'empSubBand': $('#hdnemSubBand').val() },
+                success: function (responce) {
+                    debugger;
+
+                if (responce != "true" && responce != "") {
+                    var ss = new Array;
+                    ss = responce.split('(subband)');
+                    if (ss.length == 1) {
+                        IsBandValidationOK = false;
+                        $('#msgBand').html(responce);
+                        $('#msgBand').removeAttr("style");
+                        $.unblockUI();
+                    }
+                    else {
+                        IsBandValidationOK = false;
+                        $('#msgSubBand').html(ss[1]);
+                        $('#msgSubBand').removeAttr("style");
+                        $.unblockUI();
+                    }
+                }
+            },
+            error: function () {
+
+            }
+        });
+        $.ajaxSetup({ async: true });
+    }
+
+    if (reqSoueDemEntId == "3" || reqSoueDemEntId == "2" || reqSoueDemEntId == "15" || reqSoueDemEntId == "29" || reqSoueDemEntId == "4") {
+        $.ajaxSetup({ async: false });
+        $.ajax({
+            type: "GET",
+            url: _url,
+            data: { 'SAPCode': $(ControlID).val(), 'CustomerCode': $(CustomerCode).val(), 'ProjectCode': $(ProjectCode).val(), 'RequisitionsSourceId': reqSoueDemEntId, 'Initiator': Initiator },
+            success: function (response, status, xhr) {
+
+                var _prfId = $("#hdnPRFID").val();
+
+                if (response != "0" && response != "") {
+                    if (response == "New Project Already") {
+                        var msg = 'You already have back fill SR [' + response + '] pending in Draft mode. Do you still want to continue creating new position requisition?';
+                        GetDulicateAlert(msg);
+                    }
+                    if (reqSoueDemEntId == "3" || reqSoueDemEntId == "2") {
+                        $('#Requisition').bootstrapValidator('revalidateField', 'AttritionRotationSapCode');
+                    }
+                    else if (reqSoueDemEntId == "15" || reqSoueDemEntId == "29") {
+                        $('#Requisition').bootstrapValidator('revalidateField', 'TPSAPCODE');
+                    }
+
+                    if (_prfId == "" && (response == "0" || response == "") && IsBandValidationOK == true) {
+                        SaveLeanViewData();
+                    }
+                    else if ((_prfId != "" && _prfId != "0" && response.indexOf(_prfId) >= 0) && IsBandValidationOK == true) {
+                        SaveLeanViewData();
+                    }
+                    else {
+                        if (response == "TP already") {
+                            $(msgControlId).html(" Please close open SR against this SAP Id in order to open new SR.");
+                            $(msgControlId).removeAttr("style");
+                            $.unblockUI();
+                        }
+                        else if (response == "No Active Assignation") {
+                            $(msgControlId).html("Active assignation does not exists in RAS for TP Candidate");
+                            $(msgControlId).removeAttr("style");
+                            $.unblockUI();
+                        }
+                        else {
+                            $(msgControlId).html('Requisition [' + response + '] already exist for replacement of this SAP Code.');
+                            $(msgControlId).removeAttr("style");
+                            $.unblockUI();
+                        }
+                    }
+                }
+                else {
+                    if (IsBandValidationOK)
+                        SaveLeanViewData();
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+            }
+        });
+        $.ajaxSetup({ async: true });
+    }
+    else {
+        if (IsBandValidationOK)
+            SaveLeanViewData();
+    }
+});
+}
+
+
+function GetDulicateAlert(_msg) {
+    swal({
+        title: _msg,
+        text: "",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-danger",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        showLoaderOnConfirm: true,
+        closeOnConfirm: true,
+        closeOnCancel: true
+    },
+        function (isConfirm) {
+            if (isConfirm) {
+                $.blockUI();
+                SaveLeanViewData();
+            }
+            else {
+                swal("Cancelled", "Requisition has been Canceled)", "error");
+                $.unblockUI();
+            }
+        });
+}
+
+function SaveLeanViewData() {
+    debugger;
+	if ($('#RequisitionType').val() == '') {
+		alert("Please Select RequisitionType");
+	}
+    var IsCAS = $('#hdnIsCAS').val();
+    var IsBRC = $('#hdnIsBRC').val(); // Done by Reshman Raza for the CR00019428
+    var SalesLob = $('#hdnIsSales').val();
+    var IsTSSLobUser = $('#hdnIsTSSLobUser').val();
+    _ObjLeanViewFormData.OtherProject = $('#OtherProject').val();
+    _ObjLeanViewFormData.ProsptivCustomerDetail = $('#ProsptiCustomerDetail').val();
+    _ObjLeanViewFormData.emSubBand = $("#hdnemSubBand").val();
+    _ObjLeanViewFormData.EMEmpSubgroup = $("#hdnEMEmpSubgroup").val();
+    _ObjLeanViewFormData.PRFID = $('#hdnPRFID').val();
+    _ObjLeanViewFormData.ProjectCode = $('#autocompleteinput').val();
+    var _SelectedProjCode = ExtractValue($('#autocompleteinput').val());
+    if (_SelectedProjCode == "6863")
+        _ObjLeanViewFormData.CustomerCode = $('#CustomerCodeOthers').val();
+    else
+        _ObjLeanViewFormData.CustomerCode = $('#CustomerCode').val();
+    _ObjLeanViewFormData.ProjectL1 = $('#ProjectL1').val();
+    _ObjLeanViewFormData.ProjectL4 = $('#ProjectL4').val();
+
+    
+    if (((IsCAS == "1" || IsTSSLobUser == "1") && _SelectedProjCode == "6863") || (IsBRC == "1" && _SelectedProjCode == "6863") || (SalesLob == "1" && _SelectedProjCode == "6863")) {
+        
+        _ObjLeanViewFormData.ProjectL1 = $('#ddlProjectL1').val();
+        _ObjLeanViewFormData.ProjectL4 = $('#ddlProjectL4').val();
+    }
+    _ObjLeanViewFormData.IsPositionExclusive = $("input[name='ques']:checked").val() == "Exclusive" ? true : false;
+    //$("input[name='dmnd1']:checked").val();//Commented by Rupesh CR00018206
+    _ObjLeanViewFormData.DemandType = DemandType;
+    if (_ObjLeanViewFormData.DemandType == "SOT") {
+        _ObjLeanViewFormData.ClientInterview = true;
+    }
+    else {
+        _ObjLeanViewFormData.ClientInterview = $("input[name='cl1']:checked").val() == "Yes" ? true : false;
+    }
+
+    // start C3i atma nand
+
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageID1 = $('#ddlLanguage1').val();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageGradeID1 = $('#ddlLanguageGrade1').val();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageID2 = $('#ddlLanguage2').val();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageGradeID2 = $('#ddlLanguageGrade2').val();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageID3 = $('#ddlLanguage3').val();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageGradeID3 = $('#ddlLanguageGrade3').val();
+
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageGradeText1 = $('#ddlLanguageGrade1 :selected').text();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageGradeText2 = $('#ddlLanguageGrade2 :selected').text();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageGradeText3 = $('#ddlLanguageGrade3 :selected').text();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageText1 = $('#ddlLanguage1 :selected').text();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageText2 = $('#ddlLanguage2 :selected').text();
+    _ObjLeanViewFormData.SR_LanguageMap.LanguageText3 = $('#ddlLanguage3 :selected').text();
+    // end C3i atma nand
+
+    debugger;
+    _ObjLeanViewFormData.RequisitionSourceID = $('#RequisitionType').val();
+    var ReferBackReasonCode = $("#hdnReferBackReasonCode").val();
+    var IStatusId = $("#hdnIStatusId").val();
+    var IRoleID = $("#hdnIRoleID").val();
+    var hdnIsTnMProject = $("#hdnIsTnMProject").val();
+    var currntProject = (_ObjLeanViewFormData.ProjectCode.split('(')[1]).split('/')[0].toUpperCase();
+    //atma nad nand CR00019293
+    _ObjLeanViewFormData.RequisitionSourceID = $('#RequisitionType').val();
+    if (ReferBackReasonCode == "62" && IStatusId == "1" && IRoleID == "1" && _ObjLeanViewFormData.RequisitionSourceID == 4) {
+        var ProjectCode = $("#hdnProjectCode").val().split('/')[0].toUpperCase();
+        if (ProjectCode == "Y" && currntProject == "C" && hdnIsTnMProject == "true") 
+            {
+            _ObjLeanViewFormData.DemandType = "SOT";
+            _ObjLeanViewFormData.ReferBackChanageDemandType = 1;
+            _ObjLeanViewFormData.IsReferBackChgDemndType = true;
+        }
+        else {
+            _ObjLeanViewFormData.ReferBackChanageDemandType = 0;
+            _ObjLeanViewFormData.IsReferBackChgDemndType = false;
+            _ObjLeanViewFormData.DemandType = "NONSOT";
+        }
+    }
+    //End atma nand CR00019293
+
+    _ObjLeanViewFormData.RequisitionSourceID = $('#RequisitionType').val();
+    _ObjLeanViewFormData.AttritionRotationSapCode = $('#AttritionRotationSapCode').val();
+    _ObjLeanViewFormData.TPSAPCODE = $('#TPSAPCODE').val();
+    _ObjLeanViewFormData.TPState = $('#TPState').val();
+    _ObjLeanViewFormData.IsTPtoFTEResource = $("input[name='IsTPtoFTEResource']:checked").val() == "TPtoFTEConversionYes" ? true : false;
+    _ObjLeanViewFormData.sfaAccountOppurtunity = $("#sfaAccountOppurtunity").val();
+    _ObjLeanViewFormData.sfaOppurtunity = $("#sfaOppurtunity").val();
+    _ObjLeanViewFormData.Skills = $("#Skills").val();
+    _ObjLeanViewFormData.JobId = $("#JobID").val();
+    _ObjLeanViewFormData.EmployeGroupID = $("#empG").val();
+    _ObjLeanViewFormData.BufferSRNumber = $("#SRNumber").val();    //Added by Neha Basetia CR00019233
+    //_ObjLeanFormData.JobId = "";
+    _ObjLeanViewFormData.BandId = $('#BandId').val();
+    _ObjLeanViewFormData.SubBandId = $('#subbandid').val();
+    _ObjLeanViewFormData.CountryID = $('#country').val();
+	_ObjLeanViewFormData.PersonalSubAreaID = $('#PersonalSubAreaID').val();
+	_ObjLeanViewFormData.SecondaryPersonalSubAreaID = $('#SecondaryPersonalSubAreaID').val();    //Added by Neha Basetia CR00020307
+    _ObjLeanViewFormData.BatchCode = $('#freshertype').val();
+    if ($("#divVisibleCompanyddl").is(":visible"))
+        _ObjLeanViewFormData.CompanyID = $('#ddlCompanyCode').val();
+    else
+        _ObjLeanViewFormData.CompanyID = $('#CompanyCode').val();
+    _ObjLeanViewFormData.VacancyCount = $('#VacancyCount').val();
+
+    if (LeanViewData.CopiedPRF != null) {
+        _ObjLeanViewFormData.CopiedPRF = LeanViewData.CopiedPRF;
+    }
+
+    var _objSkill = $.parseJSON($('#hdnskill').val());
+    var AdditionalSkill = $('#hdnAdditionalSkill').val();
+    var IsERS = $('#hdnIsERS').val();
+    if (AdditionalSkill != null && AdditionalSkill != '') {
+        var _objAddSkill = $.parseJSON($('#hdnAdditionalSkill').val());
+    }
+    var SR_SkillDetails = {
+        SRSkill: [],
+        SRERSSkill: []
+    }
+    if (IsERS == "True" || IsCAS == "1") {
+        SR_SkillDetails.SRSkill = _objAddSkill,
+            SR_SkillDetails.SRERSSkill = _objSkill;
+    }
+    else {
+        SR_SkillDetails.SRSkill = _objSkill;
+    }
+    var _Entity = $("#hdnEntity").val();
+    if (_Entity === "2") {
+        _ObjLeanViewFormData.SR_InfraDTO.BUID = $('#BUID').val();
+        _ObjLeanViewFormData.SR_InfraDTO.DomainID = $('#DomainID').val();
+        _ObjLeanViewFormData.SR_InfraDTO.SubDomainID = $('#SubDomainID').val();
+        _ObjLeanViewFormData.SR_InfraDTO.FunctionID = $('#FunctionID').val();
+        _ObjLeanViewFormData.SR_InfraDTO.CustomerState = $('#CustomerState').val();
+        _ObjLeanViewFormData.SR_InfraDTO.TRatingID = $('#TRatingID').val();
+        _ObjLeanViewFormData.SR_InfraDTO.ReleaseDate = $('#ReleaseDate').val();
+      //  _ObjLeanViewFormData.SR_InfraDTO.JobDescFile = $('.uploadFile .filename').val();
+		//Start : Added by Neha Basetia CR00020307
+		_ObjLeanViewFormData.SR_InfraDTO.SecondaryBUID = $('#SecondaryBUID').val();
+		_ObjLeanViewFormData.SR_InfraDTO.SecondaryDomainID = $('#SecondaryDomainID').val();
+		_ObjLeanViewFormData.SR_InfraDTO.SecondarySubDomainID = $('#SecondarySubDomainID').val();
+		_ObjLeanViewFormData.SR_InfraDTO.SecondaryFunctionID = $('#SecondaryFunctionID').val();
+		_ObjLeanViewFormData.SR_InfraDTO.SecondaryTRatingID = $('#SecondaryTRatingID').val();
+		//End : Added by Neha Basetia CR00020307
+    }
+    _ObjLeanViewFormData.SR_InfraDTO.JobDescFile = $('.uploadFile .filename').val();//added by ankit for #CR00018761
+    if ($('#hdnIsDeviationCountry').val() == 1) {
+        _ObjLeanViewFormData.IsDeviationCompany = true;
+        _ObjLeanViewFormData.IsDeviationCountry = true;
+    }
+    else if ($('#hdnIsDeviationCompany').val() == 1) {
+        _ObjLeanViewFormData.IsDeviationCompany = true;
+    }
+    //Added By Ankit Srivastava for Bserv
+    if (_Entity === "3") {
+        var _IntCounter = 1;
+        var vAssessmentCriteriaID = "";
+        var vAssessmentCriteriaDesc = "";
+        var vPRFID = "";
+        var vThresholdLevel = "";
+        var FlgdataFound = false;
+        //var MaxCount=$('#HdnACNo').val();
+        $("#tblInnerHeaderAssessmentCriteria > tbody ").find('tr').each(function () {
+
+            if ($('#Chk_' + _IntCounter).is(":checked") == true) {
+                FlgdataFound = false;
+                $(this).find('td').each(function (i, data) {
+                    //debugger;
+                    vAssessmentCriteriaID = "";
+                    vAssessmentCriteriaDesc = "";
+                    vPRFID = "";
+                    vThresholdLevel = "";
+                    vThresholdLevel = $("#Txt_" + _IntCounter).val();
+                    if (vThresholdLevel != "" && FlgdataFound == false) {
+                        vAssessmentCriteriaID = $('#Hdn_AssessmentCriteriaID_' + _IntCounter).val();
+                        FlgdataFound = true;
+                        oSR_AssessmentCriteriaDTO.push({ "AssessmentCriteriaID": vAssessmentCriteriaID, "AssessmentCriteriaDesc": vAssessmentCriteriaDesc, "PRFID": vPRFID, "ThresholdLevel": vThresholdLevel });
+                    }
+                });
+            }
+            _IntCounter = _IntCounter + 1;
+
+        });
+        // oSR_BservDTO.BservSourceID = $("#BservSourceID :selected").val();
+        _ObjLeanViewFormData.SR_BservDTO.SalaryScalID = $("#SalaryScalID :selected").val();
+        _ObjLeanViewFormData.SR_BservDTO.MaximumSalary = $("#MaximumSalary").val();
+        _ObjLeanViewFormData.SR_BservDTO.TypeOfRequirementID = $("#TypeOfRequirementID :selected").val();
+        _ObjLeanViewFormData.SR_BservDTO.Source = $("#TypeOfSourceID :selected").val();
+        _ObjLeanViewFormData.SR_BservDTO.BulkHiringVoice = bulkhiring;
+	}
+	if (_ObjLeanViewFormData.RequisitionSourceID == 18 || _ObjLeanViewFormData.RequisitionSourceID == 20) {
+		_ObjLeanViewFormData.ISCampus = true;
+		_ObjLeanViewFormData.BatchYear = $("#BatchYear").val();
+		_ObjLeanViewFormData.SR_CampusProgramId = $("#ProgramType").val();
+	}
+	else {
+		_ObjLeanViewFormData.ISCampus = false;
+		_ObjLeanViewFormData.BatchYear = null;
+		_ObjLeanViewFormData.SR_CampusProgramId = null;
+	}
+    var _SaveUrl = SimplifyHRUrl + "/Requisition/SaveLeanViewData";
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: _SaveUrl,
+        data: { _ObjLeanFormData: _ObjLeanViewFormData, _objSkillData: SR_SkillDetails, oSR_AssessmentCriteriaDTO: oSR_AssessmentCriteriaDTO },
+        success: function (data) {
+            if (data.status === "success") {
+                //infra
+
+                //if ( _ObjLeanViewFormData.RequisitionSourceID === "4") {
+                    InfraUploadfile();
+
+               // }
+                //
+                $.unblockUI();
+                window.location.href = data.redirectUrl + "&active=" + btoa(2);
+                //Clear Skill Storage
+                sessionStorage.removeItem("skill");
+                sessionStorage.removeItem("AdditionalSkill");
+                sessionStorage.removeItem("ERSSkill");
+
+            }
+            if (data.status === "Invalid") {
+                $("#invalid").show();
+                $("#invalid p").remove();
+                $.unblockUI();
+                var obj = JSON.parse(data.redirectUrl);
+                for (var i = 0; i < obj.length; i++) {
+                    $("#invalid").append("<p>" + obj[i].Message + "</p>");
+                }
+
+            }
+        },
+        error: function (xhr, status, error) {
+            window.location.href = myApp.getErrorUrl();
+        }
+    })
+}
+function InfraUploadfile() {
+    if ($("#spanfile").text().length == 0) {
+        if (window.FormData !== undefined) {
+
+            var fileUpload = $("#File").get(0);
+            var files = fileUpload.files;
+
+            // Create FormData object  
+            var fileData = new FormData();
+
+            // Looping over all files and add it to FormData object  
+            for (var i = 0; i < files.length; i++) {
+                fileData.append(files[i].name, files[i]);
+            }
+
+            // Adding one more key to FormData object  
+
+            $.ajax({
+                url: SimplifyHRUrl + "/Requisition/UploadFiles",
+                type: "POST",
+                contentType: false, // Not to set any content header  
+                processData: false, // Not to process data  
+                data: fileData,
+                success: function (result) {
+                },
+                error: function (err) {
+                    alert(err.statusText);
+                }
+            });
+        } else {
+            alert("FormData is not supported.");
+        }
+    }
+}
+$(document).on('hidden.bs.modal', '#SkillModal', function () {
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'Skills');
+    //Do stuff here
+});
+
+function InitRadioFields() {
+    $('.removeProject').show();
+    //$('.radioError').show().removeClass('hide');
+    $('.showonClInter').show().removeClass('hide');
+
+    $('.radioQuestion input').removeAttr('disabled checked');
+    //$('.radioError input').removeAttr('disabled checked');
+    $('.showonClInter input').removeAttr("disabled checked");
+}
+
+function InitOthersProjectFields() {
+    $('.showonOther').show().removeClass('hide');
+    $('.showonProject').hide();
+    $('.radioQuestion').hide();
+    $('.showonAdm').hide();
+    var iscas = $('#hdnIsCAS').val();
+    var IsBRC = $('#hdnIsBRC').val(); // Done by Reshman Raza for the CR00019428
+    //if (iscas === "0" || IsBRC === "0" ) {
+    //    $('.showonProjectPL1L4').show();
+    //    $('.showonOtherPL1L4').hide();
+    //}
+    //else {
+    //    $('.showonProjectPL1L4').hide();
+    //    $('.showonOtherPL1L4').show();
+    //}
+    var isSales = $('#hdnIsSales').val();
+    var IsTSSLobUser = $('#hdnIsTSSLobUser').val();
+    if (iscas === "1" || isSales === "1" || IsBRC === "1" || IsTSSLobUser == "1") {
+        $('.showonProjectPL1L4').hide();
+        $('.showonOtherPL1L4').show();
+    }
+    else if (iscas === "0" || isSales === "0" || IsBRC === "0" || IsTSSLobUser == "0") {
+        $('.showonProjectPL1L4').show();
+        $('.showonOtherPL1L4').hide();
+    }
+    // Start Done by Reshman Raza for the CR00019428
+    //if (IsBRC = "0") {
+    //    $('.showonProjectPL1L4').show();
+    //    $('.showonOtherPL1L4').hide();
+    //}
+    //else {
+    //    $('.showonProjectPL1L4').hide();
+    //    $('.showonOtherPL1L4').show();
+    //}//End Done by Reshman Raza for the CR00019428
+
+    ////$('.radioError input').removeAttr('disabled checked');
+    $('.radioQuestion input').removeAttr('disabled checked');
+    $('.showonClInter input').removeAttr("disabled checked");
+}
+
+function GetCustomersDetails() {
+    //var _url = ServiceApiUrl + "/api/Fulfillment/GetCustomers/";
+    var _url = GetWayUrl;//changes by ankit s
+    var customersList = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('CustomerName'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: _url + '?CustomerName=' + '%QUERY',
+            wildcard: '%QUERY'
+        }
+    });
+
+    customersList.initialize();
+    //$("#CustomerCodeOthers").typeahead('destroy');
+    $("#CustomerCodeOthers").typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+    }, {
+            name: "CustomerCodeOthers",
+            source: customersList.ttAdapter(),
+            limit: Infinity,
+            // This will be appended to "tt-dataset-" to form the class name of the suggestion menu.
+            displayKey: 'CustomerName',
+        }).on('typeahead:selected', function (event, data) {
+            OtherCustomerVisiblHide(data.CustomerName);
+        });
+}
+function Replacementvalidation() {
+
+    var reqSoueDemEntId = $("#RequisitionType").val();
+    var _prfId = $("#hdnPRFID").val();
+    if (reqSoueDemEntId == "3" || reqSoueDemEntId == "2") {
+        msgControlId = "#msgAttrRot"
+        ControlID = "#AttritionRotationSapCode";
+    }
+    else if (reqSoueDemEntId == "15" || reqSoueDemEntId == "29") {
+        msgControlId = "#msgTPRep";
+        ControlID = "#TPSAPCODE";
+
+    }
+
+    if (reqSoueDemEntId == "3" || reqSoueDemEntId == "2" || reqSoueDemEntId == "15" || reqSoueDemEntId == "29") {
+
+        if (reqSoueDemEntId == "3" || reqSoueDemEntId == "2") {
+            $('#Requisition').bootstrapValidator('revalidateField', 'AttritionRotationSapCode');
+            $(msgControlId).html("The selected resource’s project and project selected by initiator are different. Please select project in which replaced resource is assigned.");
+            $(msgControlId).removeAttr("style");
+        }
+        else if (reqSoueDemEntId == "15" || reqSoueDemEntId == "29") {
+            $('#Requisition').bootstrapValidator('revalidateField', 'TPSAPCODE');
+            $(msgControlId).html("The selected resource’s project and project selected by initiator are different. Please select project in which replaced resource is assigned.");
+            $(msgControlId).removeAttr("style");
+        }
+
+
+
+    }
+}
+function InfraValidation() {
+    $('#LeanRequisition').bootstrapValidator('addField', 'BUID', {
+        validators: {
+            callback: {
+                message: 'Please Select  Valid BU Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('BUID').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+    });
+    $('#LeanRequisition').bootstrapValidator('addField', 'DomainID', {
+        validators: {
+            callback: {
+                message: 'Please Select  Valid Domain Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('DomainID').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+    });
+    $('#LeanRequisition').bootstrapValidator('addField', 'SubDomainID', {
+		validators: {
+			// Start : Added by Neha Basetia CR00020307 
+			different: {
+				field: 'SecondarySubDomainID',
+				message: 'Primary Sub Domain and Secondary Sub Domain cannot be same.'
+			},
+			// End : Added by Neha Basetia CR00020307 
+            callback: {
+                message: 'Please Select  Valid Sub-Domain Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('SubDomainID').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+	});
+
+	// Start : Added by Neha Basetia CR00020307 
+	$('#LeanRequisition').bootstrapValidator('addField', 'SecondarySubDomainID', {
+		validators: {
+			different: {
+				field: 'SubDomainID',
+				message: 'Primary Sub Domain and Secondary Sub Domain cannot be same.'
+			}
+		}
+	});
+	// End : Added by Neha Basetia CR00020307
+
+    $('#LeanRequisition').bootstrapValidator('addField', 'FunctionID', {
+		validators: {
+			// Start : Added by Neha Basetia CR00020307 
+			different: {
+				field: 'SecondaryFunctionID',
+				message: 'Primary Function and Secondary Function cannot be same.'
+			},
+			// End : Added by Neha Basetia CR00020307
+            callback: {
+                message: 'Please Select  Valid Function Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('FunctionID').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+	});
+
+	// Start : Added by Neha Basetia CR00020307 
+	$('#LeanRequisition').bootstrapValidator('addField', 'SecondaryFunctionID', {
+		validators: {
+			different: {
+				field: 'FunctionID',
+				message: 'Primary Function and Secondary Function cannot be same.'
+			}
+		}
+	});
+	// End : Added by Neha Basetia CR00020307
+    $('#LeanRequisition').bootstrapValidator('addField', 'TRatingID', {
+		validators: {
+			// Start : Added by Neha Basetia CR00020307 
+			//different: {
+			//	field: 'SecondaryTRatingID',
+			//	message: 'Primary TRating and Secondary TRating cannot be same.'
+			//},
+			// End : Added by Neha Basetia CR00020307
+            callback: {
+                message: 'Please Select  Valid T-Rating Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('TRatingID').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+	});
+
+	// Start : Added by Neha Basetia CR00020307 
+	//$('#LeanRequisition').bootstrapValidator('addField', 'SecondaryTRatingID', {
+	//	validators: {
+	//		different: {
+	//			field: 'TRatingID',
+	//			message: 'Primary TRating and Secondary TRating cannot be same.'
+	//		}
+	//	}
+	//});
+	// End : Added by Neha Basetia CR00020307
+
+    //Start : Added by Neha Basetia CR00019177
+    $('#LeanRequisition').bootstrapValidator('addField', 'File', {
+        validators: {
+            notEmpty: {
+                message: 'Please Select Valid File To Upload'
+            }
+        }
+    });
+     //End : Added by Neha Basetia CR00019177
+}
+//BserValidation By Ankit 
+function BservValidation() {
+
+    //saveprf_AssessmentCriteria();
+    //_ObjLeanViewFormData.BandId = $('#BandId').val();
+    //var bandId = $('#BandId').val();
+    //alert(_ObjLeanViewFormData.BandId);
+    if (bandid11 == "E0") {
+        $("#SalaryScalID").prop("disabled", false);
+        $('#LeanRequisition').bootstrapValidator('addField', 'SalaryScalID', {
+            validators: {
+                callback: {
+                    message: 'Salary Scale is mandatory for E0 Band.',
+                    callback: function (value, validator, $field) {
+                        var options = validator.getFieldElements('SalaryScalID').val();
+
+                        if (options == "") {
+
+                            return { valid: false, message: 'Salary Scale is mandatory for E0 Band.' }
+                        }
+                        else { return true; }
+                    }
+                }
+            }
+
+        });
+
+    }
+    else if (bandid11 == "E1" ||
+        bandid11 == "E2" ||
+        bandid11 == "E3" ||
+        bandid11 == "E4" ||
+        bandid11 == "E5" ||
+        bandid11 == "E6") {
+        // Start : Suhasini Srivastava : SalaryScale
+        $("#SalaryScalID").val("Null");
+        // END : Suhasini Srivastava : SalaryScale
+        $("#SalaryScalID").prop("disabled", true)
+    }
+
+    $('#LeanRequisition').bootstrapValidator('addField', 'TypeOfRequirementID', {
+        validators: {
+            callback: {
+                message: 'Please Select  Valid Requirement Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('TypeOfRequirementID').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+    });
+    $('#LeanRequisition').bootstrapValidator('addField', 'Source', {
+        validators: {
+            callback: {
+                message: 'Please Select  Valid Source Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('Source').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+    });
+
+}
+//END
+
+
+function Add_AttritionRotation_Validation() {
+    $('#LeanRequisition').bootstrapValidator('addField', 'ReleaseDate', {
+        validators: {
+            callback: {
+                message: 'Please Select  Valid Release Date.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('ReleaseDate').val();
+                    if (options != "") {
+                        options = new Date(myApp.ConvertDateToStandredFormat(options));
+                        options = myApp.getFormattedDate(options);
+                        var dtCurrent = myApp.getFormattedDate(new Date());
+                        if (dtCurrent >= options) {
+                            return { valid: false, message: 'Release Date Can not be less then current date.' }
+                        }
+                        else {
+                            return { valid: true, message: '' }
+                        }
+                    } else {
+                        return { valid: false, message: 'Release Date Can not be blank.' }
+                    }
+                }
+            }
+        }
+    });
+};
+function Add_NewProjectExtension_Validation() {
+    //CustomerState
+    $('#LeanRequisition').bootstrapValidator('addField', 'CustomerState', {
+        validators: {
+            callback: {
+                message: 'Please Select  Valid Customer State Type.',
+                callback: function (value, validator, $field) {
+                    var options = validator.getFieldElements('CustomerState').val();
+                    return (options != null && options.length >= 1 && options != "--Select--");
+                }
+            }
+        }
+    });
+    $('#LeanRequisition').bootstrapValidator('addField', 'File',
+        {
+            validators: {
+
+                callback: function (value, validator, $field) {
+                    if ($("#File").val() == "") {
+                        if ($("#hdn_FilePath").val() === "") {
+                            return { valid: false, message: 'Please select valid File.' }
+                        }
+                    }
+                    else {
+                        return { valid: true, message: '' }
+
+                    }
+                }
+
+            }
+        });
+
+}
+$('#btn_preview').on('click', function () {
+    $('.panel-collapse:not(".in")')
+        .collapse('show');
+    $('.expandAll').addClass('active');
+    $('.collapseAll').removeClass('active');
+    var Entity = $("#hdnEntity").val();
+    if (Entity != 3) {
+        $("#Bservspec").css("display", "none");
+    }
+
+});
+function InitOthersYUProjectFields() {
+    $('.showonOther').removeClass('hide');
+    $('.showonOtherCust').addClass('hide');
+}
+// its used when other customer and project then other project and prosptus customer detail will display
+function OtherCustomerVisiblHide(CustomerName) {
+
+    if ($('#autocompleteinput').val() == 'Others (6863)' && CustomerName == 'Others (707)') {
+        $('#OtherProjectField').show();
+        $('#ProsptiCustomerDetailField').show();
+    }
+    else if ($('#autocompleteinput').val() != 'Others (6863)' && CustomerName == 'Others (707)') {
+        $('#OtherProjectField').hide();
+        $('#ProsptiCustomerDetailField').show();
+    }
+    else if ($('#autocompleteinput').val() == 'Others (6863)' && CustomerName != 'Others (707)') {
+        $('#OtherProjectField').show();
+        $('#ProsptiCustomerDetailField').hide();
+    }
+
+    else if ($('#autocompleteinput').val() != 'Others (6863)' && CustomerName != 'Others (707)') {
+        $('#OtherProjectField').hide();
+        $('#ProsptiCustomerDetailField').hide();
+    }
+}
+
+
+//Added By Ankit for bserv
+$(document).ready(function () {
+
+    /* Get the checkboxes values based on the parent div id */
+    $("#buttonParent").click(function () {
+        //getValueUsingParentTag();
+        ///$("#row").hide();
+        $("body").removeClass("modal-open");
+        $('.modal-backdrop').hide();
+        $('.asseC').focus();
+        $('.asseCri-Show').show();
+    });
+
+    //if ($("#checkboxlist input").prop('checked')) {
+    var ckbox = $('#suP');
+
+    $('input').on('click', function () {
+        if ($('#suP input:checked').is(":checked")) {
+            // if (ckbox.is(':checked')) {
+            $("#buttonParent").removeAttr("disabled");
+            //$("#closeBtn").removeAttr("disabled");
+            // }
+        }
+        else {
+            //$("#buttonParent").prop('disabled', true);
+            //$("#closeBtn").prop('disabled', true);
+
+        }
+    });
+
+
+
+});
+
+function getValueUsingParentTag() {
+    var chkArray = [];
+
+    ///* look for all checkboes that have a parent id called 'checkboxlist' attached to it and check if it was checked */
+    //var tmp = $('#tr input:checked').is(":checked");
+
+    //console.log(tmp);
+
+    $.each($("#suP input:checked").closest("tr").find('#ll'),
+        function () {
+            chkArray.push($(this).text());
+        });
+
+    /* we join the array separated by the comma */
+    var selected;
+    selected = chkArray.join(',');
+
+    /* check if there is selected checkboxes, by default the length is 1 as it contains one single comma */
+    if (selected.length > 0) {
+
+        $(".asseCri-Show").html(selected);
+        //$("#buttonParent").removeAttr("disabled");
+    } else {
+        $(".asseCri-Show").html("");
+    }
+}
+
+function validate1() {
+    // debugger;
+    var _prfId = $("#hdnPRFID").val();
+    if (_prfId != "0") {
+        getValueUsingParentTag();
+        $("#row").hide();
+        $("body").removeClass("modal-open");
+        $('.modal-backdrop').hide();
+        $('.asseC').focus();
+        $('.asseCri-Show').show();
+    }
+    else {
+        var isValid = $('#row').data('bootstrapValidator').isValid();
+        if (isValid == false) {
+            $('#row').data('bootstrapValidator').validate();
+        }
+        else {
+            getValueUsingParentTag();
+            $("#row").hide();
+            $("body").removeClass("modal-open");
+            $('.modal-backdrop').hide();
+            $('.asseC').focus();
+            $('.asseCri-Show').show();
+        }
+    }
+}
+
+//end
+
+function ShowDuplicateAttrition(_EmployeeCode) {   
+    ReqNo = "";
+    debugger;
+    DuplicateStatus = "-1";
+    $.ajax({
+        type: "GET",
+        dataType: "json",
+        url: SimplifyHRUrl + "/Requisition/PrevAttritionRaised",
+        data: { _SapCode: _EmployeeCode },
+        async: false,
+        success: function (data) {
+            {
+                debugger;
+
+                if (data.length > 0) {
+                    //var indexReqSource = $.inArray(InitiatorID, data)
+                    if (InitiatorID==data[0]){
+                    //if (indexReqSource != -1) {
+                        //$('#lbl_IsDuplicateAttrition').html('Demand is already created in Draft mode. Please submit from your console.');
+                        DuplicateStatus = "0";
+                    }
+                    else {
+                        //$('#lbl_IsDuplicateAttrition').html('Demand is already in Draft mode for ' + data[0] + '. Please connect with ' + data[0]);
+                        DuplicateStatus = data[0];
+                        ReqNo = data[1];
+                    }
+                    //$('#lbl_IsDuplicateAttrition').show();
+
+                }
+                //else {
+                //$('#lbl_IsDuplicateAttrition').hide();
+                //}
+
+            }
+        },
+        fail: function (error) {
+            debugger;
+            Console.Log(error);
+        }
+    })
+    return DuplicateStatus;
+}
+
+function ShowDynmicallyLuanguage() {
+
+    for (var a = 1; a <= 3; a++) {
+        var ht = '<tr><td>Language ' + a + '</td><td>' + 'Language' + '</td><td>' + 'Grade' + '</td</tr>'
+        $('#tblLanguage').append(ht);
+    }
+}
+
+$("#ddlLanguage1").change(function () {
+
+
+    LanguageValiation1();
+});
+$("#ddlLanguageGrade1").change(function () {
+
+
+    LanguageValiation1();
+});
+
+$("#ddlLanguage2").change(function () {
+
+
+    LanguageValiation2();
+});
+$("#ddlLanguageGrade2").change(function () {
+
+
+    LanguageValiation2();
+});
+
+$("#ddlLanguage3").change(function () {
+
+
+    LanguageValiation3();
+});
+$("#ddlLanguageGrade3").change(function () {
+
+  
+    LanguageValiation3();
+});
+
+
+
+function LanguageValiation1() {
+
+    var l2 = $('#ddlLanguage2').val();
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguage1');
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguageGrade1');
+    // if (l2!="") 
+     $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguage2');
+}
+
+function LanguageValiation2() {
+    var l1 = $('#ddlLanguage1').val();
+
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguage2');
+   // if (l1 != "")
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguageGrade2');
+
+}
+
+function LanguageValiation3() {
+
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguage3');
+    $('#LeanRequisition').bootstrapValidator('revalidateField', 'ddlLanguageGrade3');
+
+}
+//------------CR00018615_ balendra-----------------
+function GetAutoReqAlert(_msg) {
+    var prfid1 = $("#hdnPRFID").val();
+    var sapid = $("#AttritionRotationSapCode").val();
+    var sap = ExtractValue(sapid);
+    debugger;
+
+    swal({
+        title: _msg,
+        text: "",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-primary",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        showLoaderOnConfirm: true,
+        closeOnConfirm: true,
+        closeOnCancel: true
+
+    },
+        function (isConfirm) {
+
+            if (isConfirm) {
+
+                $.blockUI();
+                $.ajax({
+                    type: "Post",
+                    dataType: "json",
+                    url: SimplifyHRUrl + "/Requisition/GetUpdateEmpCode",
+                    data: { SAPID: sap, prfid: prfid1 },
+                    async: false,
+                    success: function (data) {
+                        $.unblockUI();
+                        window.location.href = 'https://staging.myhcl.com/SR_New/Home/SimplifyUserLogin?_EmpCode=' + LeanViewData.Initiator + '&_RequestType=DASHBOARD&_typePara=Dashboard';
+                        //window.location.href = 'http://localhost:61357/Home/SimplifyUserLogin?_EmpCode=' + LeanViewData.Initiator + '&_RequestType=DASHBOARD&_typePara=Dashboard';
+                    },
+                    fail: function (error) {
+                        $.unblockUI();
+                        Console.Log(error);
+                    }
+                })
+            }
+            else {
+                swal("Cancelled", "something wrong)", "error");
+
+            }
+
+        });
+
+
+}
+//------------End-----------------
+

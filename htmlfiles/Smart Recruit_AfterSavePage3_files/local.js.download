@@ -1,0 +1,923 @@
+var opportunitydata = null;
+var joblist = [];
+var projlist = [];
+var custlist = [];
+var sfaaccountlist = [];
+$(document).ready(function () {
+
+
+    /* 
+        $('.selectpicker').change(function(){
+                var value = $(this).selectpicker('val'); 
+                    console.log(value); 
+            }); 
+            */
+  
+    $('.collapseAll').click(function ()
+    {
+        $('.panel-collapse.in')
+         .collapse('hide');
+        $(this).addClass('active');
+        $('.expandAll').removeClass('active');
+    });
+    $('.expandAll').click(function () {
+        $('.panel-collapse:not(".in")')
+            .collapse('show');
+        $(this).addClass('active');
+        $('.collapseAll').removeClass('active');
+    });
+
+
+    $('.input-field input').on('focus blur', function (e) {
+        $(this).parents('.input-field').toggleClass('focused', (e.type === 'focus' || this.value.length > 0));
+    }).trigger('blur');
+
+    function escapeRegExp(str) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    }
+
+    /*TYPEHEAD JS - AUTOCOMPLETE*/
+
+    var substringMatcher = function (strs) {
+        return function findMatches(q, cb) {
+            var matches, substringRegex;
+
+            // an array that will be populated with substring matches
+            matches = [];
+
+            q = escapeRegExp(q);
+            // regex used to determine if a string contains the substring `q`
+            substrRegex = new RegExp(q, 'i');
+
+            // iterate through the pool of strings and for any string that
+            // contains the substring `q`, add it to the `matches` array
+            $.each(strs, function (i, str) {
+                if (substrRegex.test(str)) {
+                    matches.push(str);
+                }
+            });
+
+            cb(matches);
+        };
+    };
+
+    //Projects
+    var projects = projlist;//['ERP Platform Consolidation (C/165401)', 'Others', 'ADM_CB&S_AS PRICING 2016 (C/153950)'];
+    $('#projects .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 0,
+    },
+    {
+        name: 'projects',
+        source: substringMatcher(projects),
+        limit: Infinity,
+    }).on('typeahead:selected', function (obj, datum) {
+        // console.log(obj);
+        //console.log(datum);
+		$('.value input').val('');
+		$('#lbl_ReqType').show();
+		$('#RequisitionType').val('');
+		$('#SchoolType').val('');
+        $('.removeProject').show();
+        //$('.radioError').show().removeClass('hide');  
+        $('.showonClInter').show().removeClass('hide');
+        $('.showonProjectPL1L4').show();
+        $('.showonOtherPL1L4').hide();
+
+        $('.radioQuestion input').removeAttr('disabled checked');
+        //$('.radioError input').removeAttr('disabled checked');
+        $('.showonClInter input').removeAttr("disabled checked");
+        var iscas = $('#hdnIsCAS').val();
+        var isSales = $('#hdnIsSales').val();
+        var projCode = ExtractValue(datum);
+        var projType = projCode.substring(0, 1);
+        if ((isSales === "1" || iscas === "1") && datum === "Others (6863)") {
+			
+
+            $('.showonOther').show().removeClass('hide');
+            $('.showonProject').hide();
+            //$('.radioQuestion').hide();
+            $('.showonAdm').hide();
+            $('.showonProjectPL1L4').hide();
+            $('.showonOtherPL1L4').show();
+            //$('.radioError input').removeAttr('disabled checked');
+            //$('.radioQuestion input').removeAttr('disabled checked');
+            //$('.showonClInter input').removeAttr("disabled checked");
+        }
+        else if ((isSales === "0" || iscas === "0") && datum === "Others (6863)") {
+            $('.showonOther').show().removeClass('hide');
+            $('.showonProject').hide();
+            $('.radioQuestion').hide();
+            $('.showonAdm').hide();
+            $('.showonProjectPL1L4').show();
+            $('.showonOtherPL1L4').hide();
+            //$('.radioError input').removeAttr('disabled checked');
+            $('.radioQuestion input').removeAttr('disabled checked');
+            $('.showonClInter input').removeAttr("disabled checked");
+        }
+        else if (projType === "Y" || projType === "U") {
+            $('.showonOther').show().removeClass('hide');
+			$('.showonOtherCust').hide().addClass('hide');
+			$('.showonProject').show().removeClass('hide');
+            GetSFAAccountDetails('sfaAccountOppurtunity', 'sfaAccountOppurtunity');
+        }
+        else {
+            $('.showonOther').hide().addClass('hide');
+            $('.showonProject').show().removeClass('hide');
+        }
+
+        angular.element(document.getElementById('LeanViewDataController')).scope().ProjectCallBack(datum);
+        angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+        angular.element(document.getElementById('LeanViewDataController')).scope().ProjectProperty();
+        angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+
+        //ShowHideProjectFields();
+        console.log("autocomplete" + datum);
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'autocompleteinput');                
+        //if (datum === "Others") {
+        //    $('.showonOther').show().removeClass('hide');
+        //    $('.showonProject').hide();
+        //    $('.radioQuestion').hide();
+        //    $('.showonAdm').hide();
+        //    $('.radioError').hide();
+        //    $('.showonReType').show().removeClass('hide');
+        //    //  $('.radioError input').removeAttr('disabled checked');     
+        //    $('.showonClInter input').removeAttr("disabled checked");
+
+        //}
+
+        //if (datum === "ERP Platform Consolidation (C/165401)") {
+        //    $('.showonProject').show().removeClass('hide');
+        //    $('.showonOther').hide();
+        //    $('.showonAdm').hide();
+        //    $('.showonReType').show().removeClass('hide');
+
+        //    $('.radioError input').attr('disabled', true);
+        //    $(".radioError #nosot").prop('checked', true);
+
+        //    $(".radioError").hide();
+
+
+        //}
+
+        //if (datum === "ADM_CB&S_AS PRICING 2016 (C/153950)") {
+        //    $('.showonProject').hide();
+        //    $('.showonReType').hide();
+        //    $('.showonOther').hide();
+        //    $('.showonAdm').show().removeClass('hide');
+        //    $('.radioError input').attr('disabled', true);
+        //    $(".radioError #sot").prop('checked', true);
+        //    $('.showonClInter input').attr("disabled", true);
+        //    $('.showonClInter #yes').prop('checked', true);
+        //    $('.radioQuestion').removeClass('hide').show();
+        //    $('.radioQuestion #nonexc').prop('checked', true);
+        //    $('.radioError').show().removeClass('hide');
+        //}
+    }).on('typeahead:close', function (e) {
+        /* Revalidate the state field */
+        //$('#projects .typeahead').typeahead('destroy');
+        //$('#LeanRequisition').bootstrapValidator('revalidateField', 'autocompleteinput');
+    });
+    /*$('.typeahead').click(function() {
+       $(this).val(' '); 
+    });
+    */
+
+
+    //Customer
+    var customer = custlist;
+    $('#customer .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 0,
+    },
+    {
+        name: 'customer',
+        source: substringMatcher(customer),
+        limit: Infinity,
+    }).on('typeahead:selected', function (obj, datum) {
+        $('.removeCustomer').show();
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'CustomerCodeOthers');
+    });
+
+    //Account
+    var account = sfaaccountlist;//['HCL T FAO (001U000000XY6xaIAD )', 'HCL HRSSC (001U000000XY6xbIAD )', 'HCL ERSChannel-Manufacturing (001U000000XY6xTIAT )', 'HCL ERSChannel - Life Sciences (001U000000XY6xVIAT )'];
+    $('#account .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 0,
+    },
+    {
+        name: 'account',
+        source: substringMatcher(account),
+        limit: Infinity,
+    }).on('typeahead:selected', function (obj, datum) {
+        $('.removeAccount').show();
+    });
+
+    //Oportunity
+    
+    var opportunity = ['FAO (001U000000XY6xaIAD )', 'HRSSC (001U000000XY6xbIAD )', 'Channel-Manufacturing (001U000000XY6xTIAT )', 'Channel - Life Sciences (001U000000XY6xVIAT )'];
+    opportunitydata = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: opportunity
+    });
+    $('#opportunity .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 0,
+    },
+    {
+        name: 'opportunity',
+        source: opportunitydata,
+        limit: Infinity,
+    }).on('typeahead:selected', function (obj, datum) {
+        $('.removeOpportunity').show();
+    });
+
+    //Job
+    var job = joblist;//['Account Management Lead )', 'Admin Lead', 'City Admin', 'Facilities Server Manager', 'Facilities Server Manager'];
+    $('#job .typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 0,
+    },
+    {
+        name: 'jobs',
+        source: substringMatcher(job),
+        limit: Infinity,
+        templates: {
+            empty: function (context) {
+                $(".tt-dataset").text('No Results Found');
+            },
+            header: '<h3 class="league-name">Top Jobs ([Job Family]-Jobs)</h3>'
+        }
+    }).on('typeahead:selected', function (obj, datum) {
+        $('.removeJob').show();
+        $('.jobFilter').css({ 'opacity': '0', 'pointer-events': 'none' });
+
+        angular.element(document.getElementById('LeanViewDataController')).scope().JobCallBack(datum);
+        angular.element(document.getElementById('LeanViewDataController')).scope().$apply();
+    });
+
+
+
+
+    // Show Hide Input Elements  
+    $('input.autocomplete').click(function () {
+        if ($(this).val('')) {
+            $('.showonProject').hide().addClass('hide');
+        }
+    });
+
+    //$('.typeInput input').click(function () {
+    //    if ($(this).is(':checked', true)) {
+    //        //$('.showonReType').show().removeClass('hide');  
+    //        var thisVal = $(this).val();
+    //        if (thisVal === "SOT") {
+    //            var value = "Yes";
+    //            $("input[name=cl1][value=" + value + "]").prop('checked', true);
+    //            $('.showonClInter input').attr("disabled", true);
+    //            $('.radioQuestion').show().removeClass('hide');
+    //        }
+    //        else {
+    //            //  $('.showonClInter input').removeAttr("disabled");  
+    //            // showonReType
+    //        }
+
+    //    }
+    //});
+
+
+    /*Datepicker*/
+    $('.date_list2').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+    })
+    $('#BillingStartDateID').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function ()
+    {
+     
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+
+        var value = $("#BillingTypeID").val();
+        var entityId = $("#hdnEntity").val();
+        var SR_status = $("#hdnSR_PRFRoleStatusActionID").val();
+
+        if (value == "1" && (SR_status == "21" || SR_status == "17" || SR_status =="18" || SR_status =="19" || SR_status =="20"))
+        {           
+            var oldBsd = $("#hdnBSD").val();
+            var bsd = $("#BillingStartDateID").val();
+            if (oldBsd && bsd)
+            {
+                var _oldbsd = new Date(myApp.ConvertDateToStandredFormat($("#hdnBSD").val()));
+                var _bsd = new Date(myApp.ConvertDateToStandredFormat($("#BillingStartDateID").val()));
+                var a = moment(_oldbsd);
+                var b = moment(_bsd);
+                var diffindays = b.diff(a, 'days')
+                if (diffindays != 0)
+                {
+                    $('#bsdReason').show();
+                    $('#Requisition').bootstrapValidator('revalidateField', 'BSDReason');
+                }
+                else
+                {
+                    $('#bsdReason').hide();
+                }
+
+            }
+        }
+
+        //$('#OnBoardingDate').val($('#BillingStartDateID').val());
+        $('#Requisition').bootstrapValidator('revalidateField', 'BillingStartDateID');
+        $('#Requisition').bootstrapValidator('revalidateField', 'OnBoardingDate');
+    })
+    $('#OnBoardingDate').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#Requisition').bootstrapValidator('revalidateField', 'BillingStartDateID');
+        $('#Requisition').bootstrapValidator('revalidateField', 'ValidTillDate');
+        $('#Requisition').bootstrapValidator('revalidateField', 'OnBoardingDate');
+    })
+    $('#ValidTillDate').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#Requisition').bootstrapValidator('revalidateField', 'OnBoardingDate');
+        $('#Requisition').bootstrapValidator('revalidateField', 'ValidTillDate');
+        $('#Requisition').bootstrapValidator('revalidateField', 'BillingStartDateID');
+
+    })
+
+    $('#TxtcontractFrom').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtContractTo');
+     });
+
+    $('#TxtContractTo').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#ExternalRequisition').bootstrapValidator('revalidateField', 'TxtcontractFrom');
+    });
+
+
+    $('#TxtTPcontractFrom').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#ExternalRequisition').bootstrapValidator('revalidateField', 'TPcontractfrom');
+    });
+
+    $('#TxtTPcontractTo').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#ExternalRequisition').bootstrapValidator('revalidateField', 'TPcontracto');
+    });    
+
+    $('#ReleaseDate').datepicker({
+        format: "dd-M-yyyy",
+    }).on('changeDate', function () {
+        $(this).datepicker('hide');
+        $(this).parents('.input-field').addClass('focused');
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'ReleaseDate');
+
+    })
+    /*Success Message*/
+    //$('.success').click(function () {
+    //    $('.splash-screen').removeClass('hide').addClass('show');
+    //    $('body').removeClass('overflow-n').addClass('overflow');
+    //    $("#success_model").stop().slideDown();
+    //});
+
+
+
+
+    ///*Skill Pop button Click*/
+    //$('.showVal').click(function () {
+    //    // $('.skill').hide().val('Java');  
+    //    $('.lableskill').addClass('focused');
+    //    $('.skillTag').show().removeClass('hide');
+    //    $('.skillTag span.active').removeClass('hide');
+    //    $('.skillTag span').show();
+    //    $('.skill').hide();
+
+    //    if ($('.primarySkill').is(':checked')) {
+    //    }
+    //    else {
+    //        $('.customError').removeClass('hide');
+    //    }
+
+
+
+    //});
+
+    //$('.skill').focus(function () {
+    //    $(this).parents('.lableskill').removeClass('focused');
+    //});
+
+
+    /*Skill Pop Up Make primary*/
+    //$('.primarySkill').click(function () {
+    //    if ($(this).is(':checked')) {
+    //        $('.customError').hide();
+    //        var radioVal = $(this).val();
+    //        $('.skillTag').css({ 'border-bottom': '1px solid #000' });
+
+    //        $(".skillTag span").each(function () {
+    //            if ($(this).is('.' + radioVal)) {
+    //                $(".skillTag span").removeClass('active');
+    //                $(this).addClass('active');
+    //            }
+    //        });
+    //    }
+
+    //    $('.showVal').attr('data-dismiss', 'modal');
+    //    $('#skill-error').hide();
+    //    $('.skillTag span.active').prependTo(".skillTag");
+
+    //});
+
+    //$(".addSkillicon").one('click', function () {
+    //    var skillText = $(this).parents('tr').find('.skillName').text();
+    //    $('.skillTag').append('<span class="tooltipped ' + skillText + '">' + skillText);
+    //    $('.skillTag span').hide();
+    //});
+
+	
+    /*skill tag hover*/
+   //Added  By Ankit Sirvastava
+    $(document).on('mouseover', '.tooltipped1', function () {
+
+        //var tooltippedtext = $('.tooltipped.active').text()
+
+        $(this).append('<div class="skillTagHover"></div>');
+        $(this).find('.skillTagHover').show().html(skilll);
+
+        var thisPos = $(this).position();
+        $(this).find('.skillTagHover').css({ 'left': thisPos.left });
+    });
+    $(document).on('mouseout', '.tooltipped1', function (e) {
+        $('.skillTagHover').remove();
+    });
+
+   ///END
+    $(document).on('mouseover', '.tooltipped', function () {
+
+        //var tooltippedtext = $('.tooltipped.active').text()
+
+        $(this).append('<div class="skillTagHover"></div>');
+        $(this).find('.skillTagHover').show().html('Secondary');
+
+        var thisPos = $(this).position();
+        $(this).find('.skillTagHover').css({ 'left': thisPos.left });
+    });
+    ///
+
+    $(document).on('mouseover', '.tooltipped.active', function () {
+        $(this).find('.skillTagHover').html('Primary');
+    });
+
+
+    $(document).on('mouseout', '.tooltipped', function (e) {
+        $('.skillTagHover').remove();
+    });
+
+
+
+
+
+
+
+    $('.select-dropdown').each(function () {
+        var st = $(this).val().trim();
+        $(this).val(st);
+    });
+
+
+    $('.select-wrapper .caret').html('<i class="material-icons">expand_more</i>');
+
+    $('.openDropdown .selectDropdown li').click(function () {
+        var thisval = $(this).text();
+        $(this).parents('.selectDropdown').prev('label').prev('.updateVal').val(thisval);
+        $(this).parents('.selectDropdown').hide();
+    });
+
+
+
+    $('.updateVal').click(function () {
+        $(this).parents('.openDropdown').find('.selectDropdown').toggle();
+    });
+
+    $(document).click(function () {
+        $('.selectDropdown').hide();
+    });
+
+    $('.updateVal').click(function (e) {
+        e.stopPropagation();
+        $('.selectDropdown').show();
+    });
+
+
+
+    /*Tooltip*/
+    $('.tooltipM').tooltip();
+
+    $('[data-toggle="tooltipnew"]').tooltip({
+        trigger: 'hover'
+    });
+
+
+
+    /*Empployee Group*/
+
+    $('.employeeGroup li').on('click', function () {
+        var liValue = $(this).text();
+        // console.log(liValue);
+        if (liValue === "Contract") {
+            $('.employeeGroupInputs').removeClass('hide').show();
+            $('.constentRadio, .constentInputs').hide();
+        }
+        else {
+            $('.employeeGroupInputs').hide();
+            $('.constentRadio').show();
+            $('.constentRadio input').removeAttr('checked');
+        }
+
+    });
+
+    /*ConstentTP Group*/
+    $('.constentRadio input').on('change', function () {
+        if ($(this).is(':checked')) {
+            var tpValue = $(this).val();
+
+            if (tpValue === "TPYes") {
+                $('.constentInputs').removeClass('hide').show();
+            }
+            else {
+                $('.constentInputs').hide();
+            }
+        }
+    });
+
+
+    /*Filter Pop up*/
+
+    $('.filteradio input').on('change', function () {
+        if ($(this).is(':checked')) {
+            var tpValue = $(this).val();
+            console.log(tpValue);
+            if (tpValue === "l1") {
+                $('.jobList').removeClass('hide').show();
+            }
+            else if (tpValue === "all") {
+                $('.jobList').removeClass('hide').show();
+            }
+            else {
+                $('.jobList').hide();
+            }
+        }
+    });
+
+
+    //$('.jobList li').click(function () {
+    //    $('.jobList li').removeClass('active');
+    //    $(this).addClass('active');
+    //    $('.updatejob').removeAttr('disabled');
+    //});
+
+
+    //$('.updatejob').click(function () {
+    //    var jotext = $('.jobList li.active').text();
+    //    $('.autocompleteJob').val(jotext);
+    //    $('.jobDropdown .input-field').addClass('focused');
+    //});
+
+
+
+    $('.showonReType .selectpicker').change(function () {
+        var subtree = $(this).selectpicker('val');
+        if (subtree === "22") {
+            $('.subInput').show().removeClass('hide');
+        } else {
+            $('.subInput').hide();
+        }
+    });
+
+    $('.removeInputval').click(function () {
+        $(this).parents('.input-field').find('input').typeahead('val', '');
+        $(this).hide();
+        $(this).parents('.input-field').removeClass('focused');
+
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'autocompleteinput');
+        $('#lbl_ProjectExpiration').hide();
+    });
+
+
+
+
+    /*Empployee Group*/
+    $('.employeeGroup .selectpicker').change(function () {
+        var liValue = $(this).selectpicker('val');
+        // console.log(liValue);
+        if (liValue === "Contract") {
+            $('.employeeGroupInputs').removeClass('hide').show();
+            $('.constentRadio, .constentInputs').hide();
+        }
+        else {
+            $('.employeeGroupInputs').hide();
+            $('.constentRadio').show();
+            $('.constentRadio input').removeAttr('checked');
+        }
+
+    });
+    
+    //Add this into bottom of local js under document ready
+    /*IF INPUT has value label ---> Select, Typehead*/  
+    $('.selectpicker').change(function(){
+        $('.input-field input').each(function() {
+            var value = $(this).val().length; 
+            if(value > 0){
+                $(this).parents('.input-field').addClass('focused');
+            } 
+        }); 
+    }); 
+		
+		
+    $('.typeahead').on('typeahead:Selected', function () {
+        $('.input-field input').each(function() {
+            var value = $(this).val().length;   
+            if(value > 0){ 
+                $(this).parents('.input-field').addClass('focused'); 
+            }  
+        });
+    });
+
+    $('#rootwizard').bootstrapWizard({
+        'onNext': function (tab, navigation, index) {
+            var $valid = $(".formValidate").valid();
+            if (!$valid) {
+                $validator.focusInvalid();
+                return false;
+            }
+        }, 'onTabShow': function (tab, navigation, index)
+        {
+            var active;
+            if (getUrlParameter('active'))
+            {
+                 active = atob(getUrlParameter('active'));
+            }
+            else
+            {
+                active = getUrlParameter('active');
+
+            }
+          
+            if (active === "3") {
+                $('.submitBtn').removeClass('disabled');
+            }
+            else {
+                $('.submitBtn').addClass('disabled');
+            }
+        }
+    });
+
+
+    $('#rootwizardExternal').bootstrapWizard({
+        'onTabShow': function (tab, navigation, index) {
+            if (index === 1) {
+                $('.submitBtn').removeClass('disabled');
+            }
+            else {
+                $('.submitBtn').addClass('disabled');
+            }
+        }
+    });
+
+    $('.rowHt').each(function () {
+        var thisHT = $(this).find('.col-xs-6').height();
+        $('.rowHt .col-xs-6').css({ 'height': thisHT });
+        console.log(thisHT);
+    });
+
+
+    var bgcolorlist = new Array("#5E97F6", "#9CCC65", "#FF8A65", "#9E9E9E", "#9FA8DA", "#90A4AE", "#AED581", "#F6BF26")
+    var index = Math.floor(Math.random() * bgcolorlist.length);
+    console.log(bgcolorlist[index]);
+    $('.avatar_P').each(function () {
+        $(this).css({ 'background': bgcolorlist[Math.floor(Math.random() * 8)] });
+    });
+
+    /*scrollFilter*/
+    $(".scrollFilter").mCustomScrollbar({
+        theme: "dark-thin"
+    });
+
+    $('.closeSearch').hide();
+
+    $(".topsearchIcon").click(function (e) {
+        e.stopPropagation();
+        $('.iconSearch').addClass('active');
+        $('.dropdown-menu1').slideDown();
+        $('.topsearchIcon i').addClass('animated rotateOut').fadeOut(1000).removeClass('rotateIn');
+        $(this).next('.closeSearch').fadeIn(1000);
+        $('.closeSearch i').addClass('animated rotateIn').removeClass('rotateOut');
+        //$('.dropSplash').fadeIn();
+    });
+
+    //$('.closeSearch').hide();
+    $(".closeSearch").click(function (e) {
+        e.stopPropagation();
+        $('.iconSearch').removeClass('active');
+        $('.dropdown-menu1').slideUp();
+        $(this).fadeOut(300);
+        $('.closeSearch i').removeClass('animated rotateIn').addClass('rotateOut');
+        $('.topsearchIcon i').fadeIn(2000).removeClass('rotateOut').addClass('animated rotateIn');
+        //$('.dropSplash').fadeIn();
+    });
+
+    $('[data-toggle="collapse1"]').click(function () {
+        $(this).next('.collapse').slideToggle();
+        $(this).toggleClass('collapsed');
+    });
+
+    var rightPnaelHt = $('.colRight').height();
+    //$('.filter_bg').height(rightPnaelHt);
+    $('.filter_bg').css('min-height', rightPnaelHt);
+
+    $(".jobList").mCustomScrollbar({
+        theme: "dark-thin"
+    });
+
+    (function ($) {
+        var allPanels = $('.collapseCustom').show();
+        //$('.collapseCustom.active').show(); 
+        $('.expandCustom').click(function () {
+            var thisT = $(this);
+            var target = thisT.next();
+            var thisA = $(this).find('a');
+
+            $('.panel-heading').addClass('collapsed');
+            thisT.removeClass('collapsed');
+
+            if (!target.hasClass('active')) {
+                allPanels.removeClass('active').slideUp();
+                target.addClass('active').slideDown();
+            }
+
+            return false;
+        });
+
+
+        $('.collapseAll').click(function () {
+            $('.collapseCustom').slideUp();
+            $(this).addClass('active');
+            $('.expandAll').removeClass('active');
+            $('.panel-heading').addClass('collapsed');
+        });
+
+        $('.expandAll').click(function () {
+            $('.collapseCustom').slideDown();
+            $(this).addClass('active');
+            $('.collapseAll').removeClass('active');
+            $('.panel-heading').removeClass('collapsed');
+        });
+
+
+	})(jQuery);
+
+	// Start Menu --Category Custom DropDown 
+	$(".sizevalue").click(function () {
+		$(".dropShow").toggle();
+	});
+
+	$('.dropShow li').on("click", function (e) {
+		e.preventDefault();
+		var id = $(this).attr('data-related');
+		$(".eventSec").each(function () {
+			$(this).hide();
+			if ($(this).attr('id') == id) {
+				$(this).stop(true, true).fadeTo(700, 1.0).show('700');
+			}
+		});
+	});
+
+	$('.dropShow>.dpe>a').on('click', function () {
+		var thisText = $(this).text();
+		$('.value input').val(thisText).parents('.form-group').removeClass('has-error').addClass('has-success').on('click', function () {
+			$('button').removeAttr("disabled");
+		});
+	});
+
+	//$('.submenu>li>a').on('click', function () {
+	//	var thisText = $(this).text();
+	//	var parText = $(this).parent().parent().prev().text();
+	//	var heaTxt = $(this).parents(".headText").find("em").text();
+	//	$('.value input').val(heaTxt + ' / ' + parText + ' / ' + thisText).parents('.form-group').removeClass('has-error').addClass('has-success').on('click', function () {
+	//		$('button').removeAttr("disabled");
+	//	});
+
+	//});
+
+	//$('.submenu>.dpe1>a').on('click', function () {
+	//	var thisText = $(this).text();
+	//	var parText = $(this).parent().parent().prev().text();
+	//	$('.value input').val(parText + ' / ' + thisText).parents('.form-group').removeClass('has-error').addClass('has-success').on('click', function () {
+	//		$('button').removeAttr("disabled");
+	//	});
+
+	//});
+
+	//$('.submenu>.dpe2 li>a').on('click', function () {
+	//	var thisText = $(this).text();
+	//	var parText1 = $(this).parent().parent().parent().parent().parent().find('.sub').text();
+	//	var parText = $(this).parent().parent().prev().text();
+
+	//	$('.value input').val(parText1 + ' / ' + parText + ' / ' + thisText).parents('.form-group').removeClass('has-error').addClass('has-success').on('click', function () {
+	//		$('button').removeAttr("disabled");
+	//	});
+
+	//});
+
+
+	
+
+	//Outside click dropdown hide
+	$(document).mouseup(function (e) {
+		var container = $(".dropShow");
+		if (!container.is(e.target) && container.has(e.target).length === 0) {
+			container.hide();
+		}
+	});
+
+	$('.dropShow li a').click(function () {
+		$('.dropShow li a').removeClass("active");
+		$(this).addClass("active");
+	});
+
+	//dropshow Hide	 
+	$(document).on("click", ".dropShow li", function () {
+		$(this).parents(".dropShow").hide();
+	});
+// Category Custom DropDown End
+
+// onclick Event div show and hide js End
+// End Menu
+
+});
+
+
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+    //alert(e.target);
+    var href = $(e.target).attr('href');
+    var active;
+    if (getUrlParameter('active'))
+    {
+         active = atob(getUrlParameter('active'));
+    }
+    else
+    {
+        active = getUrlParameter('active');
+    }
+    if (active == "2" || active == "3") {
+        href = "#tab" + active;
+    }
+    var $curr = $(".formSteps  a[href='" + href + "']").parent();
+    $('.formSteps li').removeClass();
+    $curr.addClass("active");
+    $curr.prevAll().addClass("visited");
+});
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'), sParameterName, i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+
+
+
+

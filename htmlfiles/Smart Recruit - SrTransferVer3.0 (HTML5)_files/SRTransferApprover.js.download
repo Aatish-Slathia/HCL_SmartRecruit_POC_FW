@@ -1,0 +1,197 @@
+﻿//=========================================================================================================================================================
+//    Version      Modified By          Modified On          Change Description
+//=========================================================================================================================================================
+//     v1.0        Banshi Pal        31-Mar-2017           SR Transfer             
+//=========================================================================================================================================================
+
+$(function () {
+    Sourceurl = re.exec(window.location.href)
+    $('body').on('click', '.btn', function (e) {
+
+        $(this).removeData('bs.modal');
+        $(this).attr('data-target', '#modal-container');
+        $(this).attr('data-toggle', 'modal');
+
+        var id = $(this).attr("id");
+        if (id == "SearchReq" || id == "Reset") {
+            $(this).removeData('bs.modal');
+            $(this).attr('data-target', '');
+            $(this).attr('data-toggle', '');
+        }
+
+    });
+
+    $('body').on('click', '.modal-close-btn', function () {
+        $('#modal-container').modal('hide');
+    });
+
+    $('#modal-container').on('hidden.bs.modal', function () {
+        $(this).removeData('bs.modal');
+    });
+
+    $('#modal-container').on('show.bs.modal', function () {
+    });
+
+    $('#CancelModal').on('click', function () {
+        return false;
+    });
+
+    $("#SearchReq").click(function () {
+        SearchRequisitions();
+    });
+
+    $("#SearchApprovedReq").click(function () {
+        SearchApprovedRequisitions();
+    });
+
+    $("#Reset").click(function () {
+        Reset();
+    });
+
+    $("#btn-Submit").click(function () {
+        var _Remarks = $("#Remarks").val();
+        FormSubmit();
+    });
+
+    CloseProgress();
+});
+
+function Reset() {
+  
+    var Sourceurl = window.location.pathname;
+    if (Sourceurl.indexOf('ManageSRTransferApprover') != -1) {
+        window.location.href = "ManageSRTransferApprover";
+    }
+    else {
+        window.location.href = "ManageSRTransferApprover";
+    }
+}
+
+
+$(document).ready(function () {
+    $('#divdateFrom').datepicker({
+        defaultDate: new Date(),
+        autoclose: true,
+        format: 'dd-MM-yyyy',
+    });
+
+    $('#divdateTo').datepicker({
+        defaultDate: new Date(),
+        autoclose: true,
+        format: 'dd-MM-yyyy'
+
+    });
+    
+    var hdnMsgSaveReq = $("#hdnMsgSaveReq").val();
+
+    if (hdnMsgSaveReq != "" && hdnMsgSaveReq != null && hdnMsgSaveReq != undefined) {
+        alert(hdnMsgSaveReq);
+    }
+
+});
+function SearchRequisitions() {
+    var dateFrom = $("#StartDate").val();
+    var dateTo = $("#EndDate").val();
+    var ReqNo = $("#ReqNo").val();   
+    var re = /^[ A-Za-z0-9_@/-]*$/
+    if (!re.test(ReqNo)) {
+        alert("Please enter valid Requisition number");
+        return true;
+    }
+    var ReqnewVal = ReqNo.replace(/[/]/g, '!');
+    if ((dateFrom != "" && dateTo != "") || (ReqNo != "")) {
+        window.location.href = "ManageSRTransferApprover?dateFrom=" + dateFrom + "&dateTo=" + dateTo + "&ReqNo=" + ReqnewVal;
+    }
+    else {
+        alert("Please select date Or Requisition number");
+        return true;
+    }
+
+}
+
+var app = angular.module('SRTransferApprover', ['datatables']);
+app.controller('Ctrl_SRTransferApprover', ['$scope', '$http', 'DTOptionsBuilder', 'DTColumnBuilder',
+
+function ($scope, $http, DTOptionsBuilder, DTColumnBuilder) {
+    $scope.dtColumns = [
+
+        DTColumnBuilder.newColumn(-1).withOption('name', '0').
+        withTitle('Requisition Number').renderWith(function (data, type, full) {
+            return '<a title="Click to view SR details" onclick="OpenProgress();" class="modal-link btn btn-sm" href="../Home/ViewRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=0">' + full["Requisition_Number"] + '</a>';
+        }),
+        DTColumnBuilder.newColumn("Requisition_Date", "Requisition Date").withOption('name', '1'),
+        DTColumnBuilder.newColumn("Customer_Project", "Customer/Project").withOption('name', '2'),
+        DTColumnBuilder.newColumn("Country", "Country").withOption('name', '3'),
+        DTColumnBuilder.newColumn("Band", "Band").withOption('name', '4'),
+        DTColumnBuilder.newColumn("Designation", "Designation").withOption('name', '5'),
+        DTColumnBuilder.newColumn("Skills", "Skills").withOption('name', '6'),
+
+       DTColumnBuilder.newColumn("Job", "Job").withOption('name', '7'),
+       DTColumnBuilder.newColumn("Vacancy", "vacancy").withOption('name', '8'),
+       DTColumnBuilder.newColumn("Initiator", "Initiator").withOption('name', '9'),
+
+        DTColumnBuilder.newColumn(-1).withOption('name', '10').
+        withTitle('Deviation').renderWith(function (data, type, full) {
+            if (full["IsDeviation"] == true) {
+                return 'Deviation';
+            }
+            else {
+                return 'Non Deviation';
+            }
+        }),
+
+
+        DTColumnBuilder.newColumn(-1).notSortable().withOption('name', '12').
+        withTitle('Action').renderWith(function (data, type, full) {
+
+            var a = '<div class="anchor-inBlock"><a onclick="OpenProgress();" id="edit" class="modal-link btn" name="Approve" title="Approve/Reject" href="../Home/TransferPendingAcceptSR?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=1"><span class="input-group" data-toggle="" data-target=""><span class="glyphicon glyphicon-send"></span></span></a>';
+            return a;
+        })
+
+    ];
+
+    var Sourceurl = re.exec(window.location.href)
+    $scope.dtOptions = DTOptionsBuilder.newOptions().withOption('ajax', {
+        dataSrc: "data",
+        url: Sourceurl + "/SRTransferApprover_Json",
+        type: "POST"
+    })
+    .withOption('processing', true)
+    .withOption('serverSide', true)
+    .withOption('stateSave', true)
+    .withPaginationType('simple_numbers')
+    .withDisplayLength(10)
+    .withOption('aaSorting', [1, 'asc'])
+}])
+
+$(function () {
+    $("#selectall").click(function () {
+        $('.SingleCheckBox').attr('checked', this.checked);
+        if ($(".SingleCheckBox:checked").length > 0) {
+            $("#AllRemarks").show();
+        }
+        else {
+            $("#AllRemarks").hide();
+        }
+    });
+
+    
+    
+});
+
+
+function UncheckParent(control) {
+ 
+    if ($(".SingleCheckBox").length == $(".SingleCheckBox:checked").length) {
+        $("#selectall").attr("checked", "checked");
+    } else {
+        $("#selectall").removeAttr("checked");
+    }
+
+    if ($(".SingleCheckBox:checked").length > 0) {
+        $("#AllRemarks").show();
+    }
+    else {
+        $("#AllRemarks").hide();
+    }
+}

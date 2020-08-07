@@ -1,0 +1,412 @@
+﻿var myApp;
+myApp = myApp || (function () {
+    var pleaseWaitDiv = $('<div class="modal fade bs-example-modal-sm" id="myPleaseWait" tabindex="-1" role="dialog" aria-hidden="true"  data-backdrop="static"><div class="modal-dialog modal-sm"><div class="modal-content"><div class="modal-header"><h4 class="modal-title"><span class="glyphicon glyphicon-time"></span>Please Wait</h4></div><div class="modal-body"><div class="progress"><div class="progress-bar progress-bar-infoprogress-bar-striped active"style="width: 100%"></div></div></div></div></div></div>');
+    return {
+        showPleaseWait: function () {
+            pleaseWaitDiv.modal();
+        },
+        hidePleaseWait: function () {
+            pleaseWaitDiv.modal('hide');
+        },
+        GetParameterValues: function (_param) {
+            return GetParameterValues(_param);
+        },
+        ISOJsonDateFormat: function (_Param) {
+            return ISOJsonDateFormat(_Param);
+        },
+        Get_hostname: function (_Url) {
+            var m = _Url.match(/^http:\/\/[^/]+/);
+            return m ? m[0] : null;
+        },
+        GetEmployeeSapCodeName: function (ControliD, ControlName, Type, Projectcode) {
+            $("#TPResourceToFTE").hide();
+            Projectcode= ExtractValue(Projectcode)
+            var _url = Sourceurl + "GetEmployeeDetailsByNameAndSapCode";
+            var empList = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('_EmployeeCode'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                remote: {
+                    url: _url + '?_EmployeeCode=' + '%QUERY' + '&_Type=' + Type + '&_Projectcode=' + Projectcode,
+                    wildcard: '%QUERY'
+                }
+            });
+            empList.initialize();
+            //$("#" + ControliD).typeahead('destroy');
+            $("#" + ControliD).typeahead({
+                hint: true,
+                highlight: true,
+                minLength: 1
+            }, {
+                name: ControlName,
+                source: empList.ttAdapter(),
+                limit: Infinity,
+                // This will be appended to "tt-dataset-" to form the class name of the suggestion menu.
+                name: 'EmployeeList',
+                displayKey: 'EMFirstName',
+                // the key from the array we want to display (name,id,email,etc...)
+                //templates: {
+                //    empty: [
+                //        '<div class="list-group search-results-dropdown"><div class="list-group-item">Nothing found.</div></div>'
+                //    ],
+                //    header: [
+                //        '<div class="list-group search-results-dropdown">'
+                //    ],
+                //    suggestion: function (data) {
+                //        return data.EMEmpCode;
+                //    }
+                //}
+                //    function (query, process) {
+                //    var countries = [];
+                //    map = {};                
+            }).on('typeahead:selected', function (event, data) {
+                if (Type == "TP") {
+                    var TPState = data.EMEmpGroup;
+                    var TPEmpSubgroup = data.EMEmpSubgroup;
+                    $("#TPState").val(TPState);
+                    $("#hdnResourceEmpSubgroup").val(TPEmpSubgroup);
+					$("#selectedEmpL1").val(data.JoiningL1);
+                    $("#TPState").val(TPState);
+                    $("#hdnResourceEmpSubgroup").val(TPEmpSubgroup);
+
+                    if (TPEmpSubgroup == "Third Party") {
+                        //$("#TPResourceToFTE").show(); 
+                        $('#TPtoFTEConversionYes').prop('checked', false);
+                        $('#TPtoFTEConversionNo').prop('checked', false);
+                        //$('#Requisition').bootstrapValidator('revalidateField', 'IsTPtoFTEResource');
+                    }
+                    else {
+                        $('#TPtoFTEConversionNo').prop('checked', true);
+                        //$('#Requisition').bootstrapValidator('revalidateField', 'IsTPtoFTEResource');
+                        //$("#TPResourceToFTE").hide();
+                    }
+
+                    console.log("TPState:" + TPState + "-----TPEmpSubgroup:" + TPEmpSubgroup);
+                    $('#LeanRequisition').bootstrapValidator('revalidateField', 'TPSAPCODE');
+
+                }
+                else {
+                    $('#LeanRequisition').bootstrapValidator('revalidateField', 'AttritionRotationSapCode');
+                }
+				var _EmployeeCode = "";
+				if (Type == "TP") {
+					_EmployeeCode = $('#TPSAPCODE').val();
+				} else {
+					_EmployeeCode = $('#AttritionRotationSapCode').val();
+				}
+				
+				if ($('#hdnIsDuplicateAttr').val() == "true") {//temp solution
+					return;
+				}
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: SimplifyHRUrl + "/Requisition/GetemployeeDetail",
+                    data: { _EmployeeCode: _EmployeeCode },
+                    success: function (data) {                       
+                        $("#Skills").val("");
+                        angular.element(document.getElementById('LeanViewDataController')).scope().refreshreplacement(null);
+                        var contact = JSON.parse(data);                     
+                        if (contact != "") {
+                            $("#hdnEMEmpSubgroup").val(contact[0].EMEmpSubgroup);                            
+                            $("#hdnemSubBand").val(contact[0].emSubBand);
+                            //----------Added by Balendra CR00018682------  
+                            if (contact[0].EMEmpSubgroup =='FT' && contact[0].EmCountryCode =='40') {
+                                $('#lbl_FTC').show();
+                            }
+                         //--------------------------End-------------------
+                            if ($('#hdnIsERS').val() != "True") {
+                                GetSkilldata(contact)
+                            }
+                            angular.element(document.getElementById('LeanViewDataController')).scope().JobBandCallBack(contact[0].emjobcode, contact[0].EMPGROUPID, contact[0].emSubBand, contact[0].EMEmpSubgroup, contact[0].EMPSASAPCode, contact[0].EmCountryCode, contact[0].EmCompanyCode);
+                            var _Entity = $("#hdnEntity").val();
+                            if (_Entity == 2) {
+                                var RequisitionsSourceDemandEntityID = $('#hdn_RequisitionsSourceDemandEntityID').val();
+                                if (RequisitionsSourceDemandEntityID == 118 || RequisitionsSourceDemandEntityID == 119)
+                                    $("#subDomainEmp").val(contact[0].SUBDOMAINCODE);
+                            }
+                        }
+                    },
+                    fail: function (error) {
+                        Console.Log(error);
+                    }
+                })
+
+            });
+        },
+        AddDatePicker: function (ControlId) {
+            $('#' + ControlId).datepicker({
+                defaultDate: new Date(),
+                autoclose: true,
+                format: 'dd-MM-yyyy'
+
+            })
+        },
+        ConvertDateToStandredFormat: function (Date) {
+            return ConvertDateToStandredFormat(Date);
+        },
+
+        AddingAstricToFormControl: function () {
+            AddingRequired();
+        },
+        getFormattedDate: function (date) {
+            return getFormattedDate(date);
+        },
+        getErrorUrl: function () {
+            return SimplifyHRUrl + "/Home/HandleException";
+        },
+        monthNumToName: function (monthnum)
+        {        
+         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+         return months[monthnum] || '';
+        }
+    };
+})();
+
+function findIndexInData(data, property, value) {
+    var result = -1;
+    data.some(function (item, i) {
+        if (item[property] === value) {
+            result = i;
+            return true;
+        }
+    });
+    return result;
+}
+function ExtractValue(inputString) {
+    var regExp = /\((.*?)\)/g, a = [], m;
+    while (m = regExp.exec(inputString)) {
+        a.push(m[1]);
+    }
+    if (a.length > 0) {
+        return a[a.length - 1];
+    }
+    else {
+        return inputString;
+    }
+}
+
+//THIS FUNCTION IS FOR MANDATORY CUSTOMER FIELDS.
+function IsValidCustomer(customerTextCode) {
+
+    if ($.trim(customerTextCode) != "") {
+        if (customerTextCode.indexOf("(") != -1 && customerTextCode.indexOf(")") != -1) {
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
+}
+function ISOJsonDateFormat(param) {
+    var _date = "";
+    if (param === undefined || param == null || param == "") {
+        _date = "";
+    }
+    else {
+
+        _date = eval(param.replace(/\/Date\((\d+)\)\//gi, "new Date($1)"));
+    }
+    return _date;
+}
+
+function ConvertDateToStandredFormat(MyDate) {
+
+    if (!(MyDate === undefined || MyDate == '' || MyDate == null)) {
+        var parts = MyDate.split('-');
+
+        var _Month = '';
+        if (parts[1] == 'Jan') { _Month = '01' } else if (parts[1] == 'Feb') { _Month = '02' }
+        else if (parts[1] == 'Mar') { _Month = '03' } else if (parts[1] == 'Apr') { _Month = '04' }
+        else if (parts[1] == 'May') { _Month = '05' } else if (parts[1] == 'Jun') { _Month = '06' }
+        else if (parts[1] == 'Jul') { _Month = '07' } else if (parts[1] == 'Aug') { _Month = '08' }
+        else if (parts[1] == 'Sep') { _Month = '09' } else if (parts[1] == 'Oct') { _Month = '10' }
+        else if (parts[1] == 'Nov') { _Month = '11' } else if (parts[1] == 'Dec') { _Month = '12' }
+
+
+        var dmyDate = parts[2] + "/" + _Month + "/" + parts[0];
+        return dmyDate;
+    } else { return ""; }
+}
+
+function AddingRequired() {
+
+    $("form :input").each(function (index, element) {
+        var id = $(this).attr("id"); // returns the object ID
+        var value = $(this).val(); // returns the object value
+        if (!(id === undefined)) {
+            if ($("#" + id).attr("data-bv-field")) {
+                var $div = $(this).closest('.form-group');
+                var _Html = $div.find("label").find("span").remove();
+
+
+                var clone = $div.find("label").clone();
+                $("span", clone).remove();
+                clone = clone.text().replace("*", "");
+                //(" <spna class='note'>*</spna>", "");
+                $div.find("label").html("");
+                $div.find("label").html(clone + " <span class='note'>*</span>");
+                // addClass("Required-label")
+
+            }
+        }
+    });
+}
+
+function getFormattedDate(date) {
+    var year = date.getFullYear().toString();;
+    var month = (1 + date.getMonth()).toString();
+    month = month.length > 1 ? month : '0' + month;
+    var day = date.getDate().toString();
+    day = day.length > 1 ? day : '0' + day;
+    var _date = year + '/' + month + '/' + day;
+    return _date;
+}
+
+function getFormattedDateAfter2month(date) {
+    var year = date.getFullYear().toString();;
+    var month = (1 + date.getMonth() + 2).toString();
+    month = month.length > 1 ? month : '0' + month;
+    var day = date.getDate().toString();
+    day = day.length > 1 ? day : '0' + day;
+    var _date = year + '/' + month + '/' + day;
+    return _date;
+}
+
+
+
+function ConvertToString(t) {
+    var p = t.toString();
+    return p;
+}
+
+//THIS FUNCTION IS FOR MANDATORY SAP CODE/NAME FIELDS.
+function IsValidSapCode(nameSapCode) {
+
+    if ($.trim(nameSapCode) != "") {
+        if ((nameSapCode.indexOf("(") != -1 && nameSapCode.indexOf(")") != -1)) {
+            var regExp = /\(([^)]+)\)/;
+            var sapCode = regExp.exec(nameSapCode);
+            if (sapCode[1].length == 8) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else if (nameSapCode.indexOf("[") != -1 && nameSapCode.indexOf("]") != -1) {
+            var regExp = /\[([^)]+)\]/;
+            var sapCode = regExp.exec(nameSapCode);
+            if (sapCode[1].length == 8) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    else {
+        return false;
+    }
+}
+$(document).ready(function () {
+    $("#feedback").click(function () {
+        $('.splash-screen').removeClass('hide').addClass('show');
+        $('body').removeClass('overflow-n').addClass('overflow');
+        $("#feedSuccess").stop().slideDown();
+        $('#feedSuccess').delay(2000).slideUp('500', function () {
+            $('.splash-screen').removeClass('show').addClass('hide');
+            $('body').removeClass('overflow').addClass('overflow-n');
+            //$(location).attr('href', 'index.html');
+        });
+    });
+    $('.glb-pnl-role li').click(function () {
+        $(".glb-pnl-role li").removeClass("active_li");
+        $(this).addClass('active_li');
+    });
+    $('.glb-pnl-role li').click(function () {
+        var txt = $(this).text();
+        $('.role').html(txt);
+    });
+});
+
+$('#feedback').click(function () {
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: Sourceurl + "/SaveUserFeedBack",
+        data: JSON.stringify({ Rating: $('#example-fontawesome').val(), FeedbackText: $('#TxtFeedback').val() }),
+        success: function (data) {
+            //alert("Successfully saved");
+        },
+        fail: function (error) {
+            Console.Log(error);
+        }
+    });
+})
+
+$('.cancelForm').click(function () {
+    var _confrimResponse = confirm("Are you sure you want to cancel?");
+    if (_confrimResponse == true) {
+        location.href = 'http://staging.myhcl.com/SR_New/Home/SimplifyUserLogin?_EmpCode=' + InitiatorID + '&_RequestType=MANAGEREQ&_typePara=null';
+        //return true;
+    }
+    else {
+        return false;
+    }
+});
+
+function CloseProgress() {
+    $.unblockUI();
+}
+
+function OpenProgressN() {
+    $.blockUI({ message: ' <div class="go_spiner nolms"> <div class="loader2 material-spinner"></div></div>' });
+}
+
+function OpenPreviewTemplate(dname) {
+    window.open(dname.name, '_blank');
+}
+function GetSkilldata(msg) {   
+    var SessionEditSkill = "";
+    var EditSkill = [];
+    var tempSecoundary = "";
+    var tempPrimary = "";
+    $.each(msg, function (index, data) {
+        if ((data.PrimarySkill) != 0) {
+            var checked = "";
+            var IsPrimary = data.PrimarySkill;
+            if (IsPrimary) {
+                checked = "checked";
+            }
+            $('.skillTag').css({ 'border-bottom': '1px solid #000' });
+            if (IsPrimary == false) {
+                tempSecoundary = tempSecoundary + "<span class='tooltipped' style='display: inline-block;'>" + data.SkillDesc + "</span>";
+                checked = "";
+            }
+            else {
+                tempPrimary = "<span class='tooltipped active' style='display: inline-block;'>" + data.SkillDesc + "</span>";
+            }
+            EditSkill.push({ "AreaCodeID": data.AreaCodeID, "SubAreaCodeID": data.SubAreaCodeID, "SkillID": data.SkillID, "ProficiencyID": data.ProficiencyID, "PrimarySkill": true });
+            var primary_ID = "primary" + data.SkillID;
+            SessionEditSkill = SessionEditSkill + "<tr id=" + data.SkillID + ">";
+            SessionEditSkill = SessionEditSkill + "<td SkillCatagory=" + data.SubAreaCodeID + ">" + data.SubAreaCodeDesc + "</td>";
+            SessionEditSkill = SessionEditSkill + "<td SkillArea=" + data.AreaCodeID + ">" + data.AreaCodeDesc + "</td>";
+            SessionEditSkill = SessionEditSkill + "<td SkillCode=" + data.SkillID + ">" + data.SkillDesc + "</td>";
+            SessionEditSkill = SessionEditSkill + "<td ProficiencyID=" + data.ProficiencyID + "> <div>" + data.Proficiency + " </div> </td>";
+            SessionEditSkill = SessionEditSkill + "<td class='text-center radioButton' style='position:relative'><input class='with-gap primarySkill' name='primary' type='radio' id=" + primary_ID + " onclick='IsprimarySkill(" + data.SkillID + ");' " + checked + " />" +
+            "<label for=" + primary_ID + "></label> </td>";
+            SessionEditSkill = SessionEditSkill + "<td class='text-center'><i class='deleteSkill icon-delete' onclick='RemoveSkill(" + data.SkillID + ");' ></i></td>";
+            SessionEditSkill = SessionEditSkill + "</tr>";
+            $('.skillTag').html("");
+            $('.skillTag').append(tempPrimary + tempSecoundary);
+            $('.lableskill').addClass('focused');
+            $('.skillTag').show().removeClass('hide');
+            $('.skillTag span.active').removeClass('hide');
+            $('.skillTag span').show();
+            $('.skill').hide();
+            sessionStorage.removeItem("skill");
+            sessionStorage.setItem("skill", SessionEditSkill);
+            $("#hdnskill").val(JSON.stringify(EditSkill));
+        }
+    })
+}

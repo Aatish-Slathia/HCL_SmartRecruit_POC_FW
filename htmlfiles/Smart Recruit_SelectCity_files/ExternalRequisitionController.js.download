@@ -1,0 +1,846 @@
+﻿var re = new RegExp(/^.*\//);
+var Sourceurl = "";
+var _ExrnlVwObject =
+    {
+        Initiator: "",
+        EntityID: "",
+        JoiningL1Code: "",
+        JoiningL4Code: "",
+        RequisitionsourceID: "",
+        ProjectCode: "",
+        ProjectL1Code: "",
+        ProjectL4Code: "",
+        JobId: "",
+        EmployeeGroup: "",
+        BandId: "",
+        SubBandId: "",
+        IsCas:"0",
+        CountryCode: "",
+        CompanyCode:"",
+        PSACode: "",
+        DesignationCode:"",
+        ExperienceCode: "",
+        JoiningLocationCode:"",
+        PRFID: "",
+        IsERS:"",
+        Initiator: "",
+        TPEmpJoiningL1:"",
+        TPEmpJoiningL4: "",
+        IsTPtoFTEResource: "",
+        COUNTRYSTATE: "",
+        CITY: "",
+	    IsSOT: "",
+	    SecondaryPSACode: "", //Added by Neha Basetia CR00020307
+    }
+function findIndexInData(data, property, value) {
+    var result = -1;
+    data.some(function (item, i) {
+        if (item[property] === value) {
+            result = i;
+            return true;
+        }
+    });
+    return result;
+}
+var projlist = [];
+var custlist = [];
+var sfaaccountlist = [];
+var mainApp = angular.module("mainApp", ["ngRoute","myAppHeader"]);
+//mainApp.controller('ExternalViewController', function ($scope, $http) {
+mainApp.controller('ExternalViewController', ['$scope', '$http', '$interval', '$timeout', function ($scope, $http, $interval, $timeout) {
+
+    // var _url = ServiceApiUrl + "/api/Fulfillment/";
+    var _url = GetWayUrl;//Added By Ankit
+    //var _url = "http://localhost:30346/api/Fulfillment/";
+    Sourceurl = SimplifyHRUrl;
+
+    $scope.GetExModelData = function () {
+        if (ExtrnlViewData != null) {
+            $scope.ExModel = ExtrnlViewData;//Get ViewModel Data in Scope variable
+            //$scope.GetPRFDependentData();
+        }
+        else
+            return;
+        $scope.CityModel = $scope.ExModel.CITY
+        $scope.jobDesription = $scope.ExModel.JobDescription
+        $scope.AdditionalRequirement = $scope.ExModel.AdditionalRequest
+		//Start : Added by Neha Basetia CR00020307
+		if ($scope.ExModel.ReferBackReasonCode == "64" && ($scope.ExModel.SR_PRFRoleStatusActionID == "17" || $scope.ExModel.SR_PRFRoleStatusActionID == "18" || $scope.ExModel.SR_PRFRoleStatusActionID == "19" || $scope.ExModel.SR_PRFRoleStatusActionID == "20")) {
+			$scope.ClientJoiningLocationModal = $scope.ExModel.SecondaryClientJoiningLocation
+		}
+		else {
+			$scope.ClientJoiningLocationModal = $scope.ExModel.ClientJoiningLocation
+		}
+		$scope.SecondaryClientJoiningLocationModal = $scope.ExModel.SecondaryClientJoiningLocation
+		//End : Added by Neha Basetia CR00020307
+        //$scope.QualModal = $scope.ExModel.QualificationID
+        //EmployeeGroup==Contract
+        $scope.StateModel = $scope.ExModel.COUNTRYSTATE // added 
+        $scope.CityModel = $scope.ExModel.CITY
+
+        if ($scope.ExModel.ContractPeriodFrom != null) {
+            $scope.contractFromModal = new Date(parseInt($scope.ExModel.ContractPeriodFrom.replace('/Date(', '')));
+        }
+        if ($scope.ExModel.ContractPeriodTo != null) {
+            $scope.contractToModal = new Date(parseInt($scope.ExModel.ContractPeriodTo.replace('/Date(', '')));
+        }
+        $scope.BuyRateModal = $scope.ExModel.BuyRate
+        $scope.SellRateModal = $scope.ExModel.SellRate
+        
+        //TP Consent
+        if ($scope.ExModel.TPContractPeriodFrom != null) {
+            $scope.TPcontractFromModal = new Date(parseInt($scope.ExModel.TPContractPeriodFrom.replace('/Date(', '')));
+        }
+        if ($scope.ExModel.TPContractPeriodTo != null) {
+            $scope.TPcontractToModal = new Date(parseInt($scope.ExModel.TPContractPeriodTo.replace('/Date(', '')));
+        }
+        $scope.TPBuyRateModal = $scope.ExModel.TPBuyRate
+        $scope.TPSellRateModal = $scope.ExModel.TPSellRate
+        
+
+        $scope.TPConsentModal = $scope.ExModel.TPConsent == null ? "" : $scope.ExModel.TPConsent == true ? "TPYes" : "TPNo";
+        if ($scope.TPConsentModal === "TPYes") {
+            $('.constentInputs').removeClass('hide').show();
+            $scope.GetTPBand();
+        }
+    }
+    //$interval(function () {
+    //    $('.selectpicker').selectpicker('refresh');
+    //}, 1000);
+    $scope.GetPRFDependentData = function () {
+        $http({
+            url: Sourceurl + "/Requisition/GetPRFDependentData",
+            method: 'GET',
+            params: { _PRFID: ExtrnlViewData.PRFID }
+        }).success(function (data) {
+            //$scope.PRFBasedData = data;
+            _ExrnlVwObject.ProjectCode = data.ProjectCode
+            _ExrnlVwObject.CountryCode = data.CountryCode
+			_ExrnlVwObject.PSACode = data.PSACode
+			_ExrnlVwObject.SecondaryPSACode = data.SecondaryPSACode	   //Added by Neha Basetia CR00020307
+            _ExrnlVwObject.BandId = data.BandId
+            _ExrnlVwObject.SubBandId = data.SubBandId
+            _ExrnlVwObject.RequisitionsourceID = data.RequisitionsourceID
+            _ExrnlVwObject.IsCas = data.IsCAS
+            _ExrnlVwObject.CompanyCode = data.CompanyCode
+            _ExrnlVwObject.JobId = data.JobId;
+            _ExrnlVwObject.IsERS = data.IsERS;
+            _ExrnlVwObject.Initiator = data.Initiator;
+            _ExrnlVwObject.EntityID = data.EntityID;
+            _ExrnlVwObject.TPEmpJoiningL1 = data.TPEmpJoiningL1;
+            _ExrnlVwObject.TPEmpJoiningL4 = data.TPEmpJoiningL4;
+            _ExrnlVwObject.IsTPtoFTEResource = data.IsTPtoFTEResource;
+            _ExrnlVwObject.ProjectL1Code = data.ProjectL1Code;
+            _ExrnlVwObject.ProjectL4Code = data.ProjectL4Code;
+            _ExrnlVwObject.COUNTRYSTATE = data.COUNTRYSTATE;
+			_ExrnlVwObject.CITY = data.CITY;
+			_ExrnlVwObject.IsSOT = data.IsSOT;
+            if (_ExrnlVwObject.JobId != null && $scope.TPConsentModal == "TPYes")
+            {
+                $scope.GetTPBand()
+            }
+            if (data.EmployeeGroup === "5") {
+                $scope.IsEmpGrpContract = true;
+            }
+            else {
+                $scope.IsEmpGrpContract = false;
+            }
+            $scope.EmployeeGroup = data.EmployeeGroup
+			if ($scope.EmployeeGroup === "5" || _ExrnlVwObject.RequisitionsourceID === 14 || _ExrnlVwObject.IsTPtoFTEResource === true || (_ExrnlVwObject.IsCas === 1 && _ExrnlVwObject.IsSOT === '1' && $scope.EmployeeGroup === "1")
+				|| (_ExrnlVwObject.RequisitionsourceID == 18 || _ExrnlVwObject.RequisitionsourceID==20)) {
+				EmployeeGroupLogic($scope.EmployeeGroup, _ExrnlVwObject.BandId, _ExrnlVwObject.RequisitionsourceID, _ExrnlVwObject.IsTPtoFTEResource, _ExrnlVwObject.IsCas, _ExrnlVwObject.IsSOT);
+            }
+            $scope.GetQualification();
+            $scope.GetExperience();
+            $scope.GetDesignation();
+            $scope.GetJoiningL1();
+            $scope.GetState();
+            $scope.GetCity();// Added By Vinod Kumar Sorari
+            $scope.GetPA();
+			$scope.GetSecondaryPA();    //Added by Neha Basetia CR00020307
+			$scope.GetJoiningLocation();
+			$scope.GetSecondaryJoiningLocation();  //Added by Neha Basetia CR00020307
+           
+          // $scope.GetLanguage(); // added by atman nand
+          // $scope.GetLanguageGrade(); // added by atman nand
+        }).error(function (data, status) {
+            var _errorHandler = SimplifyHRUrl + "/" + myApp.getErrorController() + "/" + myApp.getErrorView();
+            window.location.href = _errorHandler;
+        });
+    }
+
+    $scope.GetExperience = function () {
+        if (_ExrnlVwObject.JobId == null)
+            _ExrnlVwObject.JobId = "0";
+
+		var isCampus = $("#hdnIsCampus").val();
+        var programCode = $("#hdnProgramCode").val();
+        var IsTSSLobUser = $("#hdnIsTSSLobUser").val();
+
+		$http({
+            url: _url + "Experience",
+			method: 'GET',
+			params: { _BandID: _ExrnlVwObject.JobId, _IsCampus: isCampus, _ProgramCode: programCode }
+        }).success(function (data) {
+            $scope.ExperienceList = data;
+            if ($scope.ExModel.ExperienceCode != null) {
+                var index = findIndexInData($scope.ExperienceList, "Value", ($scope.ExModel.ExperienceCode).toString());
+                $scope.ExperienceModal = data[index];
+            }
+            else if (IsTSSLobUser == "1" && (_ExrnlVwObject.RequisitionsourceID == 14 || _ExrnlVwObject.RequisitionsourceID == 28)) {
+                $scope.ExperienceModal = data[0];
+            }
+            else {
+                var arr = [];
+                angular.forEach($scope.ExperienceList, function (value, key) {
+                    if (value.Selected == true)
+                        arr.push(value);
+                    $scope.ExperienceModal = arr[0];
+                });
+            }
+            
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+    
+    $scope.GetQualification = function () {
+        $http({
+            url: _url + "Qualification",
+            method: 'GET',
+            params: { _SRID: ExtrnlViewData.PRFID, _ProjectCode: _ExrnlVwObject.ProjectCode, _isERS: _ExrnlVwObject.IsERS }
+        }).success(function (data) {
+            $scope.QualificationList = data[0];
+            $scope.QualificationList1 = data[1];
+            $scope.groupListQual = $scope.QualificationList.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            var arr = [];
+            if ($scope.QualificationList1.length == 0) {
+                angular.forEach($scope.QualificationList, function (value, key) {
+                    if (value.Selected == true)
+                    arr.push(value.Value);
+                });
+            }
+            else {
+                angular.forEach($scope.QualificationList1, function (value, key) {
+                   // if (value.Selected == true)
+                    arr.push(value.Value);
+                });
+            }
+            $scope.QualModal = arr;
+            }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+
+    //atma nand for language
+    $scope.GetLanguage = function () {
+        var URLl='http://localhost:30346/api/Fulfillment/'
+         debugger;
+        $http({
+            url: URLl + "GetLanguage",
+            method: 'GET',
+            params: { _SRID: ExtrnlViewData.PRFID, _ProjectCode: _ExrnlVwObject.ProjectCode, _isERS: _ExrnlVwObject.IsERS }
+        }).success(function (data) {
+            $scope.LanguageList = data;
+            $scope.GroupListLanguage = $scope.LanguageList.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            var arr = [];
+            angular.forEach($scope.LanguageList, function (value, key) {
+                if (value.Selected == true)
+                    arr.push(value.Value);
+                $scope.LanguageSourceModal = arr;
+            });
+        })
+    }
+
+    //atma nand for language grade
+    $scope.GetLanguageGrade = function () {
+        var URLl = 'http://localhost:30346/api/Fulfillment/'
+        debugger;
+        $http({
+           url: URLl + "GetLanguageGrade",
+            method: 'GET',
+            params: { _SRID: ExtrnlViewData.PRFID }
+        }).success(function (data) {
+            $scope.LanguageListGrade = data;
+
+            $scope.GroupListLanguageGrade = $scope.LanguageListGrade.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            var arr = [];
+            angular.forEach($scope.LanguageListGrade, function (value, key) {
+                if (value.Selected == true)
+                    arr.push(value.Value);
+                $scope.LanguageSourceModalGrade = arr;
+            });
+
+        })
+
+    }
+
+
+    //Start: C3i By atma nand singh
+    $scope.GetLanguage = function () {
+        //var URLl = 'http://localhost:30346/api/Fulfillment/'
+        debugger;
+        $http({
+            url: _url + "GetLanguage",
+            method: 'GET',
+            params: { _SRID: ExtrnlViewData.PRFID, _ProjectCode: _ExrnlVwObject.ProjectCode, _isERS: _ExrnlVwObject.IsERS }
+        }).success(function (data) {
+            $scope.LanguageList = data;
+            $scope.GroupListLanguage = $scope.LanguageList.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            var arr = [];
+            angular.forEach($scope.LanguageList, function (value, key) {
+                if (value.Selected == true)
+                    arr.push(value.Value);
+                $scope.LanguageSourceModal = arr;
+            });
+        })
+    }
+
+    //atma nand for language grade
+    $scope.GetLanguageGrade = function () {
+       // var URLl = 'http://localhost:30346/api/Fulfillment/'
+        debugger;
+        $http({
+            url: _url + "GetLanguageGrade",
+            method: 'GET',
+            params: { _SRID: ExtrnlViewData.PRFID }
+        }).success(function (data) {
+            $scope.LanguageListGrade = data;
+
+            $scope.GroupListLanguageGrade = $scope.LanguageListGrade.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            var arr = [];
+            angular.forEach($scope.LanguageListGrade, function (value, key) {
+                if (value.Selected == true)
+                    arr.push(value.Value);
+                $scope.LanguageSourceModalGrade = arr;
+            });
+
+        })
+
+    }
+   //End: C3i
+    $scope.GetDesignation = function () {
+        var IsTSSLobUser = $("#hdnIsTSSLobUser").val();
+        if (_ExrnlVwObject.BandId != null) {
+            $http({
+                url: _url + "Designation",
+                method: 'GET',
+                params: { _BandId: _ExrnlVwObject.BandId, _SubBandId: _ExrnlVwObject.SubBandId,_EntityID:_ExrnlVwObject.EntityID, _ProjectL1: _ExrnlVwObject.ProjectL1Code }
+            }).success(function (data) {
+                $scope.DesignationList = data;
+                var index = findIndexInData($scope.DesignationList, "Value", $scope.ExModel.DesignationCode);
+                $scope.DesignationModal = data[index];
+
+                if (IsTSSLobUser == "1" && (_ExrnlVwObject.RequisitionsourceID == 14 || _ExrnlVwObject.RequisitionsourceID == 28)) {
+                    $scope.ExperienceModal = data[0];
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+    }
+
+    $scope.GetJoiningL1 = function () {
+        var IsTSSLobUser = $("#hdnIsTSSLobUser").val();
+        $http({
+            url: _url + "JoiningL1",
+            method: 'GET',
+            params: { _LoginEmpCode: _ExrnlVwObject.Initiator, _RequisitionsourceID: _ExrnlVwObject.RequisitionsourceID, _EntityID: _ExrnlVwObject.EntityID, _ReferBackFrom: "", _ProjectCode: _ExrnlVwObject.ProjectCode, _CompanyCode: _ExrnlVwObject.CompanyCode, _IsCAS: _ExrnlVwObject.IsCas == null ? "0" : _ExrnlVwObject.IsCas, _isERS: _ExrnlVwObject.IsERS, _PRFID: ExtrnlViewData.PRFID, _CountryCode: _ExrnlVwObject.CountryCode }//
+        }).success(function (data) {
+            $scope.JoiningL1List = data;
+            $scope.groupListL1 = $scope.JoiningL1List.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            if (data.length === 1) {
+                $scope.JoiningL1Modal = data[0].Value;
+            }
+            if (_ExrnlVwObject.RequisitionsourceID === 15) {
+                var index = findIndexInData($scope.JoiningL1List, "Value", _ExrnlVwObject.TPEmpJoiningL1);
+                if(index != -1)
+                    $scope.JoiningL1Modal = data[index].Value;
+            }
+            //data[0].Selected &&
+            if (IsTSSLobUser == "1" || ($scope.ExModel.JoiningL1Code == "" || $scope.ExModel.JoiningL1Code == null))
+            {
+                var projectL1Index = findIndexInData($scope.JoiningL1List, "Value", _ExrnlVwObject.ProjectL1Code);
+                if (projectL1Index != -1)
+                {
+                    $scope.JoiningL1Modal = data[projectL1Index].Value;
+                }
+                else
+                {
+                var index = findIndexInData($scope.JoiningL1List, "Value", data[0].Value);
+                $scope.JoiningL1Modal = data[index].Value;
+            }
+               
+            }
+            else {
+                if (($scope.ExModel.JoiningL1Code != "" && $scope.ExModel.JoiningL1Code != null)) {
+                    var index = findIndexInData($scope.JoiningL1List, "Value", $scope.ExModel.JoiningL1Code);
+                    $scope.JoiningL1Modal = data[index].Value;
+                }
+            }
+            if (data[0].Selected && ($scope.ExModel.JoiningL1Code == "" || $scope.ExModel.JoiningL1Code == null)) {
+
+                var index = findIndexInData($scope.JoiningL1List, "Value", data[0].Value);
+                $scope.JoiningL1Modal = data[0];
+            }
+            if ($scope.JoiningL1Modal != null) {
+                $scope.GetJoiningL4();
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetJoiningL4 = function () {
+        var SalesLob = $('#hdnIsSales').val();
+        var IsTSSLobUser = $("#hdnIsTSSLobUser").val();
+        $http({
+            url: _url + "JoiningL4",
+            method: 'GET',
+            params: { _JoiningL1Code: $scope.JoiningL1Modal, _isERS: _ExrnlVwObject.IsERS, _PRFID: ExtrnlViewData.PRFID, _CountryCode: _ExrnlVwObject.CountryCode, _ProjectCode: _ExrnlVwObject.ProjectCode, _IsSalesLob: SalesLob }
+        }).success(function (data) {
+            $scope.JoiningL4List = data;
+
+            $scope.groupListL4 = $scope.JoiningL4List.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+                        
+            if (data.length === 1) {
+                $scope.JoiningL4Modal = data[0].Value;
+            }
+            if (_ExrnlVwObject.RequisitionsourceID === 15) {
+                var index = findIndexInData($scope.JoiningL4List, "Value", _ExrnlVwObject.TPEmpJoiningL4);
+                if (index != -1) {
+                    $scope.JoiningL4Modal = data[index].Value;
+                $scope.IsReadOnlyControl = true;
+                }
+            }
+            if (IsTSSLobUser == "1" || ($scope.ExModel.JoiningL4Code == "" || $scope.ExModel.JoiningL4Code == null))
+            {
+                var projectL4Index = findIndexInData($scope.JoiningL4List, "Value", _ExrnlVwObject.ProjectL4Code);
+                if (projectL4Index != -1)
+                {
+                    $scope.JoiningL4Modal = data[projectL4Index].Value;
+                }
+                else
+                {
+                var index = findIndexInData($scope.JoiningL4List, "Value", data[0].Value);
+                $scope.JoiningL4Modal = data[index].Value;
+                }
+            }
+            else {
+                if (($scope.ExModel.JoiningL4Code != "" && $scope.ExModel.JoiningL4Code != null)) {
+                    var index = findIndexInData($scope.JoiningL4List, "Value", $scope.ExModel.JoiningL4Code);
+                    $scope.JoiningL4Modal = data[index].Value;
+                }
+            }
+            $timeout(function () {
+                if ($scope.IsReadOnlyControl == true) {
+                    $('#ddlJoiningL4').prop('disabled', false);
+                    $('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlJoiningL4');
+                    $('#ddlJoiningL4').prop('disabled', true);
+                }
+            }, 100);
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetJoiningLocation = function () {
+        $http({
+            url: _url + "JoiningLocation",
+            method: 'GET',
+            params: { _CountryCode: _ExrnlVwObject.CountryCode, _PSACode: _ExrnlVwObject.PSACode, _CompanyCode: _ExrnlVwObject.CompanyCode, _ProjectCode: _ExrnlVwObject.ProjectCode, Initiator: _ExrnlVwObject.Initiator, EntityID: _ExrnlVwObject.EntityID }//$("#hdnEntity").val() added by ankit for bserv
+        }).success(function (data) {
+            //alert($scope.model.JoiningLocationCode)
+            $scope.JoiningLocationList = data;
+            $scope.groupListCWL = $scope.JoiningLocationList.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            
+            if (data.length === 1) {
+                $scope.JoiningLocationModal = data[0].Value;
+            }
+            if (data[0].Selected && ($scope.ExModel.JoiningLocation == "" || $scope.ExModel.JoiningLocation == null)) {
+                var index = findIndexInData($scope.JoiningLocationList, "Value", data[0].Value);
+                $scope.JoiningLocationModal = data[0].Value;
+            }
+            else
+            {
+                if ($scope.ExModel.JoiningLocation != "" && $scope.ExModel.JoiningLocation != null) {
+                    var index = findIndexInData($scope.JoiningLocationList, "Value", $scope.ExModel.JoiningLocation);
+                    $scope.JoiningLocationModal = data[index].Value;
+                }
+            }
+            //if (data[0].Selected && ($scope.ExModel.JoiningLocation == "" || $scope.ExModel.JoiningLocation == null)) {
+            //    var index = findIndexInData($scope.JoiningLocationList, "Value", data[0].Value);
+            //    $scope.JoiningLocationModal = data[0];
+            //}
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+	}
+
+	// Start : Added by Neha Basetia CR00020307
+	$scope.GetSecondaryJoiningLocation = function () {
+		$http({
+			url: _url + "JoiningLocation",
+			method: 'GET',
+			params: { _CountryCode: _ExrnlVwObject.CountryCode, _PSACode: _ExrnlVwObject.SecondaryPSACode, _CompanyCode: _ExrnlVwObject.CompanyCode, _ProjectCode: _ExrnlVwObject.ProjectCode, Initiator: _ExrnlVwObject.Initiator, EntityID: _ExrnlVwObject.EntityID }
+		}).success(function (data) {
+			$scope.SecondaryJoiningLocationList = data;
+			$scope.SecondarygroupListCWL = $scope.SecondaryJoiningLocationList.reduce(function (previous, current) {
+				if (previous.indexOf(current.Select) === -1) {
+					previous.push(current.Select);
+				}
+
+				return previous;
+			}, []);
+
+			if (data[0].Selected && ($scope.ExModel.SecondaryJoiningLocation == "" || $scope.ExModel.SecondaryJoiningLocation == null)) {
+				var indexSec = findIndexInData($scope.SecondaryJoiningLocationList, "Value", data[0].Value);
+				$scope.SecondaryJoiningLocationModal = data[0].Value;
+			}
+			else {
+				if ($scope.ExModel.SecondaryJoiningLocation != "" && $scope.ExModel.SecondaryJoiningLocation != null) {
+					var indexSec = findIndexInData($scope.SecondaryJoiningLocationList, "Value", $scope.ExModel.SecondaryJoiningLocation);
+					$scope.SecondaryJoiningLocationModal = data[indexSec].Value;
+				}
+				if ($scope.ExModel.ReferBackReasonCode == "64" && ($scope.ExModel.SR_PRFRoleStatusActionID == "17" || $scope.ExModel.SR_PRFRoleStatusActionID == "18" || $scope.ExModel.SR_PRFRoleStatusActionID == "19" || $scope.ExModel.SR_PRFRoleStatusActionID == "20")) {
+					$scope.JoiningLocationList = data;
+					var indexSec = findIndexInData($scope.JoiningLocationList, "Value", $scope.ExModel.SecondaryJoiningLocation);
+					$scope.JoiningLocationModal = data[indexSec].Value;
+				}
+			}
+		}).error(function (data, status) {
+			console.error('Error:', status, data);
+		});
+	}
+
+
+	$scope.GetSecondaryPA = function () {
+		$http({
+			url: _url + "PersonalArea",
+			method: 'GET',
+			params: { _CountryCode: _ExrnlVwObject.CountryCode, _CompanyCode: _ExrnlVwObject.CompanyCode, _ProjectCode: _ExrnlVwObject.ProjectCode, _Initiator: _ExrnlVwObject.Initiator, _PSACode: _ExrnlVwObject.SecondaryPSACode, _EntityID: _ExrnlVwObject.EntityID }
+		}).success(function (data) {
+
+			$scope.SecondaryPAList = data;
+			$scope.SecondarygroupList = $scope.SecondaryPAList.reduce(function (previous, current) {
+				if (previous.indexOf(current.Select) === -1) {
+					previous.push(current.Select);
+				}
+
+				return previous;
+			}, []);
+
+			if (data.length === 1) {
+				$scope.SecondaryPAModal = data[0].Value;
+			}
+			if (data[0].Selected && ($scope.ExModel.SecondaryPersonalArea == "" || $scope.ExModel.SecondaryPersonalArea == null)) {
+
+				var indexSec = findIndexInData($scope.SecondaryPAList, "Value", data[0].Value);
+				$scope.SecondaryPAModal = data[indexSec].Value;
+			}
+			else {
+				if ($scope.ExModel.SecondaryPersonalArea != "" && $scope.ExModel.SecondaryPersonalArea != null) {
+					var indexSec = findIndexInData($scope.SecondaryPAList, "Value", $scope.ExModel.SecondaryPersonalArea);
+					if (indexSec != -1)
+						$scope.SecondaryPAModal = data[indexSec].Value;
+				}
+				if ($scope.ExModel.ReferBackReasonCode == "64" && ($scope.ExModel.SR_PRFRoleStatusActionID == "17" || $scope.ExModel.SR_PRFRoleStatusActionID == "18" || $scope.ExModel.SR_PRFRoleStatusActionID == "19" || $scope.ExModel.SR_PRFRoleStatusActionID == "20")) {
+					$scope.PAList = data;
+					var indexSec = findIndexInData($scope.PAList, "Value", $scope.ExModel.SecondaryPersonalArea);
+					if (indexSec != -1)
+						$scope.PAModal = data[indexSec].Value;
+				}
+			}
+		}).error(function (data, status) {
+			console.error('Error:', status, data);
+		});
+	}
+	// End : Added by Neha Basetia CR00020307
+
+    $scope.GetPA = function () {
+        $http({
+            url: _url + "PersonalArea",
+            method: 'GET',
+            params: { _CountryCode: _ExrnlVwObject.CountryCode, _CompanyCode: _ExrnlVwObject.CompanyCode, _ProjectCode: _ExrnlVwObject.ProjectCode, _Initiator: _ExrnlVwObject.Initiator, _PSACode: _ExrnlVwObject.PSACode, _EntityID: _ExrnlVwObject.EntityID }
+        }).success(function (data) {
+           
+            $scope.PAList = data;
+            $scope.groupList = $scope.PAList.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            
+            if (data.length === 1) {
+                $scope.PAModal = data[0].Value;
+            }
+            if (data[0].Selected && ($scope.ExModel.PersonalArea == "" || $scope.ExModel.PersonalArea == null)) {
+               
+                var index = findIndexInData($scope.PAList, "Value", data[0].Value);
+                $scope.PAModal = data[index].Value;
+            }
+            else
+            {
+                if($scope.ExModel.PersonalArea != "" && $scope.ExModel.PersonalArea != null){
+                    var index = findIndexInData($scope.PAList, "Value", $scope.ExModel.PersonalArea);
+                    if(index != -1)
+                        $scope.PAModal = data[index].Value;
+                }
+            }
+            //if (data[0].Selected && ($scope.ExModel.PersonalArea == "" || $scope.ExModel.PersonalArea == null)) {
+
+            //    var index = findIndexInData($scope.PAList, "Value", data[0].Value);
+            //    $scope.PAModal = data[0];
+            //}
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+	$scope.GetTPBand = function () {
+
+		var _isCampus = $("#hdnIsCampus").val() == "" || $("#hdnIsCampus").val() == null ? false : $("#hdnIsCampus").val();
+		var _programCode = $("#hdnProgramCode").val() == null ? "" : $("#hdnProgramCode").val();	
+
+        if ($scope.TPConsentModal === "TPYes") {
+            $scope.TPEmployeeGroupModal = 5;
+        }
+        $http({
+            url: _url + "Bands",
+            method: 'GET',
+            params: {
+				_JobId: _ExrnlVwObject.JobId, _EmployeeGroup: $scope.TPEmployeeGroupModal, _IsCampus: _isCampus, _ProgramType: _programCode
+        }
+        }).success(function (data) {
+            $scope.TPBandList = data;
+            var index = findIndexInData($scope.TPBandList, "Value", $scope.ExModel.TPBandID);
+            $scope.TPBandModal = data[index];
+            if (data.length === 1) {
+                $scope.TPBandModal = data[0];
+            }
+            $scope.GetTPSubBand();
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetTPSubBand = function () {
+        var L0Code = $("#ddlJoiningL1").val();
+        $http({
+            url: _url + "SubBands",
+            method: 'GET',
+            params: {
+                _JobId: _ExrnlVwObject.JobId, _BandId: $scope.TPBandModal.Value, _L0_code: L0Code
+        }
+        }).success(function (data) {
+            $scope.TPSubBandList = data;
+            var index = findIndexInData($scope.TPSubBandList, "Value", $scope.ExModel.TPSubBandID);
+            $scope.TPSubBandModal = data[index];
+            //if (data.length === 1) {
+            //    $scope.TPSubBandModal = data[0];
+            //}
+            $scope.GetTPDesignation();
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+
+    }
+
+    $scope.GetTPDesignation = function () {       
+            $http({
+                url: _url + "Designation",
+                method: 'GET',
+                params: { _BandId: $scope.TPBandModal.Value, _SubBandId: $scope.TPSubBandModal.Value, _EntityID: _ExrnlVwObject.EntityID, _ProjectL1: _ExrnlVwObject.ProjectL1Code }
+            }).success(function (data) {
+                $scope.TPDesignationList = data;
+                var index = findIndexInData($scope.TPDesignationList, "Value", $scope.ExModel.TPDesignationID);
+                $scope.TPDesignationModal = data[index];
+                //if (data.length === 1) {
+                //    $scope.TPDesignationModal = data[0];
+                //}
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+    }
+
+    $scope.GetState = function () {
+
+        $http({
+            url: _url + "GetState",
+            method: 'GET',
+            params: { _CountryCode: _ExrnlVwObject.CountryCode }
+        }).success(function (data) {
+
+            $scope.StateList = data;
+            //var index = findIndexInData($scope.StateList, "Value", $scope.ExModel.StateList);
+            //$scope.GetStatemodel = data[index];
+
+            var index = findIndexInData($scope.StateList, "Value", $scope.ExModel.COUNTRYSTATE);
+            $scope.StateModel = data[index];
+
+
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetCity = function ()
+    {
+        var Stateid = $("#ddlState").val();
+        if (Stateid == "" || Stateid == null) {
+            Stateid = $scope.ExModel.COUNTRYSTATE
+        }
+        $http({
+            url: _url + "GetCity",
+            method: 'GET',
+            params: { _StateID: Stateid, Countryid: _ExrnlVwObject.CountryCode }
+        }).success(function (data) {
+            $scope.CityList = data;
+            //var index = findIndexInData($scope.CityList, "Value", $scope.ExModel.CityList);
+            //$scope.Citymodel = data[index];
+
+            var index = findIndexInData($scope.CityList, "Value", $scope.ExModel.CITY);
+            $scope.CityModel = data[index];
+
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+
+    }
+
+    //$scope.TPReplacementLogic = function()
+    //{
+    //    $scope.IsReadOnlyControl = false;
+    //    $http({
+    //        url: Sourceurl + "GetEmployeeLobDetails",
+    //        method: 'GET',
+    //        params: { _EmployeeCode: "51600838" }
+    //    }).success(function (data) {
+    //        $scope.JoiningL1Modal = data.JoiningL1
+    //        //$scope.JoiningL4Modal = data.JoiningL4;
+    //        var index = findIndexInData($scope.JoiningL1List, "Value", data.JoiningL1);
+    //        $scope.JoiningL1Modal = $scope.JoiningL1List[index];
+    //        var index = findIndexInData($scope.JoiningL4List, "Value", data.JoiningL4);
+    //        $scope.JoiningL4Modal = $scope.JoiningL4List[index];
+    //    }).error(function (data, status) {
+    //        console.error('Error:', status, data);
+    //    });
+    //}
+
+    $scope.LoadStep2 = function () {
+        $('.step1').hide();
+        $('.step2').fadeIn().removeClass('hide');
+        $('.formSteps li').removeClass('active');
+        $('.stp1').addClass('prevSt');
+
+        $('.stp1 a').html('<i class="icon-check"></i>');
+        $('.stp2').addClass('active');
+
+        $(this).hide();
+        $('.next2Btn').show().removeClass('hide');
+        $('.prev1Btn').removeAttr("disabled").show().removeClass('hide');   
+    }
+
+    $scope.CallFinish = function () {
+        $timeout(function () {
+             //addd by ankit 
+            var _Entity = $("#hdnEntity").val();
+            var SalesLob = $('#hdnIsSales').val();
+            if (_Entity == 3 || SalesLob=="1") {
+                $('#ddlJoiningL1').prop('disabled', true);
+                $('#ddlJoiningL4').prop('disabled', true);
+                $('.selectpicker').selectpicker('refresh');              
+            }
+            else {
+                $('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlJoiningL1');
+                $('#ExternalRequisition').bootstrapValidator('revalidateField', 'ddlJoiningL4');
+                $('.selectpicker').selectpicker('refresh');
+            }//end
+            
+        }, 200);
+    }
+
+}]);
+
+mainApp.directive('repeatEnd', function () {
+    return {
+        restrict: "A",
+        link: function (scope, element, attrs) {
+            if (scope.$last) {
+                scope.$eval(attrs.repeatEnd);
+            }
+        }
+    };
+});
+
+mainApp.directive("repeatOptionsEnd", function ($parse, $timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            var ngModel = $parse(attrs.ngModel);
+            var selectSourceArray = attrs.ngOptions.split(' ');
+            var regex = /List/;
+            var resultArray = $.grep(selectSourceArray, function (item) {
+                return regex.test(item);
+            });
+            var selectSource = jQuery.trim(resultArray[0]);
+            var scopeCollection = $parse(selectSource);
+            scope.$watchCollection(scopeCollection, function (newVal) {
+                $timeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 400);
+            });
+        }
+    };
+});

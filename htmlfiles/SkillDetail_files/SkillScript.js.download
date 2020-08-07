@@ -1,0 +1,649 @@
+﻿var skilll = "";
+
+$(function () {
+    //Clear Skill Storage
+    sessionStorage.removeItem("skill");
+    sessionStorage.removeItem("AdditionalSkill");
+    sessionStorage.removeItem("ERSSkill");
+    var remove = new RegExp(/^.*\//);
+    actionurl = remove.exec(window.location.href.split("?")[0]);
+    SearchSkill(actionurl);
+   
+    $('.skill').focus(function () {
+       $(this).parents('.lableskill').removeClass('focused');
+    });
+
+    $(".skill").click(function () {
+        $(".Skill").val("");
+        if ((sessionStorage.skill != null) && (sessionStorage.skill != 'undefined')) {
+              $("#txtSkill").val("");
+              $("#tbltempSearchSkill > tbody").html("");
+              $("#tblSkill > tbody").html("");
+              $('.catagorySkill').fadeOut().addClass('hide');
+              $('.showVal').removeAttr('disabled');
+              $('.skillTable').fadeIn().removeClass('hide');
+              $('#tblSkill').append(sessionStorage.skill);
+          }
+        else if (sessionStorage.ERSSkill != null && sessionStorage.ERSSkill != "undefined") {
+              $("#tblERSSkill > tbody").html("");
+              $("#tblFinalERSSkill > tbody").html("");
+              //$('.ERSSkillGroup').fadeOut().addClass('hide');
+              $('.ERSSkillGroup').fadeIn().removeClass('hide');
+              $('.ERSSkill').fadeIn().removeClass('hide');
+              $('.showVal').removeAttr('disabled');
+              $('#tblFinalERSSkill').append(sessionStorage.ERSSkill);
+              $('.selectpicker').selectpicker("refresh");
+              BindSkillGroup();
+              $('#collapseP1').collapse('show');
+              $('#collapseP2').collapse('show');
+              $('.AdditionalSkill').removeAttr('disabled');
+              if (sessionStorage.AdditionalSkill != null && sessionStorage.AdditionalSkill != "undefined") {
+                  $('.AdditionalSkill').fadeIn().removeClass('hide');
+                  $("#tblAdditionalSkill > tbody").html("");
+                  $('#tblAdditionalSkill').append(sessionStorage.AdditionalSkill);
+              }
+          }
+          //EditSkill(actionurl, PRFID);
+    });
+
+    $("#txtaddskill").click(function () {
+        $(".Skill").val("");
+        if (sessionStorage.skill != null && sessionStorage.skill != "undefined") {
+            $("#tbltempSearchSkill > tbody").html("");
+            $("#tblSkill > tbody").html("");
+            $('.catagorySkill').fadeOut().addClass('hide');
+            $('.skillTable').fadeIn().removeClass('hide');
+            $('.showVal').removeAttr('disabled');
+            $('#tblSkill').append(sessionStorage.skill);
+        }
+        else if (sessionStorage.ERSSkill != null && sessionStorage.ERSSkill != "undefined") {
+            $("#tblERSSkill > tbody").html("");
+            $("#tblFinalERSSkill > tbody").html("");
+            $('.ERSSkillGroup').fadeIn().removeClass('hide');
+            $('.ERSSkill').fadeIn().removeClass('hide');
+            $('.showVal').removeAttr('disabled');
+            $('#tblFinalERSSkill').append(sessionStorage.ERSSkill);
+            $('.selectpicker').selectpicker("refresh");
+            BindSkillGroup();
+            $('#collapseP1').collapse('show');
+            $('#collapseP2').collapse('show');
+            $('.AdditionalSkill').removeAttr('disabled');
+            if (sessionStorage.AdditionalSkill != null && sessionStorage.AdditionalSkill != "undefined") {
+                $('.AdditionalSkill').fadeIn().removeClass('hide');
+                $("#tblAdditionalSkill > tbody").html("");
+                $('#tblAdditionalSkill').append(sessionStorage.AdditionalSkill);
+            }
+        }
+        //EditSkill(actionurl, PRFID);
+    });
+
+    //var PRFID = getUrlParameter('_PRFID');
+    var PRFID = "";
+    if (LeanViewData.CopiedPRF != null) {
+         PRFID =  LeanViewData.CopiedPRF;
+    }
+    else
+    {
+        PRFID = $('#hdnPRFID').val();
+    }
+
+      
+    //alert(PRFID);
+    EditSkill(actionurl, PRFID);
+});
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),sParameterName, i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+function SearchSkill(actionurl) {
+    _url = actionurl + "/GetSkill";
+    var SkillList = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: _url + '?Skill=' + '%QUERY',
+            wildcard: '%QUERY'
+        }
+    });
+   
+    $("#txtskill").typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 3
+    }, {
+        name: "Skill",
+        source: SkillList,
+        limit: Infinity,
+        displayKey: 'Text',
+    }).on('typeahead:selected', function (obj, datum) {
+        AddSearchSkill(actionurl, datum.Text);
+        $('.catagorySkill').fadeIn().removeClass('hide');
+        $('.skillTable').fadeIn().removeClass('hide');
+        $('.removeSkill').show();
+        //$("#txtskill").val("");
+    });
+
+}
+
+function AddSearchSkill(actionurl, skill) {
+    _url = actionurl + "/GetSkillDetails";
+    var _skill = '"' + skill + '"';
+   
+    var SkillExits = $("#tbltempSearchSkill tr[class=" + _skill + "]").length;
+    if (SkillExits == 0) {
+        $.ajax({
+            type: "GET",
+            url: _url,
+            data: { 'Skill': skill },
+            success: function (msg) {
+                var tempSearchSkill = "";
+                var SkillProficiency = "";
+               
+                $.each(msg[1], function (index, data) {
+                    SkillProficiency += "<option value=" + data.Value + ">" + data.Text + "</option>";
+                })
+
+                $.each(msg[0], function (index, data) {
+                    tempSearchSkill = tempSearchSkill + "<tr id='" + data.SkillID + "' class='" + skill + "' >";
+                    tempSearchSkill = tempSearchSkill + "<td SkillCatagory=" + data.AreaCodeID + ">" + data.AreaCodeDesc + "</td>";
+                    tempSearchSkill = tempSearchSkill + "<td SkillArea=" + data.SubAreaCodeID + ">" + data.SubAreaCodeDesc + "</td>";
+                    tempSearchSkill = tempSearchSkill + "<td>" + data.SkillDesc + "</td>";
+                    tempSearchSkill = tempSearchSkill + "<td class='tdSelect subSelect'><select id='ddlSkillProficiency' class='selectpicker'  name='ddlSkillProficiency'>" + SkillProficiency + "</select></td>";
+                    tempSearchSkill = tempSearchSkill + "<td><i class='icon-add addSkillicon' onclick='AddSkill(" + data.SkillID + ");'></i></td>";
+                    tempSearchSkill = tempSearchSkill + "</tr>";
+                })
+                $('#tbltempSearchSkill').append(tempSearchSkill);
+                //$("#txtskill").val("");
+                $('.selectpicker').selectpicker("refresh");
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(thrownError);
+            }
+        });
+    }
+    else {
+        alert("Searched Skill  Already added.");
+        //$("#txtSkill").val("");
+    }
+}
+
+function AddSkill(skillid) {
+    //$("#txtskill").val("");
+    var tr_id = "#tbltempSearchSkill tr" + "#" + skillid;
+    var row = $(tr_id).closest("tr");
+    var SkillCatagory = $("td:eq(0)", row).text();
+    var SkillArea = $("td:eq(1)", row).text();
+    var Skill = $("td:eq(2)", row).text();
+
+    var SkillCatagoryCode = $("td:eq(0)", row).attr("SkillCatagory");
+    var SkillAreaCode = $("td:eq(1)", row).attr("SkillArea");
+   
+    var SkillProficiency = $("#ddlSkillProficiency :selected", row).text();
+    var SkillProficiencyID = $("#ddlSkillProficiency :selected", row).val();
+
+    var SkillExits = $("#tblSkill tr" + "#" + skillid).length;
+
+    var PrimaryDisabled = $("#hdnIsERS").val();
+   
+    if (SkillExits == 0) {
+        var addSkill = "";
+        var primary_ID = "primary" + skillid;
+        addSkill = addSkill + "<tr id=" + skillid + ">";
+        addSkill = addSkill + "<td SkillCatagory=" + SkillCatagoryCode + ">" + SkillCatagory + "</td>";
+        addSkill = addSkill + "<td SkillArea=" + SkillAreaCode + ">" + SkillArea + "</td>";
+        addSkill = addSkill + "<td SkillCode=" + skillid + ">" + Skill + "</td>";
+        addSkill = addSkill + "<td ProficiencyID=" + SkillProficiencyID + "> " + SkillProficiency + " </td>";
+        if (PrimaryDisabled == "True") {
+            addSkill = addSkill + "<td class='text-center radioButton' style='position:relative'></td>";
+        }
+        else {
+            addSkill = addSkill + "<td class='text-center radioButton' style='position:relative'><input class='with-gap primarySkill' name='primary' type='radio' id=" + primary_ID + " onclick='IsprimarySkill(" + skillid + ");'/>" +
+                              "<label for=" + primary_ID + "></label> </td>";
+        }
+       
+        addSkill = addSkill + "<td class='text-center'><i class='deleteSkill icon-delete' onclick='RemoveSkill(" + skillid + ");'></i></td>";
+        addSkill = addSkill + "</tr>";
+        $('#tblSkill').append(addSkill);
+       
+    }
+    else {
+        alert("Skill Already added.");
+    }
+          
+}
+
+function RemoveSkill(skillid) {
+    $("#tblSkill tr" + "#" + skillid).remove();
+    $("#tblAdditionalSkill tr" + "#" + skillid).remove();
+}
+
+function IsprimarySkill(skillid) {
+       $('.showVal').removeAttr('disabled');
+       //$('.showVal').attr('data-dismiss', 'modal');
+}
+
+function SubmitSkill()
+{
+    var finalskill =[];
+    var SkillCode="";var AreaCode="";var SubAreaCode=""; var ProficiencyID=""; var IsPrimary="";
+    var success = "";
+    var tempSecoundary = "";
+    var tempPrimary = "";
+    var SessionSkill = "";
+    var checked = "checked";
+    //var countskill =1;
+    $("#tblSkill > tbody>tr").each(function (i, data) {
+        SkillCode = $("td:eq(2)", this).attr("SkillCode");
+        var primary_ID = "#primary" + SkillCode;
+         var IsPrimary = $(primary_ID).is(':checked');
+        if (IsPrimary) {
+            success = true;
+        }
+    });
+    //Added BY Ankit
+    var rowCount = 0;//= $('#tblSkill >tbody >tr').length;
+    var tempskill = "";
+    //end 
+    //alert(coutskill) //countskill++;
+    if (success == true) {
+        $("#tblSkill > tbody>tr").each(function (i, data) {
+            AreaCode = $("td:eq(0)", this).attr("SkillCatagory");
+            SubAreaCode = $("td:eq(1)", this).attr("SkillArea");
+            SkillCode = $("td:eq(2)", this).attr("SkillCode");
+            var Skill = $("td:eq(2)", this).text();
+            ProficiencyID = $("td:eq(3)", this).attr("ProficiencyID");
+            var Proficiency = $("td:eq(3)", this).text();;
+            var primary_ID = "#primary" + SkillCode;
+            var IsPrimary = $(primary_ID).is(':checked');
+           
+            var SkillCatagory = $("td:eq(0)", this).text();
+            var SkillArea = $("td:eq(1)", this).text();
+            var Skill = $("td:eq(2)", this).text();
+
+            $('.skillTag').css({ 'border-bottom': '1px solid #000' });
+            //Added BY Ankit
+            if (IsPrimary == false && i >=1) {
+                tempskill = tempskill += Skill + ',';
+                rowCount = rowCount + 1;
+            }
+            if (IsPrimary == false && i < 2) {
+               // tempSecoundary = tempSecoundary + "<span  class='tooltipped' style='display: none;'>" + Skill + "</span>";
+               checked = "";
+               //document.getElementById('as').style.display = 'none';
+          }
+            if(IsPrimary == true)
+            //else
+            {
+                tempPrimary = "<span class='tooltipped active' style='display: inline-block;'>" + Skill + "</span>";
+               // tempPcout= "<span class='tooltipped active' style='display: inline-block;'>" + rowCount +"More"+ "</span>";
+                checked = "checked";
+            }
+          //End
+            finalskill.push({ "AreaCodeID": AreaCode, "SubAreaCodeID": SubAreaCode, "SkillID": SkillCode, "ProficiencyID": ProficiencyID, "PrimarySkill": IsPrimary });
+            //sessionStorage
+            var primary_ID = "primary" + SkillCode;
+            
+            SessionSkill = SessionSkill + "<tr id=" + SkillCode + ">";
+            SessionSkill = SessionSkill + "<td SkillCatagory=" + SubAreaCode + ">" + SkillCatagory + "</td>";
+            SessionSkill = SessionSkill + "<td SkillArea=" + AreaCode + ">" + SkillArea + "</td>";
+            SessionSkill = SessionSkill + "<td SkillCode=" + SkillCode + ">" + Skill + "</td>";
+            SessionSkill = SessionSkill + "<td ProficiencyID=" + ProficiencyID + "> <div>" + Proficiency + " </div> </td>";
+            SessionSkill = SessionSkill + "<td class='text-center radioButton' style='position:relative'><input class='with-gap primarySkill' name='primary' type='radio' id=" + primary_ID + " onclick='IsprimarySkill(" + SkillCode + ");' "+checked+" />" +
+                               "<label for=" + primary_ID + "></label> </td>";
+            SessionSkill = SessionSkill + "<td class='text-center'><i class='deleteSkill icon-delete' onclick='RemoveSkill(" + SkillCode + ");' ></i></td>";
+            SessionSkill = SessionSkill + "</tr>";
+
+        });
+        //Added BY Ankit
+        if (rowCount >= 1) {
+            tempSecoundary = tempSecoundary + "<span id='as" + rowCount + "' class='tooltipped1'      style='display: inline-block;'  >" + "+" + rowCount + " More</span>";
+            checked = "";
+            skilll = tempskill;
+        } //End
+        $('.skillTag').html("");
+        $('.skillTag').append(tempPrimary + tempSecoundary);
+        $('.lableskill').addClass('focused');
+        $('.skillTag').show().removeClass('hide');
+        $('.skillTag span.active').removeClass('hide');
+        $('.skillTag span').show();
+        $('.skill').hide();
+        
+        sessionStorage.removeItem("skill");
+        sessionStorage.setItem("skill", SessionSkill);
+        //console.log(finalskill);
+        $("#hdnskill").val(JSON.stringify(finalskill));
+        //console.log(JSON.stringify($("#hdnskill").val()));
+        ClearFormData();
+       
+        
+    } else {
+        alert("Please select at least one primary skill.");
+        //return false;
+    }
+}
+
+function ClearFormData() {
+    $("#txtskill").val("");
+    $("#tbltempSearchSkill > tbody").html("");
+    $("#tblSkill > tbody").html("");
+    $('#SkillModal').modal('hide');
+}
+
+function EditSkill(actionurl, PRFID)
+{
+    var IsERS = $("#hdnIsERS").val();
+    var IsCAS = $("#hdnIsCAS").val();
+    var _URL =  actionurl + "/GetPRFSkill";
+    var SessionEditSkill = "";
+    if (PRFID != null && (IsERS == "False" && IsCAS == "0")) {
+        $.ajax({
+            type: "GET",
+            url: _URL,
+            data: { 'PRFID': PRFID, 'IsERS': IsERS },
+            success: function (msg) {
+                var EditSkill = [];
+                var tempSecoundary = "";
+					var tempPrimary = "";
+					var tempskill = "";
+					var rowCount = 0;
+                $.each(msg, function (index, data) {
+                    var checked = "";
+                    var IsPrimary = data.PrimarySkill;
+                    if (IsPrimary) {
+                        checked = "checked";
+                    }
+
+						 $('.skillTag').css({ 'border-bottom': '1px solid #000' });
+
+						 if (IsPrimary == false && index >= 1) {
+							 tempskill = tempskill += data.SkillDesc + ',';
+							 rowCount = rowCount + 1;
+						 }
+						 if (IsPrimary == false && index < 2) {
+							 checked = "";
+						 }
+						 if (IsPrimary == true)
+						 {
+							 tempPrimary = "<span class='tooltipped active' style='display: inline-block;'>" + data.SkillDesc + "</span>";
+							 checked = "checked";
+						 }
+
+                    //if (IsPrimary == false) {
+                    //    tempSecoundary = tempSecoundary + "<span class='tooltipped' style='display: inline-block;'>" + data.SkillDesc + "</span>";
+                    //    checked = "";
+                    //}
+                    //else {
+                    //    tempPrimary = "<span class='tooltipped active' style='display: inline-block;'>" + data.SkillDesc + "</span>";
+                    //}
+
+                    EditSkill.push({ "AreaCodeID": data.AreaCodeID, "SubAreaCodeID": data.SubAreaCodeID, "SkillID": data.SkillID, "ProficiencyID": data.ProficiencyID, "PrimarySkill": data.PrimarySkill });
+
+                    var primary_ID = "primary" + data.SkillID;
+
+                    SessionEditSkill = SessionEditSkill + "<tr id=" + data.SkillID + ">";
+                    SessionEditSkill = SessionEditSkill + "<td SkillCatagory=" + data.SubAreaCodeID + ">" + data.SubAreaCodeDesc + "</td>";
+                    SessionEditSkill = SessionEditSkill + "<td SkillArea=" + data.AreaCodeID + ">" + data.AreaCodeDesc + "</td>";
+                    SessionEditSkill = SessionEditSkill + "<td SkillCode=" + data.SkillID + ">" + data.SkillDesc + "</td>";
+                    SessionEditSkill = SessionEditSkill + "<td ProficiencyID=" + data.ProficiencyID + "> <div>" + data.Proficiency + " </div> </td>";
+                    SessionEditSkill = SessionEditSkill + "<td class='text-center radioButton' style='position:relative'><input class='with-gap primarySkill' name='primary' type='radio' id=" + primary_ID + " onclick='IsprimarySkill(" + data.SkillID + ");' " + checked + " />" +
+                                       "<label for=" + primary_ID + "></label> </td>";
+                    SessionEditSkill = SessionEditSkill + "<td class='text-center'><i class='deleteSkill icon-delete' onclick='RemoveSkill(" + data.SkillID + ");' ></i></td>";
+                    SessionEditSkill = SessionEditSkill + "</tr>";
+
+                    $('.lableskill').addClass('focused');
+                    $('.skillTag').show().removeClass('hide');
+                    $('.skillTag span.active').removeClass('hide');
+                    $('.skillTag span').show();
+                    $('.skill').hide();
+
+                    sessionStorage.removeItem("skill");
+                    sessionStorage.setItem("skill", SessionEditSkill);
+
+                    $("#hdnskill").val(JSON.stringify(EditSkill));
+
+					})
+					if (rowCount >= 1) {
+						tempSecoundary = tempSecoundary + "<span id='as" + rowCount + "' class='tooltipped1'   style='display: inline-block;' title='" + tempskill + "' >" + "+" + rowCount + " More</span>";
+						checked = "";
+						skilll = tempskill;
+					}
+
+					$('.skillTag').html("");
+					$('.skillTag').append(tempPrimary + tempSecoundary);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(thrownError);
+            }
+        });
+    }
+    else {
+        EditERSSkill(actionurl, PRFID)
+    }
+}
+
+$(document).on('mouseover', '.tooltipped', function () {
+
+    $(this).append('<div class="skillTagHover"></div>');
+    $(this).find('.skillTagHover').show().html('Secondary');
+
+    var thisPos = $(this).position();
+    $(this).find('.skillTagHover').css({ 'left': thisPos.left });
+});
+
+$(document).on('mouseover', '.tooltipped.active', function () {
+    $(this).find('.skillTagHover').html('Primary');
+});
+
+$(document).on('mouseout', '.tooltipped', function (e) {
+    $('.skillTagHover').remove();
+});
+
+function SubmitAdditionalSkill()
+{
+    AddAdditionalSkill();
+    $("#AddSkillModal").modal('hide');
+    $('#SkillModal').modal('show');
+    $('.selectpicker').selectpicker("refresh");
+}
+
+function AddAdditionalSkill() {
+    var AdditionalSkill = "";
+    var AdditionalSkillStorage = "";
+    $("#tblSkill > tbody>tr").each(function (i, data) {
+       
+        AreaCode = $("td:eq(0)", this).attr("SkillCatagory");
+        SubAreaCode = $("td:eq(1)", this).attr("SkillArea");
+        SkillCode = $("td:eq(2)", this).attr("SkillCode");
+        var Skill = $("td:eq(2)", this).text();
+        ProficiencyID = $("td:eq(3)", this).attr("ProficiencyID");
+        var Proficiency = $("td:eq(3)", this).text();;
+
+        var SkillCatagory = $("td:eq(0)", this).text();
+        var SkillArea = $("td:eq(1)", this).text();
+        var Skill = $("td:eq(2)", this).text();
+        
+        AdditionalSkillStorage = AdditionalSkillStorage + "<tr id=" + SkillCode + ">";
+        AdditionalSkillStorage = AdditionalSkillStorage + "<td SkillCatagory=" + SubAreaCode + ">" + SkillCatagory + "</td>";
+        AdditionalSkillStorage = AdditionalSkillStorage + "<td SkillArea=" + AreaCode + ">" + SkillArea + "</td>";
+        AdditionalSkillStorage = AdditionalSkillStorage + "<td SkillCode=" + SkillCode + ">" + Skill + "</td>";
+        AdditionalSkillStorage = AdditionalSkillStorage + "<td ProficiencyID=" + ProficiencyID + "> <div>" + Proficiency + " </div> </td>";
+        AdditionalSkillStorage = AdditionalSkillStorage + "<td class='text-center radioButton' style='position:relative'></td>";
+        AdditionalSkillStorage = AdditionalSkillStorage + "<td class='text-center'><i class='deleteSkill icon-delete' onclick='RemoveSkill(" + SkillCode + ");' ></i></td>";
+        AdditionalSkillStorage = AdditionalSkillStorage + "</tr>";
+
+        AdditionalSkill = AdditionalSkill + "<tr id=" + SkillCode + ">";
+        AdditionalSkill = AdditionalSkill + "<td SkillCatagory=" + SubAreaCode + ">" + SkillCatagory + "</td>";
+        AdditionalSkill = AdditionalSkill + "<td SkillArea=" + AreaCode + ">" + SkillArea + "</td>";
+        AdditionalSkill = AdditionalSkill + "<td SkillCode=" + SkillCode + ">" + Skill + "</td>";
+        AdditionalSkill = AdditionalSkill + "<td ProficiencyID=" + ProficiencyID + "> <div>" + Proficiency + " </div> </td>";
+        AdditionalSkill = AdditionalSkill + "</tr>";
+       
+    });
+    sessionStorage.removeItem("AdditionalSkill");
+    sessionStorage.setItem("AdditionalSkill", AdditionalSkillStorage);
+    $("#txtskill").val("");
+    // ERS Skill
+    $("#txtERSSkill").val("");
+    $("#tbltempSearchERSSkill > tbody").html("");
+    $("#tblFinalERSSkill > tbody").html("");
+    $("#tblAdditionalSkill > tbody").html("");
+    //$('.catagorySkill').fadeOut().addClass('hide');
+   // $('.skillTable').fadeIn().removeClass('hide');
+    $('.showVal').removeAttr('disabled');
+    $('.AdditionalSkill').fadeIn().removeClass('hide');
+    $("#tblAdditionalSkill").append(AdditionalSkill);
+    //$('#tblERSSkill').append(sessionStorage.ERSskill);
+    $('.ERSSkillGroup').fadeIn().removeClass('hide');
+    $('.ERSSkill').fadeIn().removeClass('hide');
+    $('#tblFinalERSSkill').append(sessionStorage.ERSSkill);
+    BindSkillGroup();
+    $('#collapseP1').collapse('hide');
+    $('#collapseP2').collapse('show');
+}
+
+function BindSkillGroup()
+{
+    var distinctrows = [];
+    $("#tblFinalERSSkill > tbody>tr").each(function (i, data) {
+        var DomainCode = $("td:eq(0)", this).attr("domaincode");
+        var DomainName = $("td:eq(0)", this).text();
+        var StreamCode = $("td:eq(1)", this).attr("streamcode");
+        var SkillGroupCode = $("td:eq(2)", this).attr("skillgroupcode");
+        var SkillGroupName = $("td:eq(2)", this).text();
+        var SkillCode = $("td:eq(6)", this).attr("SkillCode");
+        //if (distinctrows.indexOf(SkillGroupCode) == -1) { 
+        //    distinctrows.push(SkillGroupCode)
+        //    AddSearchERSSkill(actionurl, SkillGroupCode, SkillGroupName, DomainName, DomainCode);
+        //}
+        if (distinctrows.indexOf(SkillCode) == -1) {
+            distinctrows.push(SkillCode)
+            //---CR00018773 by Balendra
+            if (distinctrows.indexOf(SkillCode) == 1) {              
+                //return false;
+            }
+            //-end
+           else {            
+                AddSearchERSSkill(actionurl, SkillGroupCode, SkillGroupName, DomainName, DomainCode);
+                AddSearchERSSkill(actionurl, SkillCode);
+            }
+        }
+    });
+
+}
+
+function EditERSSkill(actionurl, PRFID)
+{
+    debugger;
+    var IsERS = $("#hdnIsERS").val();
+    var IsCAS = $("#hdnIsCAS").val();
+    var _URL = actionurl + "GetERSPRFSkill";
+    if (PRFID != null && IsERS == 'True' || IsCAS =="1") {
+        $.ajax({
+            type: "GET",
+            url: _URL,
+            data: { 'PRFID': PRFID, 'IsERS': 'false' },
+            success: function (msg)
+            {
+             
+                var EditERSSkill = [];
+                var EditAddSkill = [];
+                var tempSecoundary = "";
+                var tempPrimary = "";
+                var SessionEditAddSkill = "";
+                var SessionEditERSSkill = "";
+                $.each(msg[0], function (index, data)
+                {
+                    var checked = "";
+                    var primary_ID = "#primary" + data["SR_ERSSkill"].SkillCode;
+                    var IsPrimary = data["SR_ERSSkill"].IsPrimary;
+
+                    $('.skillTag').css({ 'border-bottom': '1px solid #000' });
+                    if (IsPrimary == false) {
+                        tempSecoundary = tempSecoundary + "<span class='tooltipped' style='display: inline-block;'>" + data["SR_ERSSkill"].SkillName + "</span>";
+                        checked = "";
+                    }
+                    else {
+                        tempPrimary = "<span class='tooltipped active' style='display: inline-block;'>" + data["SR_ERSSkill"].SkillName + "</span>";
+                        checked = "checked";
+                    }
+
+                    EditERSSkill.push({
+                        "DomainCode": data["SR_ERSSkill"].DomainCode,
+                        "DomainName": data["SR_ERSSkill"].DomainName,
+                        "StreamCode": data["SR_ERSSkill"].StreamCode,
+                        "StreamName": data["SR_ERSSkill"].StreamName,
+                        "SkillGroupCode": data["SR_ERSSkill"].SkillGroupCode,
+                        "SkillGroupName": data["SR_ERSSkill"].SkillGroupName,
+                        "SkillAreaCode": data["SR_ERSSkill"].SkillAreaCode,
+                        "SkillAreaName": data["SR_ERSSkill"].SkillAreaName,
+                        "SkillCode": data["SR_ERSSkill"].SkillCode,
+                        "SkillName": data["SR_ERSSkill"].SkillName,
+                        "SubSkillCode": data["SR_ERSSkill"].SubSkillCode,
+                        "SubSkillName": data["SR_ERSSkill"].SubSkillName,
+                        "ProficiencyID": data["SR_ERSSkill"].ProficiencyID,
+                        "IsPrimary": data["SR_ERSSkill"].IsPrimary,
+                        "SubCatCode": data["SR_ERSSkill"].SubCatCode,
+                        "SubCategory": data["SR_ERSSkill"].SubCategory
+                    });
+
+                    var primary_ID = "primary" + data["SR_ERSSkill"].SkillCode;
+                    SessionEditERSSkill = SessionEditERSSkill + "<tr id='" + data["SR_ERSSkill"].SkillCode + "' class=" + data["SR_ERSSkill"].SkillGroupCode + " index=" + index + " >";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td DomainCode=" + data["SR_ERSSkill"].DomainCode + " class='hide' >" + data["SR_ERSSkill"].DomainName + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td StreamCode=" + data["SR_ERSSkill"].StreamCode + " >" + data["SR_ERSSkill"].StreamName + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td SkillGroupCode=" + data["SR_ERSSkill"].SkillGroupCode + " class='hide'>" + data["SR_ERSSkill"].SkillGroupName + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td SkillCategoryCode=" + data.SkillCategoryCode + " >" + data.SkillCategory + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td SubCategoryCode=" + data["SR_ERSSkill"].SubCatCode + ">" + data["SR_ERSSkill"].SubCategory + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td class='validate' SkillAreaCode=" + data["SR_ERSSkill"].SkillAreaCode + ">" + data["SR_ERSSkill"].SkillAreaName + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td SkillCode=" + data["SR_ERSSkill"].SkillCode + ">" + data["SR_ERSSkill"].SkillName + "</td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td class='tdSelect subSelect'><select id='ddlSubSkill' class='selectpicker'  name='ddlSubSkill'><option value=" + data["SR_ERSSkill"].SubSkillCode + ">" + data["SR_ERSSkill"].SubSkillName + "</option></select></td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td class='tdSelect subSelect'><select id='ddlSkillProficiency' class='selectpicker'  name='ddlSkillProficiency'><option value=" + data["SR_ERSSkill"].ProficiencyID + ">" + data.Proficiency + "</option></select></td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td class='text-center radioButton' style='position:relative'><input class='with-gap primarySkill' name='primary' type='radio' id=" + primary_ID + " onclick='IsprimarySkill(" + data["SR_ERSSkill"].SkillCode + ");' " + checked + "/>" +
+                                  "<label for=" + primary_ID + "></label> </td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "<td> <i class='deleteSkill icon-delete' onclick='RemoveERSSkill(" + data["SR_ERSSkill"].SkillCode + "," + index + ")' ></i></td>";
+                    SessionEditERSSkill = SessionEditERSSkill + "</tr>";
+                })
+                $.each(msg[1], function (index, data) {
+                    SessionEditAddSkill = SessionEditAddSkill + "<tr id=" + data.SkillID + ">";
+                    SessionEditAddSkill = SessionEditAddSkill + "<td SkillCatagory=" + data.SubAreaCodeID + ">" + data.SubAreaCodeDesc + "</td>";
+                    SessionEditAddSkill = SessionEditAddSkill + "<td SkillArea=" + data.AreaCodeID + ">" + data.AreaCodeDesc + "</td>";
+                    SessionEditAddSkill = SessionEditAddSkill + "<td SkillCode=" + data.SkillID + ">" + data.SkillDesc + "</td>";
+                    SessionEditAddSkill = SessionEditAddSkill + "<td ProficiencyID=" + data.ProficiencyID + "> <div>" + data.Proficiency + " </div> </td>";
+                    SessionEditAddSkill = SessionEditAddSkill + "<td class='text-center radioButton' style='position:relative'></td>";
+                    SessionEditAddSkill = SessionEditAddSkill + "<td class='text-center'><i class='deleteSkill icon-delete' onclick='RemoveSkill(" + data.SkillID + ");' ></i></td>";
+                    SessionEditAddSkill = SessionEditAddSkill + "</tr>";
+                    tempSecoundary = tempSecoundary + "<span class='tooltipped' style='display: inline-block;'>" + data.SkillDesc + "</span>";
+                    EditAddSkill.push({ "AreaCodeID": data.AreaCodeID, "SubAreaCodeID": data.SubAreaCodeID, "SkillID": data.SkillID, "ProficiencyID": data.ProficiencyID, "PrimarySkill": data.IsPrimary });
+                })
+                sessionStorage.removeItem("ERSSkill");
+                sessionStorage.setItem("ERSSkill", SessionEditERSSkill);
+                $("#hdnskill").val(JSON.stringify(EditERSSkill));
+
+                sessionStorage.removeItem("AdditionalSkill");
+                sessionStorage.setItem("AdditionalSkill", SessionEditAddSkill);
+                $("#hdnAdditionalSkill").val(JSON.stringify(EditAddSkill));
+                $('.skillTag').html("");
+                $('.skillTag').append(tempPrimary + tempSecoundary);
+                $('.lableskill').addClass('focused');
+                $('.skillTag').show().removeClass('hide');
+                $('.skillTag span.active').removeClass('hide');
+                $('.skillTag span').show();
+                $('.skill').hide();
+                $('.selectpicker').selectpicker("refresh");
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert(thrownError);
+            },
+            cache :false
+        });
+    }
+}

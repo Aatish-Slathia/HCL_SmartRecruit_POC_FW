@@ -1,0 +1,35 @@
+﻿
+
+
+var app = angular.module('RecentRequisition', ['datatables']);
+app.controller('Ctrl_RecentRequisition', ['$scope', '$http', 'DTOptionsBuilder', 'DTColumnBuilder',
+    function ($scope, $http, DTOptionsBuilder, DTColumnBuilder) {
+        $scope.dtColumns = [
+           DTColumnBuilder.newColumn(-1).
+            withTitle('Requisition Number').notSortable().renderWith(function (data, type, full) {
+                return '<a title="Click to view SR details" class="modal-link btn btn-sm" href="../Home/ViewRequisitions?SR_ID=' + full["PRFID_Encrypted"] + '&IsApprover=0">' + full["Requisition_Number"] + '</a>';
+            }),
+            DTColumnBuilder.newColumn("Status", "Action").notSortable(),
+            //DTColumnBuilder.newColumn("Status_ID", "Pending").notSortable(),
+            DTColumnBuilder.newColumn("ReqSource", "Requisition Source").notSortable(),
+            DTColumnBuilder.newColumn("ActionDate", "Action Date").notSortable()
+        ];
+
+        var Sourceurl = re.exec(window.location.href)
+        $scope.dtOptions = DTOptionsBuilder.newOptions().withOption('ajax', {
+            dataSrc: "data",
+            url: Sourceurl + "/ApproversRecentTransactions",
+            type: "POST",
+        })
+        .withOption('processing', true)
+        .withOption('serverSide', true)
+        .withOption('lengthChange', false)
+        .withOption('filter', false)
+        .withOption('info', false)
+        .withOption('paging', false)
+        .withOption('aaSorting', [0, 'DESC'])
+    }])
+
+
+
+
