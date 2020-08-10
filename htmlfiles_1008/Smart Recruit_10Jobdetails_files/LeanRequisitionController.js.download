@@ -1,0 +1,1859 @@
+﻿var _ReqObjects = {
+    LoginUserID: "", projectCode: "", RequisitionsourceID: "", EntityID: "", ReferBackFrom: "", CustomerCode: "", IsCAS: "", IsBRC: "",IsERS: "", IsSOT: "", IsSalesLobuser: "",
+    IsSalesAccess: "", IsCampus: "", CampusProgram: "", CompanyCode: "", JoiningL1Code: "", JoiningL4Code: "", ProjectL1: "", ProjectL4: "", InitiatorL1Code: "",
+    initiatorL4Code: "", EmployeeGroup: "", JobId: "", BandId: "", SubBandId: "", CountryCode: "", PSACode: "", PRFID: ""
+    , Initiator: "", OtherProject: "", ProsptiCustomerDetail: "", MaximumSalary: ""
+}
+var bulkhiring=false;
+var rectype = 0;
+var DemandTypeModal = "";//Added by Rupesh
+var mainApp = angular.module("mainApp", ["ngRoute", "myAppHeader"]);
+mainApp.controller('LeanViewController', ['$scope', '$http', '$interval', '$timeout', function ($scope, $http, $interval, $timeout) {
+
+    _ReqObjects.Initiator = "";
+    var _url = GetWayUrl;//Added By Ankit
+    //var _url = ServiceApiUrl+"/api/Fulfillment/";
+ //var _url = "http://localhost:30346/api/Fulfillment/"
+
+    $scope.OpportunityProject = null;
+    $scope.ExistingProject = null;
+    $scope.CustomerProject = null;
+    $scope.IsTnMProject = null;
+
+    $interval(function () {
+        //$('.selectpicker').selectpicker('refresh');
+        $('.input-field input').each(function () {
+            var value = $(this).val().length;
+            if (value > 0) {
+                $(this).parents('.input-field').addClass('focused');
+            }
+        });
+    }, 500);
+
+    $('.selectpicker').change(function () {
+        $('.input-field input').each(function () {
+            var value = $(this).val().length;
+            if (value > 0) {
+                $(this).parents('.input-field').addClass('focused');
+            }
+        });
+    });
+    $scope.GetModelData = function () {     
+        $scope.model = LeanViewData; //null;
+        //$scope.ProjectCode = $scope.model.ProjectCode;
+        //$scope.GetProjectCustomer();
+        _ReqObjects.Initiator = $scope.model.Initiator;
+
+        $scope.DemandTypeModal = $scope.model.DemandType;
+        $scope.PositionExclusiveModal = $scope.model.IsPositionExclusive;
+        $scope.ClientInterviewModal = $scope.model.ClientInterview;
+        //$scope.RequisitionsSourceModal = $scope.model.RequisitionType;
+        $scope.SRNumberModal = $scope.model.BufferSRNumber;   //Added by Neha Basetia CR00019233
+        $scope.JobCodeModal = $scope.model.JobId;
+        $scope.EmpGroupModal = $scope.model.EmployeGroupID;
+        $scope.BandModal = $scope.model.BandId;
+        $scope.SubBandModal = $scope.model.SubBandId;
+        $scope.CountryModal = $scope.model.CountryID;
+		$scope.PSAModal = $scope.model.PersonalSubAreaID;
+		$scope.SecondaryPSAModal = $scope.model.SecondaryPersonalSubAreaID;    //Added by Neha Basetia CR00020307
+        $scope.CompanyModal = $scope.model.CompanyID;
+        $scope.PositionModal = $scope.model.VacancyCount;
+        $scope.SFAAccountNameID = $scope.model.sfaAccountOppurtunity;
+        $scope.SFAOpportunityNameID = $scope.model.sfaOppurtunity;
+        $scope.ResourceSAPCodeModal = $scope.model.SAPIDFofAttritionResource;
+        $scope.TPStateModal = $scope.model.TPState;
+        $scope.ProjectL1Modal = $scope.model.ProjectL1;
+        $scope.ProjectL4Modal = $scope.model.ProjectL4;
+        $scope.IsTPtoFTEResourceModal = $scope.model.IsTPtoFTEResource;
+        $scope.ProsptiCustomerDetail = $scope.model.ProsptivCustomerDetail;
+        $scope.MaximumSalaryModel = $scope.model.SR_BservDTO.MaximumSalary;//Added By Ankit for bserv
+		$scope.BatchYearValue = $scope.model.BatchYear;
+		$scope.ProgramValue = $scope.model.SR_CampusProgramId;
+		$scope.SchoolValue = $scope.model.SchoolType;
+
+		if ($scope.model.ProsptivCustomerDetail != null)
+            $scope.OtherProject = $scope.model.OtherProject;
+        else {
+            $scope.ProsptiCustomerDetail = "Other";
+            $scope.OtherProject = 'Other';
+        }
+        DemandTypeModal = $scope.DemandTypeModal;//Added by Rupesh CR00018206   
+        console.log("GetModelData - 21");
+        if ($scope.model.SR_InfraDTO.ReleaseDate != null && $scope.model.SR_InfraDTO.ReleaseDate != undefined)
+            $scope.ReleaseDateModal = $scope.model.SR_InfraDTO.ReleaseDate;
+    }
+
+    // Start C3i atma nand
+
+
+  
+
+    $scope.GetLanguageL1 = function () {
+
+        //var URLl = 'http://localhost:30346/api/Fulfillment/'
+
+        $http({
+            url: _url + "GetLanguage",
+            method: 'GET',
+            params: { _SRID: $scope.model.PRFID, _LgnOrdrNo: 1 }
+        }).success(function (data) {
+            $scope.LanguageList1 = data;
+
+            var i = -1;
+            angular.forEach($scope.LanguageList1, function (value, key) {
+                i++
+                if (value.Selected == true)
+
+                    $scope.LanguageSourceModal1 = $scope.LanguageList1[i];
+                return;
+            });
+        })
+
+    }
+
+    $scope.GetLanguageL2 = function () {
+
+        //var URLl = 'http://localhost:30346/api/Fulfillment/'
+
+        $http({
+            url: _url + "GetLanguage",
+            method: 'GET',
+            params: { _SRID: $scope.model.PRFID, _LgnOrdrNo: 2 }
+        }).success(function (data) {
+            $scope.LanguageList2 = data;
+            var i = -1;
+            angular.forEach($scope.LanguageList2, function (value, key) {
+                i++
+                if (value.Selected == true)
+
+                    $scope.LanguageSourceModal2 = $scope.LanguageList2[i];
+                return;
+            });
+        })
+
+    }
+    $scope.GetLanguageL3 = function () {
+
+        // var URLl = 'http://localhost:30346/api/Fulfillment/'
+
+        $http({
+            url: _url + "GetLanguage",
+            method: 'GET',
+            params: { _SRID: $scope.model.PRFID, _LgnOrdrNo: 3 }
+        }).success(function (data) {
+            $scope.LanguageList3 = data;
+
+            var i = -1;
+            angular.forEach($scope.LanguageList3, function (value, key) {
+                i++
+                if (value.Selected == true)
+
+                    $scope.LanguageSourceModal3 = $scope.LanguageList3[i];
+                return;
+            });
+        })
+
+    }
+
+
+    //atma nand for language grade
+    $scope.GetLanguageGrade1 = function () {
+        //var URLl = 'http://localhost:30346/api/Fulfillment/'
+
+        $http({
+            url: _url + "GetLanguageGrade",
+            method: 'GET',
+            params: { _SRID: $scope.model.PRFID, _LgnOrdrNo: 1  }
+        }).success(function (data) {
+            $scope.LanguageListGrade1 = data;
+
+
+            var i = -1;
+            angular.forEach($scope.LanguageListGrade1, function (value, key) {
+                i++
+                if (value.Selected == true)
+
+                    $scope.LanguageSourceModalGrade1 = $scope.LanguageListGrade1[i];
+                return;
+            });
+
+        })
+
+    }
+
+    $scope.GetLanguageGrade2 = function () {
+        ///var URLl = 'http://localhost:30346/api/Fulfillment/'
+
+        $http({
+            url: _url + "GetLanguageGrade",
+            method: 'GET',
+            params: { _SRID: $scope.model.PRFID, _LgnOrdrNo: 2 }
+        }).success(function (data) {
+            $scope.LanguageListGrade2 = data;
+
+            var i = -1;
+            angular.forEach($scope.LanguageListGrade2, function (value, key) {
+                i++
+                if (value.Selected == true)
+
+                    $scope.LanguageSourceModalGrade2 = $scope.LanguageListGrade2[i];
+                return;
+            });
+
+        })
+
+    }
+
+    $scope.GetLanguageGrade3 = function () {
+        //var URLl = 'http://localhost:30346/api/Fulfillment/'
+
+        $http({
+            url: _url + "GetLanguageGrade",
+            method: 'GET',
+            params: { _SRID: $scope.model.PRFID, _LgnOrdrNo: 3 }
+        }).success(function (data) {
+            $scope.LanguageListGrade3 = data;
+
+            var i = -1;
+            angular.forEach($scope.LanguageListGrade3, function (value, key) {
+                i++
+                if (value.Selected == true)
+
+                    $scope.LanguageSourceModalGrade3 = $scope.LanguageListGrade3[i];
+                return;
+            });
+
+        })
+
+    }
+
+   
+    // End C3i
+
+    $scope.GetProject = function () {
+        debugger
+        var ReferBackReasonCode = $("#hdnReferBackReasonCode").val();
+        var IStatusId = $("#hdnIStatusId").val();
+        var IRoleID = $("#hdnIRoleID").val();
+
+        //debugger
+        $http({
+            url: _url + "InitiatorProjects",
+            method: 'GET',
+            params: { _LoginEmpCode: _ReqObjects.Initiator, _EntityID: $("#hdnEntity").val() }
+        }).success(function (data) {
+            $scope.project = data[0];
+            $scope.projectCategoryData = data[1];
+            $scope.defaultProject = data[2];
+            angular.forEach(data[0], function (value, key) {
+                //Start on refer back with reasion code 62 then only C type of project select
+                if (ReferBackReasonCode == "62" && IStatusId == "1" && IRoleID == "1") {
+                    if (value.Value.split('/')[0].toUpperCase() == 'C') {
+                        var str = value.Text + " (" + value.Value + ")";
+                        projlist.push(str);
+                    }
+                }
+                else {
+                    var str = value.Text + " (" + value.Value + ")";
+                    //projlist[str] = null;
+                    projlist.push(str);
+                }
+            });
+
+            //delete projlist.a;
+            if ($scope.model.PRFID == 0 && $scope.model.CopiedPRF == null) {
+                $scope.model.ProjectCode = $scope.defaultProject[0].ProjectCode;
+                var e = $scope.defaultProject[0].IsProjectExpired;
+                if (e == true) {
+                    $('#lbl_ProjectExpiration').show();
+                }
+
+            }
+
+            if ($scope.model.ProjectCode != null) {
+                InitRadioFields();
+                var index = findIndexInData($scope.project, "Value", $scope.model.ProjectCode);
+                if (index != -1) {
+                    //Start  for refer back reason code is 62 then previous project insert in project list,which  all selected c type project.
+                    if (ReferBackReasonCode == "62" && IStatusId == "1" && IRoleID == "1") {
+                        var str = $scope.project[index].Text + " (" + $scope.project[index].Value + ")";
+                        projlist.push(str);
+                    }
+                     //End  for refer back reason code is 62 then previous project insert in project list,which  all selected c type project.
+
+                    $scope.ProjectCode = $scope.project[index].Text + " (" + $scope.project[index].Value + ")";
+                    $scope.GetProjectExpiration($scope.ProjectCode);
+                    $scope.GetProjectCustomer();
+                    //$scope.GetRequisitiontypenSource();
+                    $scope.GetSRNumber();    //Added by Neha Basetia CR00019233
+                    $scope.GetCountry();
+                    $scope.IsVisibleCompanyddl = false;
+                    //var proj = $scope.project[index].Text;
+                    //var a = proj.indexOf("C3i");
+                    //if (a !=-1){
+                    //   // $('#divC3i_Language').show();
+                    //}
+                    //else{
+                    //  //  $('#divC3i_Language').hide();
+                    //}
+                    $scope.GetLanguageL1();
+                    $scope.GetLanguageL2();
+                    $scope.GetLanguageL3();
+
+                    $scope.GetLanguageGrade1();
+                    $scope.GetLanguageGrade2();
+                    $scope.GetLanguageGrade3();
+                }
+                $timeout(function () {
+                    $scope.ProjectProperty();
+                }, 0);
+            }
+            console.log("GetProject - 01");
+
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+    $scope.GetProjectExpiration = function (projectcode) {
+        //debugger;       
+        projectcode = ExtractValue(projectcode);
+
+        $http({
+            url: _url + "GetProjectExpiration",
+            method: 'GET',
+            params: {
+                _ProjectCode: projectcode
+            }
+        }).success(function (data) {
+            if (data == true) {
+                $('#lbl_ProjectExpiration').show();
+            }
+            else {
+                $('#lbl_ProjectExpiration').hide();
+
+
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+
+    $scope.ProjectCallBack = function (pcode) {
+        
+        $("#hdnIsDeviationCompany").val(0);
+        $("#hdnIsDeviationCountry").val(0);
+        $scope.model.CountryID = null;
+        $scope.model.CompanyID = null;
+        console.log("ProjectCallBack - " + pcode);
+        $scope.ProjectCode = pcode;
+        $scope.GetProjectCustomer();
+        //$scope.GetRequisitiontypenSource();
+        $scope.GetCountry();
+        $scope.GetSRNumber();    //Added by Neha Basetia CR00019233
+        $scope.GetProjectExpiration(pcode);
+        //$scope.GetCompany();
+        //var a = pcode.indexOf("C3i");
+        //if (a != -1) {
+        //    $('#divC3i_Language').show();
+            $scope.GetLanguageL1();
+            $scope.GetLanguageL2();
+            $scope.GetLanguageL3();
+
+            $scope.GetLanguageGrade1();
+            $scope.GetLanguageGrade2();
+            $scope.GetLanguageGrade3();
+        //}
+        //else {
+        //    $('#divC3i_Language').hide();
+        //}
+
+    }
+
+    $scope.JobCallBack = function (jobcode) {
+        console.log("JobCallBack - " + jobcode);
+        $scope.JobCodeModal = jobcode;
+        $scope.BandModal = null;
+        $scope.model.BandId = null;
+        $scope.GetBand();
+        //$scope.EmpGroupModal = null;
+        //$("#empG option:first").attr('selected', 'selected');
+        $('#LeanRequisition').bootstrapValidator('revalidateField', 'JobID');
+    }
+    $scope.refreshreplacement = function (refresh) {
+        $('.skillTag').html("");
+        sessionStorage.removeItem("skill");
+        $scope.JobCodeModal = refresh;
+        $scope.BandModal = null;
+        $scope.model.BandId = null;
+        $scope.SubBandModal = null;
+        $scope.EmpGroupModal = null;
+        $scope.model.PersonalSubAreaID = null;
+    }
+    $scope.PsaCallBack = function (req) {
+        rectype = req;
+        $scope.GetPSA();
+    }
+    $scope.JobBandCallBack = function (jobcode, empgroup, emSubBand, EMEmpSubgroup, EMPSASAPCode, EmCountryCode, EmCompanyCode) {
+        console.log("JobBandCallBack - " + jobcode);
+        if (jobcode != null) {
+            $scope.JobCodeModal = jobcode;
+        }
+        $scope.EmpGroupModal = empgroup;
+        $scope.model.BandId = EMEmpSubgroup;
+        $scope.model.PersonalSubAreaID = EMPSASAPCode;
+        $scope.model.CountryID = EmCountryCode;
+        $scope.model.CompanyID = EmCompanyCode;
+        //$scope.SubBandModal = emSubBand
+        $scope.model.SubBandId = emSubBand;
+        var reqSource = $('#RequisitionType :selected').val();
+        //--------//Added by Balendra CR00018682   ------------------
+        if (EMEmpSubgroup == 'FT' && reqSource == '29') {
+            var index = findIndexInData($scope.CountryList, "Value", "40");
+            if (index != -1)
+                $scope.CountryList.splice(index, 1);
+            else {
+            }
+        }
+        //--------End -------------------------------------
+        if ($scope.EmpGroupList != null) {
+            var index = findIndexInData($scope.EmpGroupList, "Value", $scope.EmpGroupModal);
+            $scope.EmpGroupModal = $scope.EmpGroupList[index];
+            $scope.GetBand();
+        }
+        if ($scope.model.CountryID != undefined && $scope.model.CountryID != null) {
+            var index = findIndexInData($scope.CountryList, "Value", $scope.model.CountryID);
+            if (index == -1) {
+                Replacementvalidation();
+            }
+            else
+			{
+				$scope.CountryModal = $scope.CountryList[index];
+				$('#country').val($scope.CountryModal.Value);
+				$('#LeanRequisition').bootstrapValidator('revalidateField', 'country');
+				$scope.GetCompany();
+			}
+        }
+        if ($scope.model.CompanyID != undefined && $scope.model.CompanyID != null) {
+            var index = findIndexInData($scope.CompanyList, "Value", $scope.model.CompanyID);
+            if (index == -1) {
+                Replacementvalidation();
+                $scope.CompanyModal = null;
+            }
+            //else
+            //    $scope.CountryModal = $scope.CountryList[index];
+        }
+    }
+
+    $scope.ProjectProperty = function () {
+        var projCode = ExtractValue($scope.ProjectCode);
+        var projInitial = projCode.charAt(0);
+        $scope.CustomerProject = null;
+
+        var index = findIndexInData($scope.projectCategoryData, "ProjectCode", projCode);
+        if (index != -1) {
+            $scope.ProjectCategory = $scope.projectCategoryData[index].ProjectCat;
+        }
+
+        if (projCode == "6863" || projInitial == 'U' || projInitial == 'Y') {
+            $scope.OpportunityProject = true;
+            $scope.ExistingProject = false;
+        }
+        else {
+            $scope.OpportunityProject = false;
+            $scope.ExistingProject = true;
+        }
+
+        if (projInitial == 'C' || projInitial == 'D' || projInitial == 'E' || projInitial == 'V') {
+            $scope.CustomerProject = true;
+        }
+        else if (projCode == "6863" || projInitial == 'I' || projInitial == 'N' || projInitial == 'S' || projInitial == 'O' || projInitial == 'X' || projInitial == 'Z') {
+            $scope.CustomerProject = false;
+        }
+
+        if ($scope.ProjectCategory == "ZHOV" || $scope.ProjectCategory == "ZHPV" || $scope.ProjectCategory == "ZHPQ" || $scope.ProjectCategory == "ZHOQ" || $scope.ProjectCategory == "ZHTS" || $scope.ProjectCategory == "ZHSA" || $scope.ProjectCategory == "ARRC" || $scope.ProjectCategory == "ZHTM") {
+            $scope.IsTnMProject = true;
+            //$("#hdnIsTnMProject").trigger('change');
+        }
+        else {
+            $scope.IsTnMProject = false;
+        }
+        console.log("ProjectProperty - 10");
+    }
+
+    $scope.GetProjectCustomer = function () {
+        var projCode = ExtractValue($scope.ProjectCode);    
+      
+        if (projCode == "")
+            return;
+        $http({
+            url: _url + "ProjectsCustomernLobs",
+            method: 'GET',
+            params: { _LoginEmpCode: _ReqObjects.Initiator, _ProjectCode: ExtractValue($scope.ProjectCode) }
+        }).success(function (data) {
+            $scope.CustomerName = data[0].CustomerName + " (" + data[0].CustomerCode + ")";
+            $scope.ProjectL1 = data[0].ProjectL0Name + " (" + data[0].ProjectL0Code + ")";
+            $scope.ProjectL4 = data[0].ProjectL3Name + " (" + data[0].ProjectL3Code + ")";
+            $scope.ProjectCatDesc = data[0].ProjectCategoryDesc;     //Added by Neha Basetia CR00019177
+           
+            $scope.IsVisibleCompanyddl = ExtractValue($scope.ProjectCode) == "6863" ? true : false;
+            $scope.ModeCode = data[0].ZZPS_MODE; //Added by jyoti ojha 
+			$("#hdnMode").val($scope.ModeCode);
+			if ($("#hdnEntity").val() == "2") {
+				$scope.GetBu();
+			}
+            //if ($scope.ModeCode != null && $scope.ModeCode != '') {
+            //    $scope.GetBu();
+            //} // Ended by jyoti ojha
+
+            //$scope.ProjectCategory = data[0].ProjCat;
+            if (ExtractValue($scope.ProjectCode) == "6863") {
+               
+				//Start Done by Reshman Raza for the CR00019428
+				var da = $("#hdnIsBRC").val();
+
+				if (da == "1") {
+					$scope.ProjectL1ListBRC(); // Done by Reshman Raza for the CR00019428
+				}
+				//end Done by Reshman Raza for the CR00019428
+				else {					
+					//custlist.push($scope.CustomerName);
+					$scope.ProjectL1List();
+				}
+               
+                //$scope.GetSFAAccount();
+                GetSFAAccountDetails('sfaAccountOppurtunity', 'sfaAccountOppurtunity');
+                GetCustomersDetails();
+            }
+           
+            if ($scope.ProjectCode != null && $("#autocompleteinput").val() == "") {
+                $scope.ProjectProperty();
+                //$("#autocompleteinput").typeahead('lookup').focus();
+                $("#autocompleteinput").typeahead('val', $scope.ProjectCode);
+                $('.removeProject').show();
+                $scope.PositionExclusiveModal = $scope.model.IsPositionExclusive == null ? "" : $scope.model.IsPositionExclusive == true ? "Exclusive" : "Non-Exclusive";
+                $scope.ClientInterviewModal = $scope.model.ClientInterview == null ? "" : $scope.model.ClientInterview == true ? "Yes" : "No";
+                if (ExtractValue($scope.ProjectCode) == "6863") {
+                    InitOthersProjectFields();
+                    if ($scope.SFAAccountNameID != null) {
+                        $("#sfaAccountOppurtunity").typeahead('val', $scope.SFAAccountNameID);
+                        $('.removeAccount').show();
+                        $scope.GetSFAOpportunity(ExtractValue($scope.SFAAccountNameID));
+                        $("#sfaOppurtunity").typeahead('val', $scope.SFAOpportunityNameID);
+                        $('.removeOpportunity').show();
+                    }
+                }
+                var projType = projCode.substring(0, 1);
+                if (projType == "Y" || projType == "U") {
+                    InitOthersYUProjectFields();
+                    if ($scope.SFAAccountNameID != null) {
+                        $("#sfaAccountOppurtunity").typeahead('val', $scope.SFAAccountNameID);
+                        $('.removeAccount').show();
+                        $scope.GetSFAOpportunity(ExtractValue($scope.SFAAccountNameID));
+                        $("#sfaOppurtunity").typeahead('val', $scope.SFAOpportunityNameID);
+                        $('.removeOpportunity').show();
+                    }
+                }
+            }
+            OtherCustomerVisiblHide($scope.CustomerName);
+            console.log("GetProjectCustomer - 1");
+            $timeout(function () {
+
+                ShowHideProjectFields();
+
+            }, 0);
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+        $scope.ClearControls();
+    }
+
+    $scope.ProjectL1List = function () {
+        var IsTSSLobUser = $("#hdnIsTSSLobUser").val();
+        $http({
+            url: _url + "ProjectL1List",
+            method: 'GET',
+            params: { _IsSalesLob: $('#hdnIsSales').val(), IsTSSLobUser: IsTSSLobUser}
+            //params: { _ProjectCode: ExtractValue($scope.ProjectCode) }
+        }).success(function (data) {
+            $scope.ProjectL1ListData = data;
+            if ($scope.model.ProjectL1 != null) {
+                var index = findIndexInData($scope.ProjectL1ListData, "Value", $scope.model.ProjectL1);
+                $scope.ProjectL1Modal = $scope.ProjectL1ListData[index];
+                $scope.ProjectL4List();
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    // Done by Reshman Raza for the CR00019428
+    $scope.ProjectL1ListBRC = function () {
+        $http({
+            url: _url + "ProjectL1ListBRC",
+            method: 'GET'
+            //params: { _ProjectCode: ExtractValue($scope.ProjectCode) }
+        }).success(function (data) {
+            $scope.ProjectL1ListData = data;
+            if ($scope.model.ProjectL1 != null) {
+                var index = findIndexInData($scope.ProjectL1ListData, "Value", $scope.model.ProjectL1);
+                $scope.ProjectL1Modal = $scope.ProjectL1ListData[index];
+                $scope.ProjectL4List();
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.ProjectL4List = function () {
+        var pL1 = $scope.ProjectL1;
+        $http({
+            url: _url + "ProjectL4List",
+            method: 'GET',
+			params: { _ProjectL1: $scope.ProjectL1Modal.Value, _IsSalesLob: $('#hdnIsSales').val()}
+        }).success(function (data) {
+            $scope.ProjectL4ListData = data;
+            if ($scope.model.ProjectL4 != null) {
+                var index = findIndexInData($scope.ProjectL4ListData, "Value", $scope.model.ProjectL4);
+                $scope.ProjectL4Modal = $scope.ProjectL4ListData[index];
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+	$scope.ShowReqHierarchy = function (reqType, reqSource, schools){
+		var thisText = "";
+		$('#RequisitionType').val(reqSource.RequisitionsSourceId);
+
+		if (schools != "") {
+			$('#lbl_ReqType').hide();
+			thisText = reqType.SR_ReqTypeTEXT + ' / ' + reqSource.RequisitionsSourceText + ' / ' + schools.Text;
+			$('#SchoolType').val(schools.Value);
+			$scope.GetCampusPrograms();
+		}
+		else {
+			$('#lbl_ReqType').hide();
+			thisText = reqType.SR_ReqTypeTEXT + ' / ' + reqSource.RequisitionsSourceText;
+			$('#SchoolType').val("");
+		}
+		//$('#LeanRequisition').bootstrapValidator('revalidateField', 'RequisitionType');
+		RequisitionTypeChange();
+		$('.value input').val(thisText).parents('.form-group').removeClass('has-error').addClass('has-success').on('click', function () {
+			$('button').removeAttr("disabled");
+		});
+	}
+    $scope.GetRequisitiontypenSource = function () {      
+        $("#TPResourceToFTE").hide();
+        var LobCategory = $("#hdnLobCategory").val();
+        var projCode = ExtractValue($scope.ProjectCode);
+        if (projCode == "")
+            return;
+        var _sot = DemandType;//Changed by Rupesh CR00018206
+        $http({
+            url: _url + "RequisitiontypenSource",
+            method: 'GET',
+            params: { _ProjectCode: ExtractValue($scope.ProjectCode), LobCategory: LobCategory }
+		}).success(function (data) {
+			$scope.GetBatchYear();
+            var projInitial = '';
+            if (typeof projCode != 'undefined')
+                projInitial = projCode.charAt(0);
+            var IsCAS = $('#hdnIsCAS').val();
+            var IsBRC = $('#hdnIsBRC').val(); // Done by Reshman Raza for the CR00019428
+            var IsIBL = $('#hdnIsIBL').val();
+			var arr = []; var arrCampus = [];
+			var arrReq = []
+            angular.forEach(data, function (value, key) {
+				if (value.SR_ReqTypeID == 4) {
+					arrCampus.push(value);
+					arrReq.push(value);
+				}
+				else if ((IsCAS == "1" || IsIBL == "True") && projInitial.toUpperCase() == "Y") {
+					if (value.SR_ReqTypeID == 3) {
+						arr.push(value);
+						arrReq.push(value);
+					}
+                }
+                else if (_sot === "SOT") {
+					if (value.SR_ReqTypeID == 1 || value.SR_ReqTypeID == 2) {
+						arr.push(value);
+						arrReq.push(value);
+                    }
+                }
+				else {
+						arr.push(value);
+						arrReq.push(value);
+                }
+            });
+			$scope.reqSourcesList = arr;
+			$scope.reqSourcesListCampus = arrCampus;
+			
+			if ($scope.model.RequisitionType != null) {
+				continueLoop = true;
+				angular.forEach(arrReq, function (value, key) {
+					if (continueLoop) {
+						var index = findIndexInData(value.ReqSourceList, "RequisitionsSourceId", $scope.model.RequisitionType);
+						if (index != -1) {
+							if ($scope.SchoolValue == null || $scope.SchoolValue == '') {
+								$scope.ShowReqHierarchy(value, value.ReqSourceList[index], '');
+							}
+							else {
+								var arrSchool = [];
+								arrSchool.push({ Text: 'B School', Value: 'B' });
+								arrSchool.push({ Text: 'E School', Value: 'E' });
+								arrSchool.push({ Text: 'Others', Value: 'O' });
+								var indexSchool = findIndexInData(arrSchool, "Value", $scope.SchoolValue);
+								$scope.ShowReqHierarchy(value, value.ReqSourceList[index], arrSchool[indexSchool]);
+							}
+							continueLoop = false;
+						}
+					}
+				});
+				
+
+			}
+			else {
+				//$scope.RequisitionsSourceModal = null;
+				$('#FreshersDiv').hide();
+			}
+				
+			var isAutoReq = $('#hdnIsAutoReq').val();
+			//var modelReqType = angular.element("#RequisitionType").scope().RequisitionsSourceModal;
+			//var modelReqList = angular.element("#RequisitionType").scope().reqSourcesList;
+			if (isAutoReq.toUpperCase() == 'TRUE' && $('#autocompleteinput').val().length > 0 && $('#RequisitionType').val() != '') {
+				$("#NewRequisitionType").prop('disabled', true);
+				$("#AttritionRotationSapCode").prop('disabled', true);
+			}
+			else {
+				$("#NewRequisitionType").prop('disabled', false);
+			}
+            $timeout(function () {
+                if ($scope.model.RequisitionType != null) {
+                    RequisitionTypeChange();
+                    if ($scope.model.RequisitionType == 15 || $scope.model.RequisitionType == 29) {
+                        $("#TPSAPCODE").typeahead('val', $scope.ResourceSAPCodeModal);
+                        $("#TPState").val($scope.TPStateModal);
+                        if ($scope.IsTPtoFTEResourceModal) {
+                            $("#TPtoFTEConversionYes").prop('checked', true);
+                        }
+                        else {
+                            $("#TPtoFTEConversionNo").prop('checked', true);
+                        }
+                    }
+                    else
+                        $("#AttritionRotationSapCode").typeahead('val', $scope.ResourceSAPCodeModal);
+                }
+            }, 0);
+            console.log("GetRequisitiontypenSource - 2");
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    // Start : Added by Neha Basetia CR00019233
+
+    $scope.GetSRNumber = function () {
+        $scope.SRNumberList = null;
+        var projCode = ExtractValue($scope.ProjectCode);
+        if (projCode == "")
+            return;
+        $http({
+            url: _url + "SRNumber",
+            method: 'GET',
+            params: { _ProjectCode: projCode, EntityID: $("#hdnEntity").val() }
+        }).success(function (data) {
+            console.log(data);
+            $scope.SRNumberList = data;
+
+            if ($scope.model.BufferSRNumber != null || $scope.model.BufferSRNumber == "") {
+                var index = findIndexInData($scope.SRNumberList, "Value", "" + $scope.model.BufferSRNumber + "");
+                $scope.SRNumberModal = data[index];
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    // End : Added by Neha Basetia CR00019233
+
+    $scope.GetCountry = function () {
+        var ProgramCode = $('#ProgramType').val();
+        var projCode = ExtractValue($scope.ProjectCode);
+        var VoiceBulkHiring = bulkhiring;
+        if ($("#hdnIsDeviationCountry").val() == 1 && ProgramCode==null) {
+            projCode = "6863";
+        }
+        if (projCode == "")
+            return;
+        $http({
+            url: _url + "Country",
+            method: 'GET',
+
+            params: { _ProjectCode: projCode, EntityID: $("#hdnEntity").val(), BulkHiringVoice: VoiceBulkHiring , ProgramCode: ProgramCode }
+        }).success(function (data) {
+            $scope.CountryList = data[0];
+            $scope.DefaultCountry = data[1];
+            var _TP2FTEResource = $("input[name='IsTPtoFTEResource']:checked").val() == "TPtoFTEConversionYes" ? true : false;
+            var _EntityID = $("#hdnEntity").val();
+            if (_TP2FTEResource && _EntityID != "2") {
+                var index = findIndexInData($scope.CountryList, "Value", "40");
+                if (index != -1)
+                    $scope.CountryList = $scope.RemoveItem($scope.CountryList, $scope.CountryList[index]);
+                else {
+                    $scope.CountryList = $scope.RemoveItem($scope.CountryList, $scope.CountryList[0]);
+                }
+            }
+            if ($scope.model != null) {
+                if ($scope.CountryModal != undefined) {
+                    var index = findIndexInData($scope.CountryList, "Value", $scope.model.CountryID);
+					if (index != -1)
+						$scope.CountryModal = $scope.CountryList[index];
+					}
+					if (($scope.model.CountryID == null || $scope.model.CountryID == undefined) && $scope.DefaultCountry != undefined && $scope.DefaultCountry[0] != null) {//|| ExtractValue($scope.ProjectCode) != $scope.model.ProjectCode
+                    var index = findIndexInData($scope.CountryList, "Value", $scope.DefaultCountry[0].Value);
+						$scope.CountryModal = $scope.CountryList[index];
+                }
+            }
+            if ($scope.model != null && $scope.model.CountryID != null) {
+                var index = findIndexInData($scope.CountryList, "Value", $scope.model.CountryID);
+                if (index != -1)
+                    $scope.CountryModal = $scope.CountryList[index];
+            }
+            console.log("GetCountry - 3");
+            if ($scope.CountryList.length === 1) {
+                $scope.CountryModal = $scope.CountryList[0];
+            }
+            if ($scope.CountryList.length > 0 && $scope.CountryModal != undefined) {
+                $scope.GetCompany();
+            }
+
+            if ($scope.CountryList.length == 0) {
+                $scope.CountryModal = "";
+                $timeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                    $('#LeanRequisition').bootstrapValidator('revalidateField', 'country');
+                }, 200);
+            }
+            else {
+                $timeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                    $('#LeanRequisition').bootstrapValidator('revalidateField', 'country');
+                }, 200);
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetCompany = function () {
+        var CountryModal = $scope.CountryModal.Value == null || $scope.CountryModal.Value == "" ? $scope.CountryModal : $scope.CountryModal.Value;
+        //alert(CountryModal);
+        var ProgramCode = $('#ProgramType').val();
+        var projCode = ExtractValue($scope.ProjectCode);
+        var req = $('#RequisitionType :selected').val();
+        var subEmp = $('#hdnEMEmpSubgroup').val();
+        if (($("#hdnIsDeviationCountry").val() == 1 || $("#hdnIsDeviationCompany").val() == 1) &&   ProgramCode =='') {
+            projCode = "6863";
+        }
+        if ($("#hdnIsDeviationCountry").val() == 1 && ProgramCode == '') {
+            projCode = "6863";
+        }
+        if (CountryModal === "ShowallCountry") {
+            var ProgramCode = $('#ProgramType').val();
+            var VoiceBulkHiring = bulkhiring;
+            $scope.CountryModal = null;
+            $http({
+                url: _url + "Country",
+                method: 'GET',
+                params: { _ProjectCode: "6863", EntityID: $("#hdnEntity").val(), BulkHiringVoice: VoiceBulkHiring, ProgramCode: ProgramCode }
+            }).success(function (data) {
+                $scope.CountryList = data[0];
+                //---Added by Balendra CR00018682------  
+                if (subEmp == 'FT' && req == '29') {
+                    var index = findIndexInData($scope.CountryList, "Value", "40");
+                    if (index != -1)
+                        $scope.CountryList.splice(index, 1);
+                    else {
+
+                    }
+                }
+                //--------------------END--------------------
+                $("#hdnIsDeviationCompany").val(1);
+                $("#hdnIsDeviationCountry").val(1);
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+        $http({
+            url: _url + "Company",
+            method: 'GET',
+            params: { _ProjectCode: projCode, _CountryCode: CountryModal, EntityID: $("#hdnEntity").val(), ProgramCode: ProgramCode  }  //atma nand for campus
+        }).success(function (data) {
+            $scope.CompanyList = data[0];
+            $scope.DefaultCompany = data[1];
+            if (ExtractValue($scope.ProjectCode) != "6863" && data[0].length == 1) {
+                $scope.CompanyModal = data[0][0].Text;// + " (" + data[0][0].Value + ")";
+                $scope.GetPSA();
+            }
+            else if ($scope.model.CompanyID != null || $scope.model.CompanyID != undefined) {
+                $scope.IsVisibleCompanyddl = true;
+                var index = findIndexInData($scope.CompanyList, "Value", $scope.model.CompanyID);
+                if (index != -1) {
+                    $scope.CompanyModal = $scope.CompanyList[index];
+                    $scope.GetPSA();
+                }
+
+
+            }
+            else if (ExtractValue($scope.ProjectCode) != "6863" && data[0].length > 1) {
+                $scope.IsVisibleCompanyddl = true;
+                if ($scope.model != null) {
+                    if ($scope.model.CompanyID == null || $scope.model.CompanyID == undefined) {
+                        var index = findIndexInData($scope.CompanyList, "Value", $scope.DefaultCompany[0].Value);
+                        $scope.CompanyModal = $scope.CompanyList[index];
+                        $scope.GetPSA();
+                    }
+                }
+            }
+
+            if ($scope.model.CompanyID != null && ExtractValue($scope.ProjectCode) == "6863") {
+                var index = findIndexInData($scope.CompanyList, "Value", $scope.model.CompanyID);
+                $scope.CompanyModal = $scope.CompanyList[index];
+                $scope.GetPSA();
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetPSA = function () {
+        var _CompanyModel = ExtractValue($scope.CompanyModal);
+        if ($scope.CountryModal == undefined || _CompanyModel == undefined)
+            return;
+        var _CompanyModel = $scope.IsVisibleCompanyddl ? $scope.CompanyModal.Value : ExtractValue($scope.CompanyModal);
+        var CountryModal = $scope.CountryModal.Value == null || $scope.CountryModal.Value == "" ? $scope.CountryModal : $scope.CountryModal.Value;
+        if (_CompanyModel === "ShowallCompany") {
+            $scope.CompanyModal = null;
+            $http({
+                url: _url + "IsDeviationCompany",//Added By Ankit
+                method: 'GET',
+                params: { _Country: CountryModal, EntityID: $("#hdnEntity").val() }
+            }).success(function (data) {
+                $scope.CompanyList = data;
+                $("#hdnIsDeviationCompany").val(1);
+                return;
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+        //
+        var projCode = ExtractValue($scope.ProjectCode);
+        if (projCode == "")
+            return;
+
+        console.log(_CompanyModel);
+        if ($scope.CountryModal == "")
+            return;
+        var _CompanyModal = $scope.ProjectCode == "Others (6863)" ? $scope.CompanyModal.Value : _CompanyModel;
+        $http({
+            url: _url + "PSA",
+            method: 'GET',
+            params: { _CountryCode: CountryModal, _CompanyCode: _CompanyModal, _ProjectCode: projCode, _Initiator: _ReqObjects.Initiator }
+        }).success(function (data) {
+            //if (rectype === "2")
+            //{
+            //    $scope.PSAList = data;
+            //    $scope.groupList = $scope.PSAList.reduce(function (previous, current) {
+            //        if (previous.indexOf(current.Select) === -1) {
+            //            previous.push(current.Select);
+            //        }
+
+            //        return previous;
+            //    }, []);
+            //    //$scope.PSAList = null;
+            //    //var objects =[];
+            //    //for (var i in data) {
+            //    //    if (data[i].Select !== "Recent Cities") {
+            //    //        objects.push(data[i]);
+            //    //    }
+            //    //}
+            //    //$scope.PSAList = objects;
+            //    $scope.PSAModal = null;
+            //    if ($scope.model.PersonalSubAreaID != "" || $scope.model.PersonalSubAreaID != null) {
+            //        var index = findIndexInData($scope.PSAList, "Value", $scope.model.PersonalSubAreaID);
+            //        $scope.PSAModal = $scope.PSAList[index].Value;
+            //    }
+            //}
+            //else
+            //{
+            $scope.PSAList = data;
+            $scope.groupList = $scope.PSAList.reduce(function (previous, current) {
+                if (previous.indexOf(current.Select) === -1) {
+                    previous.push(current.Select);
+                }
+
+                return previous;
+            }, []);
+            if ((data.length > 0 && data[0].Selected != null && data[0].Selected) && ($scope.model.PersonalSubAreaID == "" || $scope.model.PersonalSubAreaID == null)) {
+                var index = findIndexInData($scope.PSAList, "Value", data[0].Value);
+                $scope.PSAModal = $scope.PSAList[index].Value;
+            }
+			else {
+				if ($scope.model.PersonalSubAreaID != "" && $scope.model.PersonalSubAreaID != null) {
+					//Start : Added by Neha Basetia CR00020307
+					if ($scope.model.ReferBackReasonCode == "64" && ($scope.model.SR_PRFRoleStatusActionID == "17" || $scope.model.SR_PRFRoleStatusActionID == "18" || $scope.model.SR_PRFRoleStatusActionID == "19" || $scope.model.SR_PRFRoleStatusActionID == "20")) {
+						var indexSec = findIndexInData($scope.PSAList, "Value", $scope.model.SecondaryPersonalSubAreaID);
+						if (indexSec != -1) {
+							$scope.PSAModal = data[indexSec].Value;
+						}
+						else {
+							$scope.PSAModal = null;
+						}
+					}
+					//End : Added by Neha Basetia CR00020307
+					else {
+						var index = findIndexInData($scope.PSAList, "Value", $scope.model.PersonalSubAreaID);
+						if (index != -1) {
+							$scope.PSAModal = data[index].Value;
+						}
+						else {
+							$scope.PSAModal = null;
+						}
+					}
+                }
+			}
+			//Start : Added by Neha Basetia CR00020307
+			if ((data.length > 0 && data[0].Selected != null && data[0].Selected) && ($scope.model.SecondaryPersonalSubAreaID == "" || $scope.model.SecondaryPersonalSubAreaID == null)) {
+				var indexSec = findIndexInData($scope.PSAList, "Value", data[0].Value);
+				$scope.SecondaryPSAModal = $scope.PSAList[indexSec].Value;
+			}
+			else {
+				if ($scope.model.SecondaryPersonalSubAreaID != "" && $scope.model.SecondaryPersonalSubAreaID != null) {
+					var indexSec = findIndexInData($scope.PSAList, "Value", $scope.model.SecondaryPersonalSubAreaID);
+					if (indexSec != -1) {
+						$scope.SecondaryPSAModal = data[indexSec].Value;
+					}
+					else {
+						$scope.SecondaryPSAModal = null;
+					}
+				}
+			}
+			//End : Added by Neha Basetia CR00020307
+            if (data.length == 0) {
+				$scope.PSAModal = "";
+				$scope.SecondaryPSAModal = "";  //Added by Neha Basetia CR00020307
+                $timeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                    $('#LeanRequisition').bootstrapValidator('revalidateField', 'PersonalSubAreaID');
+                }, 200);
+            }
+            //}           
+            console.log("GetPSA - 3");
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetLocalJobs = function () {
+        var lobFilter = $('#hdnLobType').val();
+        var bulk = "";
+        var bulkhiringbserv = $("#hdnBulkHiringVoiceBserv").val();
+        //alert(bulkhiringbserv);
+        if (bulkhiringbserv == "True") {
+
+            bulk = bulkhiringbserv
+        }
+        else {
+            bulk = bulkhiring;
+        }
+        $http({
+            url: _url + "LocalJobs",
+            //url: "http://localhost:30346/api/Fulfillment/LocalJobs",
+            method: 'GET',
+            params: { _FilterType: lobFilter, _BulkHiringVoice: bulk }
+        }).success(function (data) {
+            $scope.LocalJobsList = data;
+
+            angular.forEach(data, function (value, key) {
+                var str = value.Select + value.Text + " (" + value.Value + ")";
+                //projlist[str] = null;
+                joblist.push(str);
+            });
+
+            if ($scope.LocalJobsList.length > 0)
+                $scope.SRJobs = $scope.LocalJobsList[0].Text;
+
+            if ($scope.model.JobId != null) {
+                var index = findIndexInData($scope.LocalJobsList, "Value", $scope.model.JobId);
+                if (index != -1) {
+                    $scope.JobCodeModal = $scope.LocalJobsList[index].Select + $scope.LocalJobsList[index].Text + " (" + $scope.LocalJobsList[index].Value + ")";
+                }
+                else {
+                    $scope.JobCodeModal = $("#hdnRequisitionJob").val();
+                }
+            }
+            $timeout(function () {
+                if ($scope.model.JobId != null) {
+                    $("#JobID").typeahead('val', $scope.JobCodeModal);
+                    $('.removeProject').show();
+                }
+            }, 0);
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+	$scope.GetEmployeeGroup = function () {
+		$scope.ProgramModal = null;
+		//$scope.SchoolModal = null;
+		$scope.programList = null;
+		$http({
+				url: _url + "EmployeeGroup",
+				method: 'GET',
+			}).success(function (data) {
+
+					$scope.EmployeeGroupData(data);
+
+			}).error(function (data, status) {
+			console.error('Error:', status, data);
+			});
+	}
+
+	$scope.EmployeeGroupData = function (data) {
+		var _rs = $('#RequisitionType').val();
+		var arr = [];
+		angular.forEach(data, function (value, key) {
+			if (_rs === 15 && $scope.IsTPtoFTEResourceModal == true) {
+				if (value.Value != "5") {
+					arr.push(value);
+				}
+			}
+			else { 
+				if (!(value.Value == "5" && _rs == "29")) {
+					arr.push(value);
+				}
+			}
+			$scope.EmpGroupList = arr;
+		});
+
+
+		if ($scope.model.EmployeGroupID != null) {
+			var index = findIndexInData($scope.EmpGroupList, "Value", $scope.model.EmployeGroupID);
+			$scope.EmpGroupModal = $scope.EmpGroupList[index];
+			$scope.GetBand();
+		}
+	}
+
+	$scope.GetEmployeeGroupCampus = function () {
+		var entityType = "";
+		var _programType = $scope.ProgramModal.ProgramCode == null ? $scope.ProgramModal : $scope.ProgramModal.ProgramCode;
+		if ($("#hdnEntity").val() == 1)
+			entityType = "Tech";
+		else if ($("#hdnEntity").val() == 2)
+			entityType = "Infra";
+		else if ($("#hdnEntity").val() == 3)
+			entityType = "Beserv";
+		$http({
+			url: _url + "EmployeeGroupCampus",
+			method: 'GET',
+			params: { Entity: entityType, ProgramCode: _programType }
+		}).success(function (data) {
+
+			$scope.EmployeeGroupData(data);
+
+		}).error(function (data, status) {
+			console.error('Error:', status, data);
+		});
+	}
+
+	//$scope.GetSchoolType = function () {
+	//	var arrSchool = [];
+	//	arrSchool.push({ Text: 'B School', Value: 'B' });
+	//	arrSchool.push({ Text: 'E School', Value: 'E' });
+	//	arrSchool.push({ Text: 'Others', Value: 'O' });
+	//	$scope.schoolList = arrSchool;
+	//	var index = findIndexInData($scope.schoolList, "Value", $scope.SchoolValue);
+	//	if (index != -1) {
+	//		$scope.SchoolModal = $scope.schoolList[index];
+	//		$scope.GetCampusPrograms();
+	//	}
+	//	else {
+	//		$scope.SchoolModal = "";
+	//	}
+	//}
+	$scope.GetBatchYear = function () {
+		$http({
+			url: SimplifyHRUrl + "/Requisition/GetBatchYear",
+			method: 'GET',
+		}).success(function (data) {
+			$scope.batchList = data;
+			var index = findIndexInData($scope.batchList, "Value", $scope.BatchYearValue);
+			if (index != -1) {
+				$scope.BatchYearModal = $scope.batchList[index];
+			}
+			else {
+				$scope.BatchYearModal = "";
+			}
+		})
+	}
+	$scope.GetCampusPrograms = function () {
+		$http({
+			url: _url + "GetCampusPrograms",
+			method: 'GET',
+			params: { schoolType: $('#SchoolType').val() }
+		}).success(function (data) {
+			$scope.programList = data;
+			var index = findIndexInData($scope.programList, "ProgramCode", $scope.ProgramValue);
+			if (index != -1) {
+				$scope.ProgramModal = $scope.programList[index];
+				$scope.ProgramTypeChange();
+			}
+			else {
+				$scope.ProgramModal = "";
+			}})
+	}
+	$scope.ProgramTypeChange = function () {
+		var _reqType = $('#RequisitionType').val();
+		if ((_reqType == "18" || _reqType == "20") && $scope.ProgramModal != null) {
+			//var index = findIndexInData($scope.programList, "SR_CampusProgramID", $scope.ProgramModal);
+			//if (index != -1) {
+			//	CampusProgramCode = $scope.programList[index].ProgramCode;
+			//}
+			$scope.GetEmployeeGroupCampus();
+        }
+        $scope.GetCountry();  // added atma nand
+	}
+
+    $scope.GetBand = function () {
+        //$scope.JobModal = "53011026";
+        //$scope.EmpGroupModal = "1";      
+        var _JobCode = ExtractValue($scope.JobCodeModal);      
+		var _programCode = "";
+		var fresher = false;
+        var _EmpGroupID = $scope.model.EmployeGroupID == null ? $scope.EmpGroupModal : $scope.model.EmployeGroupID;
+        if ($scope.EmpGroupModal != null && $scope.EmpGroupModal.Value != null)
+            _EmpGroupID = $scope.EmpGroupModal.Value;
+        if (_EmpGroupID == null || _EmpGroupID == undefined || !_JobCode)
+			return;
+		var _reqType = $('#RequisitionType').val();
+		if (_reqType == "18" || _reqType == "20") {
+			fresher = true;
+			_programCode = $scope.ProgramModal.ProgramCode == null ? $scope.ProgramModal : $scope.ProgramModal.ProgramCode;
+		}
+        $http({
+         url: _url + "Bands",
+			method: 'GET',
+			params: { _JobId: _JobCode, _EmployeeGroup: _EmpGroupID, _IsCampus: fresher, _ProgramType: _programCode}
+        }).success(function (data) {
+            $scope.BandList = data;
+            if ($scope.model.BandId != null) {
+                var index = findIndexInData($scope.BandList, "Value", $scope.model.BandId);
+                if (index == -1) {
+                    $scope.model.BandId = null;
+                }
+                $scope.model.EmployeGroupID = null;
+                $scope.BandModal = $scope.BandList[index];
+                $scope.GetSubBand();
+            }
+
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetSubBand = function () {   
+        var _JobCode = ExtractValue($scope.JobCodeModal);
+        var _BandCode = $scope.model.BandId == null ? $scope.BandModal : $scope.model.BandId;
+        var L0Code = $("#hdnL0Code").val();
+        if ($scope.SubBandModal != null && $scope.SubBandModal.Value != null)
+            _BandCode = $scope.BandModal.Value == undefined ? $scope.BandModal : $scope.BandModal.Value;
+        $http({
+            url: _url + "SubBands",
+            method: 'GET',
+            params: { _JobId: _JobCode, _BandId: _BandCode, _L0_code: L0Code }
+        }).success(function (data) {
+            $scope.SubBandList = data;
+            if ($scope.model.SubBandId != null) {
+                var index = findIndexInData($scope.SubBandList, "Value", $scope.model.SubBandId);
+                if (index != -1) {
+                    $scope.SubBandModal = $scope.SubBandList[index];
+                    $scope.GetFresherType();//ankit
+                    if ($("#hdnEntity").val() == "2") {
+                        $scope.GetTRating();
+                    }
+                }
+            }
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+
+    }
+
+    $scope.GetRM = function () {
+        $http({
+            url: _url + "ReportingManager",
+            method: 'GET',
+            params: _ReqObjects
+        }).success(function (data) {
+            $scope.EmpRMData = data;
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.ClearControls = function () {
+        if ($scope.ProjectCode == null) {
+            $scope.CustomerName = "";
+            $scope.ProjectL1 = "";
+            $scope.ProjectL4 = "";
+            $scope.reqSourcesList = "";
+            $scope.reqSourcesListCampus = "";
+            $scope.CountryList = "";
+            $scope.PSAList = "";
+        }
+    }
+
+    $scope.SetPSA = function () {
+        var thisval = $(this)[0].item.Text;
+        //$(this).parent('.selectDropdown').prev('label').prev('.updateVal').val(thisval);
+        $("#reqPSA").val(thisval);
+        $(this).parents('.selectDropdown').hide();
+    }
+
+    var _ObjLeanFormData = {
+        ProjectCode: "",
+        CustomerCode: "",
+        ProjectL1: "",
+        ProjectL4: "",
+        DemandType: "",
+        ClientInterview: "",
+        RequisitionType: "",
+        RequisitionSourceID: "",
+        JobId: "",
+        BandId: "",
+        SubBandId: "",
+        CountryID: "",
+        PersonalSubAreaID: "",
+        CompanyCode: "",
+        VacancyCount: "",
+        EmployeGroupID: "",
+    }
+
+    /*
+    $scope.SaveLeanFormData = function () {
+        _ObjLeanFormData.ProjectCode = $scope.ProjectCode
+        _ObjLeanFormData.CustomerCode = $scope.CustomerName
+        _ObjLeanFormData.ProjectL1 = $scope.ProjectL1
+        _ObjLeanFormData.ProjectL4 = $scope.ProjectL4
+        _ObjLeanFormData.DemandType = $scope.DemandTypeModal
+        _ObjLeanFormData.ClientInterview = $scope.ClientInterviewModal
+        _ObjLeanFormData.RequisitionSourceID = $scope.RequisitionsSourceModal
+        //_ObjLeanFormData.JobId = "";
+        _ObjLeanFormData.BandId = $scope.BandModal
+        _ObjLeanFormData.SubBandId = $scope.SubBandModal
+        _ObjLeanFormData.CountryID = $scope.CountryModal
+        _ObjLeanFormData.PersonalSubAreaID = $scope.PSAModal
+        _ObjLeanFormData.VacancyCount = "2"//$scope.VacancyCountModal
+        _ObjLeanFormData.CompanyCode = $scope.CompanyModal
+        _ObjLeanFormData.EmployeGroupID = "1";
+    
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "http://localhost:30324/Requisition/SaveLeanViewData",
+            data: JSON.stringify({ _ObjLeanFormData: _ObjLeanFormData }),
+            success: function (data) {
+                alert("Successfully saved");
+            },
+            fail: function (error) {
+                Console.Log(error);
+            }
+        })
+    }*/
+
+    $scope.GetSFAAccount = function () {
+        $http({
+            url: _url + "SFAAccount",
+            method: 'GET'
+        }).success(function (data) {
+            $scope.SFAAccountList = data;
+
+            angular.forEach(data, function (value, key) {
+
+                sfaaccountlist.push(value.Text);
+            });
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+
+    $scope.GetSFAOpportunity = function (accountid) {
+        $http({
+            url: _url + "SFAOpportunity",
+            method: 'GET',
+            params: { AccoutId: accountid }
+        }).success(function (data) {
+            $scope.SFAOpportunityList = data;
+            sfaaccountlist = [];
+            angular.forEach(data, function (value, key) {
+                sfaaccountlist.push(value.Text);
+            });
+
+            opportunitydata.clear();
+            opportunitydata.local = sfaaccountlist;
+            opportunitydata.initialize(true);
+        }).error(function (data, status) {
+            console.error('Error:', status, data);
+        });
+    }
+    if ($("#hdnEntity").val() == "2") {
+        $scope.GetBu = function () {           
+            $http({
+                url: _url + "GetBU",
+                method: 'GET',
+                params: { _ModeCode: $("#hdnMode").val() } //Added by jyoti
+            }).success(function (data) {
+                $scope.Bulist = data;
+				if ($scope.model.SR_InfraDTO.BUID != null || $scope.model.SR_InfraDTO.BUID == "") {
+					//Start : Added by Neha Basetia CR00020307
+					if ($scope.model.ReferBackReasonCode == "64" && ($scope.model.SR_PRFRoleStatusActionID == "17" || $scope.model.SR_PRFRoleStatusActionID == "18" || $scope.model.SR_PRFRoleStatusActionID == "19" || $scope.model.SR_PRFRoleStatusActionID == "20")) {
+						var indexSec = findIndexInData($scope.Bulist, "Value", "" + $scope.model.SR_InfraDTO.SecondaryBUID + "");
+						$scope.BUIDModal = data[indexSec];
+						$scope.GetDomain();
+					}
+					//End : Added by Neha Basetia CR00020307
+					else {
+						var index = findIndexInData($scope.Bulist, "Value", "" + $scope.model.SR_InfraDTO.BUID + "");
+						$scope.BUIDModal = data[index];
+						$scope.GetDomain();
+					}
+
+					var indexSec = findIndexInData($scope.Bulist, "Value", "" + $scope.model.SR_InfraDTO.SecondaryBUID + "");
+					$scope.SecondaryBUIDModal = data[indexSec];
+					$scope.GetSecondaryDomain();
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+        $scope.GetDomain = function () {
+            $scope.DomainList = null;
+            $http({
+                url: _url + "GetDomain",
+                method: 'GET',
+                params: { _BU: $scope.BUIDModal.Value }
+            }).success(function (data) {
+                $scope.DomainList = data;
+                if ($scope.model.SR_InfraDTO.DomainID != null || $scope.model.SR_InfraDTO.DomainID == "") {                   
+					//Start : Added by Neha Basetia CR00020307
+					if ($scope.model.ReferBackReasonCode != "64" && ($scope.model.SR_PRFRoleStatusActionID != "17" || $scope.model.SR_PRFRoleStatusActionID != "18" || $scope.model.SR_PRFRoleStatusActionID != "19" || $scope.model.SR_PRFRoleStatusActionID != "20")) {
+						var index = findIndexInData($scope.DomainList, "Value", "" + $scope.model.SR_InfraDTO.DomainID + "");
+						$scope.DomainIDModal = data[index];
+						$scope.GetSubDomain();
+					}
+					if ($scope.model.ReferBackReasonCode == "64" && $scope.model.SR_PRFRoleStatusActionID == "21") {
+						var index = findIndexInData($scope.DomainList, "Value", "" + $scope.model.SR_InfraDTO.DomainID + "");
+						$scope.DomainIDModal = data[index];
+						$scope.GetSubDomain();
+					}
+					//End : Added by Neha Basetia CR00020307
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+		}
+
+		//Start: Added by Neha Basetia CR00020307
+		$scope.GetSecondaryDomain = function () {
+			$scope.SecondaryDomainList = null;
+			$http({
+				url: _url + "GetDomain",
+				method: 'GET',
+				params: { _BU: $scope.SecondaryBUIDModal.Value }
+			}).success(function (data) {
+				$scope.SecondaryDomainList = data;
+				if ($scope.model.SR_InfraDTO.SecondaryDomainID != null || $scope.model.SR_InfraDTO.SecondaryDomainID == "") {
+					var index = findIndexInData($scope.SecondaryDomainList, "Value", "" + $scope.model.SR_InfraDTO.SecondaryDomainID + "");
+					$scope.SecondaryDomainIDModal = data[index];
+					$scope.GetSecondarySubDomain();
+				}
+				if ($scope.model.ReferBackReasonCode == "64" && ($scope.model.SR_PRFRoleStatusActionID == "17" || $scope.model.SR_PRFRoleStatusActionID == "18" || $scope.model.SR_PRFRoleStatusActionID == "19" || $scope.model.SR_PRFRoleStatusActionID == "20")) {
+					$scope.DomainList = data;
+					var index = findIndexInData($scope.DomainList, "Value", "" + $scope.model.SR_InfraDTO.SecondaryDomainID + "");
+					$scope.DomainIDModal = data[index];
+					$scope.GetSecondarySubDomain();
+				}
+			}).error(function (data, status) {
+				console.error('Error:', status, data);
+			});
+		}
+		//End: Added by Neha Basetia CR00020307
+
+        $scope.GetSubDomain = function () {
+            $scope.SubDomainList = null;
+            $http({
+                url: _url + "GetSubDomain",
+                method: 'GET',
+                params: { _Domain: $scope.DomainIDModal.Value }
+            }).success(function (data) {
+                $scope.SubDomainList = data;
+                if ($scope.model.SR_InfraDTO.SubDomainID != null || $scope.model.SR_InfraDTO.SubDomainID == "") {
+					//Start : Added by Neha Basetia CR00020307
+					var index = findIndexInData($scope.SubDomainList, "Value", "" + $scope.model.SR_InfraDTO.SubDomainID + "");
+					$scope.SubDomainIDModal = data[index];
+					//End: Added by Neha Basetia CR00020307
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+		}
+
+		//Start: Added by Neha Basetia CR00020307
+		$scope.GetSecondarySubDomain = function () {
+			$scope.SecondarySubDomainList = null;
+			$http({
+				url: _url + "GetSubDomain",
+				method: 'GET',
+				params: { _Domain: $scope.SecondaryDomainIDModal.Value }
+			}).success(function (data) {
+				$scope.SecondarySubDomainList = data;
+				if ($scope.model.ReferBackReasonCode == "64" && ($scope.model.SR_PRFRoleStatusActionID == "17" || $scope.model.SR_PRFRoleStatusActionID == "18" || $scope.model.SR_PRFRoleStatusActionID == "19" || $scope.model.SR_PRFRoleStatusActionID == "20")) {
+					$scope.SubDomainList = data;
+					var index = findIndexInData($scope.SubDomainList, "Value", "" + $scope.model.SR_InfraDTO.SecondarySubDomainID + "");
+					$scope.SubDomainIDModal = data[index];
+				}
+				if ($scope.model.SR_InfraDTO.SecondarySubDomainID != null || $scope.model.SR_InfraDTO.SecondarySubDomainID == "") {
+					var index = findIndexInData($scope.SecondarySubDomainList, "Value", "" + $scope.model.SR_InfraDTO.SecondarySubDomainID + "");
+					$scope.SecondarySubDomainIDModal = data[index];
+				}
+
+			}).error(function (data, status) {
+				console.error('Error:', status, data);
+			});
+		}
+		//End: Added by Neha Basetia CR00020307
+
+        $scope.GetFunction = function () {
+            $scope.Functionlist = null;
+            $http({
+                url: _url + "GetFunction",
+                method: 'GET'
+            }).success(function (data) {
+                $scope.Functionlist = data;
+				if ($scope.model.SR_InfraDTO.FunctionID != null || $scope.model.SR_InfraDTO.FunctionID == "") {
+					//Start: Added by Neha Basetia CR00020307
+					if ($scope.model.ReferBackReasonCode == "64" && ($scope.model.SR_PRFRoleStatusActionID == "17" || $scope.model.SR_PRFRoleStatusActionID == "18" || $scope.model.SR_PRFRoleStatusActionID == "19" || $scope.model.SR_PRFRoleStatusActionID == "20")) {
+						var indexSec = findIndexInData($scope.Functionlist, "Value", "" + $scope.model.SR_InfraDTO.SecondaryFunctionID + "");
+						$scope.FunctionIDModal = data[indexSec];
+					}
+					//End: Added by Neha Basetia CR00020307
+					else {
+						var index = findIndexInData($scope.Functionlist, "Value", "" + $scope.model.SR_InfraDTO.FunctionID + "");
+						$scope.FunctionIDModal = data[index];
+					}
+				}
+				//Start: Added by Neha Basetia CR00020307
+				if ($scope.model.SR_InfraDTO.SecondaryFunctionID != null || $scope.model.SR_InfraDTO.SecondaryFunctionID == "") {
+					var indexSec = findIndexInData($scope.Functionlist, "Value", "" + $scope.model.SR_InfraDTO.SecondaryFunctionID + "");
+					$scope.SecondaryFunctionIDModal = data[indexSec];
+				}
+				//End: Added by Neha Basetia CR00020307
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+        $scope.GetCustomerState = function () {
+            $http({
+                url: _url + "GetCustomerState",
+                method: 'GET'
+            }).success(function (data) {
+                $scope.CustomerStatelist = data;
+                if ($scope.model.SR_InfraDTO.CustomerState != null || $scope.model.SR_InfraDTO.CustomerState == "") {
+                    var index = findIndexInData($scope.CustomerStatelist, "Value", "" + $scope.model.SR_InfraDTO.CustomerState + "");
+                    $scope.CustomerStateModal = data[index];
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+        $scope.GetTRating = function () {
+			$scope.TRatinglist = null;
+			$scope.SecondaryTRatinglist = null;    // Added by Neha Basetia CR00020307
+            var _SubBandCode = $scope.model.SubBandId == null ? $scope.SubBandModal : $scope.model.SubBandId;
+            $http({
+                url: _url + "GetTRating",
+                method: 'GET',
+                params: { _SubBand: _SubBandCode }
+            }).success(function (data) {
+				$scope.TRatinglist = data;
+				$scope.SecondaryTRatinglist = data;    //Added by Neha Basetia CR00020307
+
+				if ($scope.model.SR_InfraDTO.TRatingID != null || $scope.model.SR_InfraDTO.TRatingID == "") {
+					//Start: Added by Neha Basetia CR00020307
+					if ($scope.model.ReferBackReasonCode == "64" && ($scope.model.SR_PRFRoleStatusActionID == "17" || $scope.model.SR_PRFRoleStatusActionID == "18" || $scope.model.SR_PRFRoleStatusActionID == "19" || $scope.model.SR_PRFRoleStatusActionID == "20")) {
+						var indexSec = findIndexInData($scope.SecondaryTRatinglist, "Value", "" + $scope.model.SR_InfraDTO.SecondaryTRatingID + "");
+						$scope.TRatingIDModal = data[indexSec];
+					}
+					//End: Added by Neha Basetia CR00020307
+					else {
+						var index = findIndexInData($scope.TRatinglist, "Value", "" + $scope.model.SR_InfraDTO.TRatingID + "");
+						$scope.TRatingIDModal = data[index];
+					}
+				}
+				//Start: Added by Neha Basetia CR00020307
+				if ($scope.model.SR_InfraDTO.SecondaryTRatingID != null || $scope.model.SR_InfraDTO.SecondaryTRatingID == "") {
+					var indexSec = findIndexInData($scope.SecondaryTRatinglist, "Value", "" + $scope.model.SR_InfraDTO.SecondaryTRatingID + "");
+					$scope.SecondaryTRatingIDModal = data[indexSec];
+				}
+				//End: Added by Neha Basetia CR00020307
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+    }
+    $scope.GetFresherType = function () {
+       
+        //alert(2);
+
+        var SubBand = $('#subbandid').val();
+        var Lobcode = $('#ProjectL1').val();
+        var empgroup = $("#empG").val();
+        var empgroup1 = $("#empG").Text;
+        var Country = $('#country').val();
+		var Lob_Code = ExtractValue(Lobcode);
+        var _reqTypeId = $("#RequisitionType").val();
+        if (SubBand == "" || SubBand == null) {
+            var SubBand = $scope.model.SubBandId;
+        }
+        else {
+            var SubBand = $('#subbandid').val();
+        }
+
+        if (SubBand < 'E2' || SubBand == 'T0') {
+			var _reqTypeId = $('#RequisitionType').val();
+			if (_reqTypeId == 18 || _reqTypeId == 20) {
+				$('#FresherType').hide();
+			}
+			else {
+				$('#FresherType').show();
+			}
+
+
+		//if (SubBand <= 'E2' && (!(_reqTypeId == 18 || _reqTypeId == 20))) {
+            //alert(empgroup);
+            //alert(Country);
+           
+
+            //}
+
+            //$scope.JobModal = "53011026";
+            //$scope.EmpGroupModal = "1";
+            var _isOnSiteApplicable;
+            //var _EmpGroupID = $scope.model.EmployeGroupID == null ? $scope.EmpGroupModal : $scope.model.EmployeGroupID;
+            //var CountryModal = $scope.model.CountryID;// == null || $scope.CountryModal.Value == "" ? $scope.CountryModal : $scope.CountryModal.Value;
+            //var _LobCode = $scope.ProjectL1Modal;
+            var h = $scope.ProjectCode;
+            if (Country == "40" || Country =='') {
+                _isOnSiteApplicable = 0;
+            }
+            else {
+                _isOnSiteApplicable = 1;
+            }
+
+            //if ($scope.EmpGroupModal != null && $scope.EmpGroupModal.Value != null)
+            //    _EmpGroupID = $scope.EmpGroupModal.Value;
+            //if (_EmpGroupID == null || _EmpGroupID == undefined)
+            //    return;
+            $http({
+                url: _url + "GetFresherType",
+                method: 'GET',
+                params: { LobCode: Lob_Code, empgroup: empgroup, isonsite: _isOnSiteApplicable }
+                // params: { LobCode: '54350412', empgroup: '', isonsite: 1 }
+            }).success(function (data) {
+                $scope.FresherList = data;
+
+                var index = findIndexInData($scope.FresherList, "Value", $scope.model.BatchCode);
+                if (index == -1) {
+                    $scope.model.BatchCode = null;
+                }
+
+                $scope.FresherTypeModal = $scope.FresherList[index];
+
+
+
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+        else {
+            $('#FresherType').hide();
+            $('#freshertype').val('');
+        }
+    }
+
+    if ($("#hdnEntity").val() == "3") {
+        // $scope.GetSalaryScale
+        $scope.GetSalaryScale = function () {
+            debugger;
+            //$scope.SalaryClist = null;
+            $http({
+
+                url: _url + "GetSalaryScale",
+                method: 'GET'
+            }).success(function (data) {
+                $scope.SalaryClist = data;
+                if ($scope.model.SR_BservDTO.SalaryScalID != null || $scope.model.SR_BservDTO.SalaryScalID == "") {
+                    var index = findIndexInData($scope.SalaryClist, "Value", "" + $scope.model.SR_BservDTO.SalaryScalID + "");
+                    $scope.SalaryScaleModel = data[index];
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+
+        $scope.GetTypeOfRequirement = function () {
+            debugger;
+            //$scope.SalaryClist = null;
+            $http({
+
+                url: _url + "GetTypeOfRequirement",
+                method: 'GET'
+            }).success(function (data) {
+                $scope.TypeOfRequirementList = data;
+                if ($scope.model.SR_BservDTO.TypeOfRequirementID != null || $scope.model.SR_BservDTO.TypeOfRequirementID == "") {
+                    var index = findIndexInData($scope.TypeOfRequirementList, "Value", "" + $scope.model.SR_BservDTO.TypeOfRequirementID + "");
+                    $scope.TypeOfRequirementModel = data[index];
+                }
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+
+        $scope.GetSource = function () {
+            debugger;
+            
+            $http({
+                url: _url + "GetSource",
+                method: 'GET',
+            }).success(function (data) {
+
+                $scope.SourceList = data;
+
+                var index = findIndexInData($scope.SourceList, "Value", "" + $scope.model.SR_BservDTO.Source + "");
+                $scope.SourceModel = data[index];
+
+
+            }).error(function (data, status) {
+                console.error('Error:', status, data);
+            });
+        }
+
+
+        $scope.GetBulkVoiceJob = function () {
+
+            //alert(2);
+           
+            var BulkVoice= bulkhiring;;
+          //    return;
+                $http({
+                    url: _url + "GetBulkVoiceJob",
+                    method: 'GET',
+                    params: { _BulkHiringVoice: BulkVoice }
+                    // params: { LobCode: '54350412', empgroup: '', isonsite: 1 }
+                }).success(function (data) {
+                    $scope.BulkJobList = data;
+
+                    var index = findIndexInData($scope.BulkJobList, "Value", $scope.model.JobId);
+                    if (index == -1) {
+                        $scope.model.JobId = null;
+                    }
+
+                    $scope.BulkvoicejobModal = $scope.BulkJobList[index];
+
+
+
+                }).error(function (data, status) {
+                    console.error('Error:', status, data);
+                });
+            }
+            
+        }
+
+  
+    //END By Ankit
+
+
+    function CheckValues(code) {
+        return code.Value === "40";
+    }
+    $scope.CallFinish = function () {
+        $timeout(function () {
+            $('#LeanRequisition').bootstrapValidator('revalidateField', 'PersonalSubAreaID');
+            $('.selectpicker').selectpicker('refresh');
+        }, 200);
+    }
+    $scope.RemoveItem = function (array, element) {
+        return array.filter(CheckValues);
+    }
+    $("#bulk").click(function () {
+
+        if ($(this).is(':checked')) {
+            //alert(5);
+            $('#BulkHiring').hide();
+            //$(".filterDropdown").clear();
+            //$("#jobl").clear();
+            //if ($("#txtJob").data('autocomplete')) {
+           
+           
+            bulkhiring = true;
+            
+            //$('#jobmaain').hide();
+            //$('#Bulkjobid').show();
+            
+            //var remove = new RegExp(/^.*\//);
+            //actionurl = remove.exec(window.location.href.split("?")[0]);
+            //alert(actionurl);
+            
+           //SearchJob(actionurl);
+            $scope.GetCountry();
+            //$scope.GetBulkVoiceJob();
+            $scope.GetLocalJobs();
+           
+        }
+        else { bulkhiring = false; $scope.GetCountry(); $('#BulkHiring').show(); $("#txtJob").val(''); }
+    });
+}]);
+
+mainApp.directive('repeatEnd', function () {
+    return {
+        restrict: "A",
+        link: function (scope, element, attrs) {
+            if (scope.$last) {
+                scope.$eval(attrs.repeatEnd);
+            }
+        }
+    };
+});
+
+mainApp.directive("repeatOptionsEnd", function ($parse, $timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            var ngModel = $parse(attrs.ngModel);
+            var selectSourceArray = attrs.ngOptions.split(' ');
+            var regex = /List/;
+            var resultArray = $.grep(selectSourceArray, function (item) {
+                return regex.test(item);
+            });
+            var selectSource = jQuery.trim(resultArray[0]);
+            var scopeCollection = $parse(selectSource);
+            scope.$watchCollection(scopeCollection, function (newVal) {
+                $timeout(function () {
+                    $('.selectpicker').selectpicker('refresh');
+                }, 400);
+            });
+        }
+    };
+});
+

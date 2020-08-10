@@ -1,0 +1,1152 @@
+﻿var Interviewer = [];
+var InterviewerCount = 1;
+var re = new RegExp(/^.*\//);
+var Sourceurl = ""
+var clickcount = ""
+var ValidationError = 0;
+var flag = 0;
+var IsSaveSubmitClick = false;
+$(function () { 
+    
+    var value = $("#hdnReqSource").val();
+    var BillTypeIDVal = $("#hdnBillingTypeID").val();
+    var entity = $("#hdnEntity").val();
+    if ((BillTypeIDVal == "2" || BillTypeIDVal == "") && (entity == "1" || entity == "2")) {
+        $("#BillingStartDateID").val("");
+        $("#divBSD").hide();
+        $("#bsdReason").hide();
+    }
+    
+    
+    
+
+});
+function SaveInterviewerApprover(flag) {
+    var oSR_InterviewerApproverDTO = {
+        interviewerid1TP1: "",
+        interviewerid2TP1: "",
+        interviewerid1TP2: "",
+        interviewerid2TP2: "",
+        ValidTillDate: "",
+        ReportingManagerID: "",
+        BillingStartDate: "",
+        OnBoardingDate: "",
+        BillingTypeID: "",
+        GraID: "",
+        Category: "",
+        PRFID: "",
+        Remarks: "",
+        BSDReasonID: "",
+        IsDeviationCalculated: "",
+        DemandProbability: "",
+        IsDuplicateSR: "",
+        duplicateSRs :""
+    }
+    oSR_InterviewerApproverDTO.interviewerid1TP1 = $('#interviewerid1TP1').val();
+    oSR_InterviewerApproverDTO.interviewerid2TP1 = $('#interviewerid2TP1').val();
+    oSR_InterviewerApproverDTO.interviewerid1TP2 = $('#interviewerid1TP2').val();
+    oSR_InterviewerApproverDTO.interviewerid2TP2 = $('#interviewerid2TP2').val();
+    oSR_InterviewerApproverDTO.ValidTillDate = myApp.ConvertDateToStandredFormat($('#ValidTillDate').val());
+    oSR_InterviewerApproverDTO.ReportingManagerID = $('#ReportingManagerID').val();
+    oSR_InterviewerApproverDTO.BillingStartDate = myApp.ConvertDateToStandredFormat($('#BillingStartDateID').val());
+    oSR_InterviewerApproverDTO.OnBoardingDate = myApp.ConvertDateToStandredFormat($('#OnBoardingDate').val());
+    oSR_InterviewerApproverDTO.BillingTypeID = $('#BillingTypeID').val();
+    oSR_InterviewerApproverDTO.GraID = $('#GraID').val();
+    oSR_InterviewerApproverDTO.DemandProbability = $('#DemandProbability').val();
+    oSR_InterviewerApproverDTO.PRFID = InterviewerApproverData.PRFID;
+    oSR_InterviewerApproverDTO.Remarks = $('#Remarks').val();
+    oSR_InterviewerApproverDTO.BSDReasonID = $('#BSDReason').val();
+    oSR_InterviewerApproverDTO.IsDeviationCalculated = $('#hdnvalidate').val();
+    oSR_InterviewerApproverDTO.IsDuplicateSR = $('#hdnisDuplicate').val();
+    oSR_InterviewerApproverDTO.duplicateSRs = $('#hdnisDuplicateSRs').val();;
+    if(flag==1)
+        var Saveurl = Sourceurl + "SaveInterviewerApprover";
+    else
+        var Saveurl = Sourceurl + "SaveJobInterviewerApprover";
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        url: Saveurl,
+        data: JSON.stringify({ oSR_InterviewerApproverDTO: oSR_InterviewerApproverDTO }),
+        success: function (data) {
+            if (data.status === "success") {
+                if (flag != 1) {
+                    //alert(data.EnaHALink);
+                    var HaLink = data.EnaHALink;                
+                    if (HaLink == true || HaLink == "true") {
+                        var newLine = "\r\n"
+                        var msg = "Requisition has been submitted successfully and requisition number is  " + data.reqnumber + ".";
+                        msg += newLine;
+                        msg += "Redirecting to iTAP EDGE where you can access the most relevant profiles on bench";
+                        msg += newLine;
+                        msg += newLine;
+
+                        msg += "Note-" + "Please set the pop-up permission of your browser to “Always allow” for Smart Recruit Application.";
+
+                        alert(msg);
+                       // alert("Requisition has been submitted along with - " + data.reqnumber + ".Redirecting to iTAP EDGE where you can access the most relevant profiles on bench");
+
+                       
+                         window.open('http://staging.myhcl.com/ssoha/home/HAmidway.aspx?UserID=' + InterviewerApproverData.Initiator + '&Role=INH&Prf=' + InterviewerApproverData.PRFID + '', '_blank');
+                       // window.location.href = ('http://localhost:61357/Home/SimplifyUserLogin?_EmpCode=' + InterviewerApproverData.Initiator + '&_RequestType=DASHBOARD&_typePara=Dashboard &link=1');
+                        window.location.href = 'https://staging.myhcl.com/SR_New/Home/SimplifyUserLogin?_EmpCode=' + InterviewerApproverData.Initiator + '&_RequestType=DASHBOARD&_typePara=Dashboard';
+                      
+                    } else {
+                        alert("Requisition has been submitted successfully - " + data.reqnumber);
+                        window.location.href = 'https://staging.myhcl.com/SR_New/Home/SimplifyUserLogin?_EmpCode=' + InterviewerApproverData.Initiator + '&_RequestType=DASHBOARD&_typePara=Dashboard';
+                    }
+                   
+                   
+                }
+                else {
+                    alert("Requisition has been saved successfully.");
+                    window.location.href = data.redirectUrl + "&active=" + btoa(3);
+                }
+                $.unblockUI();
+            }
+            else if (data.status === "Invalid") {
+                $("#invalid").show();
+                $("#invalid p").remove();
+                $.unblockUI();
+                var obj = JSON.parse(data.redirectUrl);
+                for (var i = 0; i < obj.length; i++) {
+                    $("#invalid").append("<p>" + obj[i].Message + "</p>");
+                }
+            }
+            else {
+                alert("Requisition has been saved successfully.");
+                window.location.href = data.redirectUrl + "&active=" + btoa(3);
+            }
+        },
+        error: function (xhr, status, error)
+        {
+            window.location.href = myApp.getErrorUrl();
+        }
+    })
+}
+$(document).ready(function () {
+    $('#SaveSubmit').on('click', function (e) {
+        OpenProgressN();
+        IsSaveSubmitClick = true;
+    });
+    $('#btnPrev').on('click', function (e) {
+ 
+        if (InterviewerApproverData.PRFID == null || InterviewerApproverData.PRFID == "" || InterviewerApproverData.PRFID === undefined) {
+            location.href = Sourceurl + "ExternalRequisition?active="+btoa(2);
+        }
+        else {
+            location.href = Sourceurl + "ExternalRequisition?_PRFID=" + InterviewerApproverData.EnCryptedPrfID + "&active="+btoa(2);
+        }
+    });
+    GetInterviewerManager("interviewerid1TP1");
+    GetInterviewerManager("interviewerid2TP1");
+    GetInterviewerManager("interviewerid1TP2");
+    GetInterviewerManager("interviewerid2TP2");
+    GetReportingManager();
+    ValidateFormApprover();
+    var hdnSR_PRFRoleStatusActionID = $("#hdnSR_PRFRoleStatusActionID").val();
+
+    if (hdnSR_PRFRoleStatusActionID != "4" && hdnSR_PRFRoleStatusActionID != "") {
+        $("#divRsRemarks").show();
+        $('#Requisition').bootstrapValidator('addField', 'Remarks', {
+            validators: {
+                callback: {
+                    message: 'Please enter remarks.',
+                    callback: function (value, validator, $field) {
+                        var options = $.trim(validator.getFieldElements('Remarks').val());
+                        if (options == "") {
+                            CloseProgress();
+                            return { valid: false, message: 'Please enter remarks.' }
+                        }
+                        else {
+                            return { valid: true, message: '' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    else {
+
+        $("#divRsRemarks").hide();
+    }
+    Sourceurl = re.exec(window.location.href.split("?")[0]);
+    $('#draftSave').on('click', function (e) {
+        //debugger;
+        ValidationError == 0;
+        
+        $('#Requisition').bootstrapValidator('revalidateField', 'BillingStartDateID');
+        $('#Requisition').bootstrapValidator('revalidateField', 'ValidTillDate');
+        $('#Requisition').bootstrapValidator('revalidateField', 'OnBoardingDate');
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+
+        //$('#Requisition').bootstrapValidator('validate');
+        if ($('#Requisition').bootstrapValidator('validate').has('.has-error').length) {
+            ValidationError = 1;
+        }
+        else
+        {
+            OpenProgressN();
+        }
+
+        if (ValidationError == 0) {
+            
+            if (interviewervalidation(e))
+            {
+                SaveInterviewerApprover(1)
+
+            }
+
+        }
+        else
+        {
+            ValidationError = 0;
+        }
+    });
+
+    $('#btn_preview').on('click', function ()
+    {     
+        $('.panel-collapse:not(".in")')
+          .collapse('show');
+        $('.expandAll').addClass('active');
+        $('.collapseAll').removeClass('active');
+
+    });
+});
+function interviewervalidation(e)
+{
+    var value = $("#hdnReqSource").val();
+    //v1.2
+    var TP11l = "", TP11_A, TP11_B, TP11_C, TP11_D;
+    var TP21l = "", TP21_A, TP21_B, TP21_C, TP21_D;
+    var TP12l = "", TP12_A, TP12_B, TP12_C, TP12_D;
+    var TP22l = "", TP22_A, TP22_B, TP22_C, TP22_D;
+    if ($("#interviewerid1TP1").val().length > 0) {
+        if ($("#interviewerid1TP1").val().length > 8) {
+            TP11_A = $("#interviewerid1TP1").val();
+            TP11_B = TP11_A.split('('); TP11_C = TP11_B[0]; TP11_D = TP11_B[1]; TP11_E = TP11_D.split(')');
+            TP11l = TP11_E[0];
+        }
+        else { $("#interviewerid1TP1").val(''); TP11l = $("#interviewerid1TP1").val(); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11"); return false; }
+    }
+    if ($("#interviewerid2TP1").val().length > 0) {
+        if ($("#interviewerid2TP1").val().length > 8) {
+            TP21_A = $("#interviewerid2TP1").val();
+            TP21_B = TP21_A.split('('); TP21_C = TP21_B[0]; TP21_D = TP21_B[1]; TP21_E = TP21_D.split(')');
+            TP21l = TP21_E[0];
+        }
+        else { $("#interviewerid2TP1").val(''); TP21l = $("#interviewerid2TP1").val(); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false; }
+    }
+    if ($("#interviewerid1TP2").val().length > 0) {
+        if ($("#interviewerid1TP2").val().length > 8) {
+            TP12_A = $("#interviewerid1TP2").val();
+            TP12_B = TP12_A.split('('); TP12_C = TP12_B[0]; TP12_D = TP12_B[1]; TP12_E = TP12_D.split(')');
+            TP12l = TP12_E[0];
+        }
+        else { $("#interviewerid1TP2").val(''); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11"); return false; }
+    }
+    if ($("#interviewerid2TP2").val().length > 0) {
+        if ($("#interviewerid2TP2").val().length > 8) {
+            TP22_A = $("#interviewerid2TP2").val();
+            TP22_B = TP22_A.split('('); TP22_C = TP22_B[0]; TP22_D = TP22_B[1]; TP22_E = TP22_D.split(')');
+            TP22l = TP22_E[0];
+        }
+        else { $("#interviewerid2TP2").val(''); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false; }
+    }
+    if (TP11l != '') {
+        //Code removed due to error in interviewer 1 getting blank done by Reshman Raza //
+        if (TP11l != '' && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))) {
+        //if (TP11l == TP21l) {
+            DisplayError("divinterviewerid2TP", "1st Technical Panel 1 interviewers cannot be blank or same as 2nd Technical Panel 1 interviewers.", "smlTP", "SaveSubmit", e, "TP11");
+        }
+        else if ((TP12l == TP22l) && (TP12l != '' && TP22l != '') && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))
+        ) {
+            DisplayError("divinterviewerid2TP", "1st Technical Panel 2 interviewers cannot be blank or same as 2nd Technical Panel 2 interviewers.", "smlTP", "SaveSubmit", e, "TP11");
+        }
+        else if ((TP11l == TP12l) && (TP11l != '' && TP12l != '') && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))
+        ) {
+            DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP11");
+        }
+        else if ((TP11l == TP22l) && (TP11l != '' && TP22l != '') && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))
+        ) {
+            DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+        }
+        else if ((TP21l === TP12l) && (TP21l != '' && TP12l != '') && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))
+        ) {
+            DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+        }
+        else if ((TP21l == TP22l) && (TP21l != '' && TP22l != '') && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))
+        ) {
+            DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+        }
+        else if ($("#interviewerid1TP2").val() > 0) {
+            if ((TP21l == TP22l) && (TP21l != '' && TP22l != '')) {
+                DisplayError("divinterviewerid2TP", "Technical Panel 1 interviewer cannot be same as Technical Panel 2 Interviewer", "smlTP", "SaveSubmit", e, "TP22");
+            }
+        }
+        else if ((TP11l.length < 8)) {
+            if (TP12l.length > 0) {
+                $("#interviewerid1TP2").val(''); DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11");
+                return false;
+            }
+            else {
+
+                $("#interviewerid1TP2").val('');
+                DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP11");
+                return false;
+            }
+        }
+        else if ((TP21l.length < 8 && $('#hdnEntity').val() != 3)) {
+            if (TP22l.length > 0) {
+                $("#interviewerid2TP2").val('');
+                DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false;
+            }
+            else {
+                if (TP21l.length == 0) {
+                    $("#interviewerid2TP1").val('');
+                    $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+                }
+                else {
+                    $("#interviewerid2TP1").val('');
+                    DisplayError("divinterviewerid2TP", "SAP Code is not valid", "smlTP", "SaveSubmit", e, "TP22"); return false;
+                }
+
+            }
+        }
+        else {
+            
+            if ($('#Approver1').val() == "" && $('#DemandType').val() != "SOT" && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1) && value != "28")
+            )
+            {             
+              
+                    if (value == "22") {
+                        alert('Forecasted Demand cannot be raised as no DPL is mapped. Please raise SSD to get the DPL mapping done.');
+                    }
+                    else{
+                        alert('Requisition cannot be raised as no approver is found.');
+                    }
+                    return false;
+                }
+                else {
+                    if ($("#hdnApproverValidationMessage").val() != "") {
+                        alert($("#hdnApproverValidationMessage").val());
+                        clickcount = "2";
+                        return false;
+                    }
+                }
+                return ValidateApprover(e);
+            }
+    }
+    else {
+       
+        if (value != "22") {
+            if ($('#hdnEntity').val() != 3) {
+                $("#interviewerid1TP1").val('');
+                $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+                $("#interviewerid2TP1").val('');
+            }
+            else {
+                if (TP11l.length < 8) {
+                    $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+                    $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+                }
+                else {
+                    ValidateApprover();
+                }
+            }
+        }
+        else {
+             ValidateApprover();
+        }  
+        if ($('#Approver1').val() == null && $('#DemandType').val() != "SOT" && ($("#LinearWorkflow").val() == false || ($("#LinearWorkflow").val() == true && $("#LinearInterviewerWorkflow").val() == 1))
+        )
+        {                   
+           
+            if (value == "22") {
+                alert('Forecasted Demand cannot be raised as no DPL is mapped. Please raise SSD to get the DPL mapping done.');
+            }
+            else{
+                alert('Requisition cannot be raised as no approver is found.');
+            }
+            
+            
+            return false;
+        }
+        else {
+            if ($("#hdnApproverValidationMessage").val() != "") {
+                alert($("#hdnApproverValidationMessage").val());
+                clickcount = "2";
+                return false;
+            }
+        }
+    }
+}
+function ValidateApprover(e1) {
+    var t1 = $("#interviewerid1TP1").val();
+    var t2 = $("#interviewerid2TP1").val();
+    var t12 = $("#interviewerid1TP2").val();
+    var t22 = $("#interviewerid2TP2").val();
+    var _SR = $("#PRFID").val();
+    var _Billingtype = $("#BillingTypeID").val();
+    var _onboardingdate = $("#OnBoardingDate").val();
+    var LW = $("#hdnLinearWorkflow").val();
+    var LW1 = $("#hdnHeadcountValidationWorkflow").val();
+    var IsSuccess = false;
+    $.ajaxSetup({ async: false });
+    var _url = Sourceurl + "ValidateInterViewer?inter1= " + t1 + "&&inter2=" + t2 + "&&inter11=" + t12 + "&&inter22=" + t22 + "&&_SR=" + _SR + "&&Billingtype=" + _Billingtype + "&&onboardingdate=" + _onboardingdate + "&&LinearWorkflow=" + LW + "&&HeadcountValidationWorkflow=" + LW1 + ""
+    $.ajax({
+        type: "GET",
+        url: _url,
+        //async: true,
+        contentType: 'application/json; charset=utf-8',
+        success: function (msg) {
+            var contact = JSON.parse(msg);
+            if (contact[0].TPvalidation == "Success") {
+                clickcount = "";
+                var DeviationMessage = contact[0].DeviationMessage;//$('#hdnDeviationMessage').val();
+                if (DeviationMessage != "") {
+                    var resultConfirm = confirm(DeviationMessage);
+                    if (resultConfirm == true) {
+                        clickcount = "";
+                        $('#hdnvalidate').val("True");
+                        IsSuccess = true;
+                        return true;
+                    }
+                    else {
+                        $('#hdnvalidate').val("False");
+                        clickcount = "2";
+                        IsSuccess = true;
+                        return true;
+                    }
+                }
+                else {
+                    IsSuccess = true;
+                    return true;
+                }
+
+            }
+            else if (contact[0].TPvalidation != "Success") {
+
+                clickcount = "2";
+                DisplayError("divinterviewerid2TP", contact[0].TPvalidation, "smlTP", "SaveSubmit", e1, "TP22");
+                IsSuccess = false
+
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            alert(thrownError);
+            return false;
+        }
+    });
+    $.ajaxSetup({ async: true });
+    return IsSuccess;
+}
+function ValidateFormApprover() 
+{
+    $('#Requisition').bootstrapValidator({
+        framework: 'bootstrap',
+        feedbackIcons: {
+            valid: null,
+            invalid: null,
+            validating: null
+        },
+         fields: {
+             BillingTypeID: {
+                 validators: {
+                     callback: {
+                         message: 'Please Select BillingType.',
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('BillingTypeID').val();
+                             ValidationError = 0;
+                             if (options == "1") {
+                                 $('#Requisition').bootstrapValidator('revalidateField', 'BillingStartDateID');
+                             }
+                             if (options != "") {
+                                 return { valid: true, message: '' }
+                             }
+                             else {
+                                 ValidationError = 1;
+                                 return { valid: false, message: 'Please Select BillingType.' }
+                             }
+
+                         }
+                     }
+
+                 }
+             },
+             interviewerid1TP1: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('interviewerid1TP1').val();
+                             ValidationError = 0;
+                             if ($("#hdnReqSource").val() != "22" && options == "") {
+
+                                 return { valid: false, message: 'Interviewer 1(TP1) cannot be blank.' }
+                             }
+                             else if (!IsValidSapCode(options)) {
+                                 ValidationError = 1;
+
+                                 return { valid: false, message: 'Interviewer 1(TP1) cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+
+                     }
+                 }
+             },
+             interviewerid1TP2: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('interviewerid1TP2').val();
+                             ValidationError = 0;
+                             if (!IsValidSapCodeN(options)) {
+                                 ValidationError = 1;
+
+                                 return { valid: false, message: 'Interviewer 1(TP2) cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+                     }
+                 }
+             },
+             interviewerid2TP1: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options                    
+
+                             var options = validator.getFieldElements('interviewerid2TP1').val();
+
+                             if ($('#hdnEntity').val() == 3) {
+
+                                 if (!IsValidSapCodeN(options)) {
+                                     ValidationError = 1;
+                                     return { valid: false, message: 'Interviewer 2(TP1) cannot be blank or InValid.' }
+                                 }
+                                 else {
+                                     return { valid: true, message: '' }
+                                 }
+                             }
+                             ValidationError = 0;
+                             if ($("#hdnReqSource").val() != "22" && options == "" && $('#hdnEntity').val() != 3) {
+                                 return { valid: false, message: 'Interviewer 2(TP1) cannot be blank.' }
+                             }
+                             else {
+                                 if (!IsValidSapCode(options)) {
+                                     ValidationError = 1;
+                                     return { valid: false, message: 'Interviewer 2(TP1) cannot be blank or InValid.' }
+                                 }
+                                 else {
+                                     return { valid: true, message: '' }
+                                 }
+                             }
+                         }
+                     }
+                 }
+             },
+             interviewerid2TP2: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options
+                             var options = validator.getFieldElements('interviewerid2TP2').val();
+                             ValidationError = 0;
+                             if (!IsValidSapCodeN(options)) {
+                                 ValidationError = 1;
+                                 return { valid: false, message: 'Interviewer 2(TP2) cannot be blank or InValid.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+
+                             }
+                         }
+                     }
+                 }
+             },
+             ReportingManagerID: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             ValidationError = 0;
+                             var RM = validator.getFieldElements('ReportingManagerID').val();
+                             if (!IsValidSapCode(RM)) {
+                                 ValidationError = 1;
+
+                                 return { valid: false, message: 'Invalid Reporting Manager.' }
+                             }
+
+                             if ($("#RequisitionsSource").val() != "137" && RM == "") {
+                                 ValidationError = 1;
+
+                                 return { valid: false, message: 'Please provide valid Reporting Manager.' }
+                             }
+                             else {
+                                 return { valid: true, message: '' }
+                             }
+                         }
+                     }
+                 }
+             },
+             OnBoardingDate: {
+                 validators: {
+                     notEmpty: {
+                         message: 'Please Provide On OnBoarding Date.'
+                     }
+                 }
+             },
+             OnBoardingDate: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {
+                             // Get the selected options                           
+                             var options = validator.getFieldElements('OnBoardingDate').val();
+                             var dtValid = '';
+                             var dtoptions = new Date(myApp.ConvertDateToStandredFormat(options));
+
+                             //var hdnIsFromLastPage = $("#hdnIsFromLastPage").val();
+                             //var bservMessage = $("#hdnBservEcdMessage").val();
+                             var entity = $("#hdnEntity").val();
+                             var msg = "";
+
+                             if ($("#RequisitionsSource").val() != "137") {
+                                 if ($("#ValidTillDate").val() != null || $("#ValidTillDate").val() != "") {
+                                     dtValid = new Date(myApp.ConvertDateToStandredFormat($("#ValidTillDate").val()));
+                                 } else { dtValid = new Date(); }
+
+                                 var dtCurrent = myApp.getFormattedDate(new Date());
+                                 var dtonborading = myApp.getFormattedDate(dtoptions);
+                                 var dtValiddate = myApp.getFormattedDate(dtValid);
+                                 var m = new moment(myApp.ConvertDateToStandredFormat(options), 'YYYY/MM/DD', true);
+                                 ValidationError = 0;
+                                 if (dtCurrent == dtonborading) {
+
+                                     if (dtCurrent == dtonborading && dtonborading == dtValiddate) {
+                                         return { valid: true, message: '' }
+                                     }
+                                     else {
+                                         if (!m.isValid()) {
+                                             ValidationError = 1;
+
+                                             return { valid: false, message: 'On Boarding Date should not be back date and cannot be greater than and equal to Valid Till Date.' }
+                                         }
+                                         return m.isBefore(myApp.getFormattedDate(dtValid));
+
+                                     }
+
+                                 }
+                                 else if (dtonborading < dtCurrent) {
+                                     ValidationError = 1;
+
+                                     return { valid: false, message: 'On Boarding Date should not be back date' }
+                                 }
+
+                                 if (!m.isValid()) {
+                                     ValidationError = 1;
+
+                                     return { valid: false, message: 'On Boarding Date should not be back date and cannot be greater than and equal to Valid Till Date.' }
+                                 }
+                                 if (!(m.isAfter(dtCurrent) && m.isBefore(myApp.getFormattedDate(dtValid)))) {
+                                     ValidationError = 1;
+
+                                     return { valid: false, message: 'On Boarding Date should not be back date and cannot be greater than and equal to Valid Till Date.' }
+                                 }
+                                 else
+                                     return m.isAfter(dtCurrent) && m.isBefore(myApp.getFormattedDate(dtValid));
+                             }
+                             else {
+                                 dtValid = new Date();
+
+                                 var dtCurrent = myApp.getFormattedDate(new Date());
+                                 var m = new moment(myApp.ConvertDateToStandredFormat(options), 'YYYY/MM/DD', true);
+
+                                 if (!m.isValid()) {
+                                     ValidationError = 1;
+
+                                     return { valid: false, message: 'On Boarding Date should not be back date.' }
+                                 }
+                                 // Check if the date in our range
+                                 return m.isAfter(dtCurrent);
+                             }
+                         }
+                     }
+                 }
+             },
+             ValidTillDate: {
+                 validators: {
+                     callback: {
+                         callback: function (value, validator, $field) {                            
+                             ValidationError = 0;
+                             if ($("#ValidTillDate").val() == "") {//$("#RequisitionsSource").val() != "137" &&
+                                 ValidationError = 1;
+                                 message: 'Valid Till date is not valid.';
+                                 // Get the selected options
+                                 var options = validator.getFieldElements('ValidTillDate').val();
+                                 var dtOnboarding = '';
+                                 dtoptions = new Date(myApp.ConvertDateToStandredFormat(options));
+                                 if ($("#OnBoardingDate").val() != null || $("#OnBoardingDate").val() != "") {
+                                     dtOnboarding = new Date(myApp.ConvertDateToStandredFormat($("#OnBoardingDate").val()));
+                                 } else { dtOnboarding = new Date(); }
+
+                                 var dtCurrent = myApp.getFormattedDate(new Date());
+                                 var m = new moment(myApp.ConvertDateToStandredFormat(options), 'YYYY/MM/DD', true);
+
+                                 if (!m.isValid()) {
+                                     ValidationError = 1;
+                                     return { valid: false, message: 'Valid Till Date should not be back date and less than On boarding date.' }
+                                 }
+                                 // Check if the date in our range
+                                 return m.isAfter(dtOnboarding);
+                             }
+                             else { return { valid: true, message: '' } }
+                         }
+                         /**/
+                     }
+
+                 }
+             },
+             BillingStartDateID: { //Bill Start Date
+                 validators: {
+                     callback: {
+                         //message: 'Bill Start Date should not be less than On Boarding Date and cannot be greater than Valid Till Date.',
+                         callback: function (value, validator, $field) {                          
+                             // Get the selected options
+							 if (InterviewerApproverData.SR_PRFRoleStatusActionID != 4) {
+								 return { valid: true }
+							 }
+                             var options = validator.getFieldElements('BillingTypeID').val();
+                             var _EndValuevalue = myApp.ConvertDateToStandredFormat(validator.getFieldElements('BillingStartDateID').val());
+                             var bsd = new Date(_EndValuevalue);
+                             var _BSD = myApp.ConvertDateToStandredFormat(validator.getFieldElements('BillingStartDateID').val());
+                             //var _PSD = myApp.ConvertDateToStandredFormat(validator.getFieldElements('PositionEnddateID').val());
+                             dtoptions = new Date(_EndValuevalue);
+
+                             dtCurrent = new Date();
+                             if (options == 1) {
+
+                                 var _obd = myApp.ConvertDateToStandredFormat($("#OnBoardingDate").val());
+                                 var _vtd = myApp.ConvertDateToStandredFormat($("#ValidTillDate").val());
+                                 var dtOnBoardingDate = new Date(_obd);
+                                 var dtValidTillDate = new Date(_vtd);
+                                 var m = new moment(_EndValuevalue, 'YYYY/MM/DD', true);
+								 var IsCampus = $("#hdnIsCampus").val();
+
+                                 var obd = new Date(_obd);
+                                 var vtd = new Date(_vtd);
+
+                                 if (IsCampus.toLowerCase() == "true") {
+                                     var dtValidBSD = new Date();
+                                     var BillSpanCampus = $("#hdnCampusBillSpan").val();
+                                     dtValidBSD = addMonths(myApp.getFormattedDate(new Date()), BillSpanCampus);
+
+									 if (bsd < dtValidBSD) {
+										 return { valid: false, message: 'Bill Start Date should not be less than ' + dtValidBSD.toDateString() + ' for selected Campus Program.' }
+                                     }
+                                 }
+                                 ValidationError = 0;
+                                 if (!m.isValid()) {
+                                     ValidationError = 1;
+                                     return { valid: false, message: 'Bill Start Date should not be less than On Boarding Date and cannot be greater than Valid Till Date .' }
+                                 }
+                                 //else if (_EndValuevalue == _obd || _EndValuevalue == _vtd) {
+                                 //    return { valid: true, message: '' }
+                                 //}
+                                 else if (bsd >= obd && bsd <= vtd) {
+                                     //if (_PSD != null && _PSD != "") {
+                                     //    //if (_PSD < _BSD) {
+                                     //    //    return { valid: false, message: 'Bill Start Date should not be greater than position end date.' }
+                                     //    //}
+                                     //    //else {
+                                     //        return { valid: true }
+                                     //    //}
+                                     //}
+                                     //else {
+                                     return { valid: true }
+                                     //}
+                                 }
+
+                                 else {
+                                     ValidationError = 1;
+                                     return { valid: false, message: 'Bill Start Date should not be less than On Boarding Date and cannot be greater than Valid Till Date.' }
+                                 }
+                                 // Check if the date in our range
+                                 return m.isAfter(dtOnBoardingDate) && m.isBefore(dtValidTillDate);
+                             }
+                             else {
+                                 return { valid: true }
+                             }
+
+                         }
+                         /**/
+                     }
+
+                 }
+             }
+             , BSDReason:
+             {
+               validators:
+                   {
+                       callback: {
+                           callback: function (value, validator, $field) {
+                               // Get the selected options 
+                               debugger;
+                               var options = validator.getFieldElements('BSDReason').val();
+                               if (options == "") {
+                                   return { valid: false, message: 'Please select valid Reason' }
+                               }
+                               else {
+                                   return { valid: true, message: '' }
+                               }
+                           }
+                       }
+
+                   }
+			 },
+			 DemandProbability: {
+				 validators: {
+					 notEmpty: {
+						 message: 'Please Select Demand Probability.'
+					 }
+				 }
+			 }
+
+         }
+     }).on('error.form.bv', function (e) {
+         e.preventDefault();
+         $.unblockUI();
+         IsSaveSubmitClick = false;         
+     }).on('success.form.bv', function (e) {
+         e.preventDefault();
+         
+         if (IsSaveSubmitClick)
+
+             SaveFormData(e);
+     });
+}
+function SaveFormData(e)
+{
+    
+    var validationStat = interviewervalidation(e);
+    if (validationStat)
+    {
+        var duplicateSRs = CheckifDuplicateSR(e);
+        if (duplicateSRs.length>0)
+        {
+            var _msg = "A similar requisition is already created in system. Requisition number is ";
+            var SRs = "";
+            $.each(duplicateSRs, function (index, item)
+            {
+                SRs += item + ',';
+            });
+
+            if (SRs.length > 0) {
+                SRs = SRs.substr(0, SRs.length - 1);
+            }
+            _msg = _msg + SRs + '\n Do you still want to create similar requisition?';
+            $.unblockUI();
+            ////var result = confirm(_msg);
+            GetDulicateAlert(_msg, SRs);
+            ////if (result)
+            ////{               
+            ////    $('#hdnisDuplicate').val(result);
+            ////    $('#hdnisDuplicateSRs').val(SRs);
+              ////}
+            
+        }
+        else
+        {
+          ////    SaveInterviewerApprover();
+            SaveInterviewerApprover();
+        }
+        
+    }
+    else
+    {
+        $.unblockUI();
+
+    }
+       
+
+}
+function CheckifDuplicateSR(e)
+{
+   //debugger;
+    var _SR = $("#PRFID").val();
+    var _duplicatePRF;
+    $.ajax(
+        {
+           type: "GET",
+           url: Sourceurl + "CheckDuplicateSRS?_PrfID=" + _SR,
+           async :false,
+           success: function(data)
+           {
+               _duplicatePRF = data;
+           }         
+
+        });
+
+    return _duplicatePRF;
+
+var isConfirmed = false;}
+
+
+function GetDulicateAlert(_msg,SRs) {
+
+  
+    swal({
+        title: _msg,
+        text: "",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonClass: "btn-primary",
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        showLoaderOnConfirm: true,
+        closeOnConfirm: true,
+        closeOnCancel: true        
+       
+    },
+   function (isConfirm) {
+       
+       if (isConfirm)
+       {
+           
+                $.blockUI();
+                $('#hdnisDuplicate').val(true);
+                $('#hdnisDuplicateSRs').val(SRs);
+                SaveInterviewerApprover();          
+       }
+       else
+       {
+           swal("Cancelled", "Requisition has been Canceled)", "error");
+       }
+   });
+
+
+}
+
+
+
+function GetInterviewerManager(ControliD, ControlName) {
+    var Type = "";
+    var _url = Sourceurl + "GetEmployeeDetailsByNameAndSapCode";
+    var rmList = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('_EmployeeCode'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: _url + '?_EmployeeCode=' + '%QUERY' + '&_Type=' + Type + '&_Projectcode=' + "",
+            wildcard: '%QUERY'
+        }
+    });
+    rmList.initialize();
+    $('#' + ControliD).typeahead(
+        {
+            hint: true,
+            highlight: true,
+            minLength: 0,
+        },
+        {
+            name: 'Interviewer',
+            source: rmList,
+            limit: Infinity,
+            displayKey: 'EMFirstName'
+        }
+        ).on('typeahead:selected', function (obj, datum) {
+            $('#Requisition').bootstrapValidator('revalidateField', ControliD);
+            $('#divinterviewerid2TP').css('display', 'None');
+        }).on('typeahead:closed', function (obj, datum) {
+            $('#Requisition').bootstrapValidator('revalidateField', ControliD);
+        });
+
+};
+function abc() {
+    alert("hi");
+}
+function GetReportingManager() {    
+    var Type = "";
+    var _url = Sourceurl + "GetEmployeeDetailsByNameAndSapCodeRM";
+    var rmList = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('_EmployeeCode'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote: {
+            url: _url + '?_EmployeeCode=' + '%QUERY' + '&_Type=' + Type + '&_Projectcode=' + "",
+            wildcard: '%QUERY'
+        }
+    });
+    rmList.initialize();
+    $('#ReportingManagerID').typeahead(
+        {
+            hint: true,
+            highlight: true,
+            minLength: 0,
+        },
+        {
+            name: 'ReportingManager',
+            source: rmList,
+            limit: Infinity,
+            displayKey: 'EMFirstName'
+        }
+        ).on('typeahead:selected', function (obj, datum) {
+            $('#Requisition').bootstrapValidator('revalidateField', 'ReportingManagerID');
+        }).on('typeahead:closed', function (obj, datum) {
+            $('#Requisition').bootstrapValidator('revalidateField', 'ReportingManagerID');
+        });
+}
+//THIS FUNCTION IS FOR MANDATORY SAP CODE/NAME FIELDS.
+function IsValidSapCode(nameSapCode) {
+
+    if ($.trim(nameSapCode) != "") {
+        if ((nameSapCode.indexOf("(") != -1 && nameSapCode.indexOf(")") != -1)) {
+            var regExp = /\(([^)]+)\)/;
+            var sapCode = regExp.exec(nameSapCode);
+            if (sapCode[1].length == 8) {
+                return true;
+                alert(sapCode)
+            }
+            else {
+                alert(sapCode)
+
+                return false;
+            }
+        }
+        else if (nameSapCode.indexOf("[") != -1 && nameSapCode.indexOf("]") != -1) {
+            var regExp = /\[([^)]+)\]/;
+            var sapCode = regExp.exec(nameSapCode);
+            if (sapCode[1].length == 8) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    else {
+        return false;
+    }
+}
+//THIS FUNCTION IS FOR NON MANDATORY SAP CODE/NAME FIELDS.
+function IsValidSapCodeN(nameSapCode) {
+    if ($.trim(nameSapCode) != "") {
+        if (nameSapCode.indexOf("(") != -1 && nameSapCode.indexOf(")") != -1) {
+            var regExp = /\(([^)]+)\)/;
+            var sapCode = regExp.exec(nameSapCode);
+            if (sapCode[1].length == 8) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else if (nameSapCode.indexOf("[") != -1 && nameSapCode.indexOf("]") != -1) {
+            var regExp = /\[([^)]+)\]/;
+            var sapCode = regExp.exec(nameSapCode);
+            if (sapCode[1].length == 8) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    else {
+        return true;
+    }
+}
+function DisplayError(insertAfterId, errorMsg, displayId, btnId, e, controlid) {
+    $.unblockUI();
+    var insertAfterId = "#" + insertAfterId;
+    var btnId = "#" + btnId;
+    var control = "<small class=\"displayErr\" id=\"" + displayId + "\">" + errorMsg + "</small>";
+    $(insertAfterId).html(control);
+    $('#divinterviewerid2TP').css('display', 'block');
+    if (controlid == "TP11") {
+        $("#interviewerid1TP1").val("");
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+    }
+    else if (controlid == "TP21") {
+        $("#interviewerid2TP1").val("");
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+    }
+    else {
+        $("#interviewerid1TP1").val("");
+        $("#interviewerid2TP1").val("");
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid2TP1');
+        $('#Requisition').bootstrapValidator('revalidateField', 'interviewerid1TP1');
+    }
+    //srApp.HideOverLay();
+    //$('#hdnvalidate').val("False");
+    e.preventDefault();
+    return false;
+}
+function addMonths(date, newmonth) {
+	var calcval = null;
+
+	var start_date = date;
+	var term = document.getElementById("hdnCampusBillSpan").value;  // IS TEXT VALUE
+
+	var set_start = start_date.split('/');
+
+	var day = set_start[2];
+	var month = (set_start[1] - 1);  // JANUARY IS 0 SO AUGUST (8TH MONTH) IS 7
+	var year = set_start[0];
+	var datetime = new Date(year, month, day);
+	var newmonth = (month + parseInt(term));  // MUST CONVERT TERM TO INTEGER
+	var newdate = datetime.setMonth(newmonth);
+
+	newdate = new Date(newdate);
+
+	return newdate;
+}
+$("#BillingTypeID").change(function ()
+{
+    //if ((BillTypeIDVal == "2" || BillTypeIDVal == "") && (entity == "1" || entity == "2")) {
+    //    $("#BillingStartDateID").val("");
+    //    $("#divBSD").hide();
+    //}
+    //debugger;
+    var value = $("#BillingTypeID").val();
+    var entityId = $("#hdnEntity").val();
+    var SR_status = $("#hdnSR_PRFRoleStatusActionID").val();
+    if (value == "1")
+    {
+        $("#divBSD").show();
+         var val = $('#OnBoardingDate').val();
+         var _obd = new Date(myApp.ConvertDateToStandredFormat(val));
+         if (_obd && _obd != "Invalid Date")
+         {
+           _obd.setDate(_obd.getDate() + 7);
+           var dd = _obd.getDate() < 10 ? "0" + _obd.getDate() : _obd.getDate();
+           var mm = myApp.monthNumToName(_obd.getMonth());
+           var y = _obd.getFullYear();
+           var _bsddate = dd + '-' + mm + '-' + y;
+           $('#BillingStartDateID').val(_bsddate);
+        }
+       
+        $('#Requisition').bootstrapValidator('revalidateField', 'BillingStartDateID');
+        //if (SR_status == "21")
+        //{
+        //    $("#bsdReason").show();
+        //    $('#Requisition').bootstrapValidator('revalidateField', 'BSDReason');
+        //}
+    }
+    if (value == "2" || value == "") { //TECH AND VALUE1=NON BILLABLE
+        $("#BillingStartDateID").val("");
+        //$("#OnBoardingDate").val("");
+        $("#divBSD").hide();
+        $("#bsdReason").hide();
+    }
+    $('#Requisition').bootstrapValidator('revalidateField', 'BillingTypeID');
+
+});
